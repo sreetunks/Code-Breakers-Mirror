@@ -13,12 +13,19 @@ public class Unit : MonoBehaviour
     [SerializeField] private Animator unitAnimator;
     
     private Vector3 _targetPosition;
+    private GridPosition _gridPosition;
     
     private static readonly int IsWalking = Animator.StringToHash("IsWalking"); // Caching ID for Parameter
 
     private void Awake()
     {
         _targetPosition = transform.position; // Makes sure the unit does not walk to Vector3(0, 0, 0) upon load.
+    }
+
+    private void Start()
+    {
+        _gridPosition = LevelGrid.Instance.GetGridPosition((transform.position));
+        LevelGrid.Instance.AddUnitAtGridPosition(_gridPosition, this);
     }
 
     private void Update()
@@ -42,6 +49,12 @@ public class Unit : MonoBehaviour
         }
         else
             unitAnimator.SetBool(IsWalking, false); // Ends "Walk" Animations
+        
+        
+        var newGridPosition = LevelGrid.Instance.GetGridPosition((transform.position));
+        if (newGridPosition == _gridPosition) return;
+        LevelGrid.Instance.UnitMovedGridPosition(this, _gridPosition, newGridPosition);
+        _gridPosition = newGridPosition;
     }
 
     public void Move(Vector3 targetPosition)
