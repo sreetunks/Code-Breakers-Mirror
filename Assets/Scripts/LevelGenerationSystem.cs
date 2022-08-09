@@ -219,4 +219,61 @@ public class LevelGenerationSystem : MonoBehaviour
             ++numIterations;
         }
     }
+
+    /// <summary>
+    /// Light-weight representation of the generated Rooms structure in a Level.
+    /// Pre-Processed and used as an input to actually instantiate Room Prefabs.
+    /// </summary>
+
+    public interface IQuadTreeDataType
+    {
+        public int CheckOverlap(Bounds bounds);
+    }
+
+    public class QuadTree<T> where T : IQuadTreeDataType
+    {
+        public struct Bounds
+        {
+            public int width;
+            public int height;
+
+            public Bounds(int width, int height)
+            {
+                this.width = width;
+                this.height = height;
+            }
+        }
+
+        public class Node { protected Bounds _bounds; }
+        public class BranchNode : Node
+        {
+            Node topLeft, topRight, bottomLeft, bottomRight;
+
+            public BranchNode(int width, int height)
+            {
+                _bounds = new Bounds(width, height);
+            }
+
+            public void AddChild(T data)
+            {
+            }
+        }
+        public class LeafNode : Node
+        {
+            T _data;
+            public LeafNode(T data)
+            {
+                _data = data;
+            }
+        }
+
+        BranchNode _root;
+
+        public QuadTree(int width, int height)
+        {
+            _root = new BranchNode(width, height);
+        }
+
+        public void Insert(T data) { _root.AddChild(data); }
+    }
 }
