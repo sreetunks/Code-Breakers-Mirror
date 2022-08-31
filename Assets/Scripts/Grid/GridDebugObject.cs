@@ -7,9 +7,9 @@ using TMPro;
 public class GridDebugObject : MonoBehaviour
 {
     [SerializeField] private TextMeshPro textMeshPro;
-    private GridObject _gridObject;
+    private IGridObject _gridObject;
     
-    public void SetGridObject(GridObject gridObject)
+    public void SetGridObject(IGridObject gridObject)
     {
         _gridObject = gridObject;
     }
