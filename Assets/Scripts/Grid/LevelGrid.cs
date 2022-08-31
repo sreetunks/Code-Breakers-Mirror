@@ -8,11 +8,13 @@ public class LevelGrid : MonoBehaviour
     [SerializeField] private int gridWidth;
     [SerializeField] private int gridHeight;
     [SerializeField] private float gridCellSize;
+    [SerializeField] private Vector3 gridOffset;
     [SerializeField, HideInInspector] GridCellState[,] gridCellStates;
 
     public int GridWidth { get => gridWidth; }
     public int GridHeight { get => gridHeight; }
     public float GridCellSize { get => gridCellSize; }
+    public Vector3 GridOffset { get => gridOffset; }
     public GridCellState[,] GridCellStates { get => gridCellStates; }
 
     private void Awake()

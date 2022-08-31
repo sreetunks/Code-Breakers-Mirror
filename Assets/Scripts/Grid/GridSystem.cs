@@ -55,11 +55,12 @@ public class GridSystem : MonoBehaviour
 
     public static Vector3 GetWorldPosition(GridPosition gridPosition)
     {
-        return new Vector3(gridPosition.X, 0, gridPosition.Z) * Instance._activeLevelGrid.GridCellSize;
+        return ActiveLevelGrid.GridOffset + new Vector3(gridPosition.X, 0, gridPosition.Z) * Instance._activeLevelGrid.GridCellSize;
     }
 
     public static GridPosition GetGridPosition(Vector3 worldPosition)
     {
+        worldPosition -= ActiveLevelGrid.GridOffset;
         return new GridPosition(
             Mathf.RoundToInt(worldPosition.x / Instance._activeLevelGrid.GridCellSize),
             Mathf.RoundToInt(worldPosition.z / Instance._activeLevelGrid.GridCellSize)
