@@ -70,6 +70,11 @@ public class GridSystem : MonoBehaviour
         return Instance._activeLevelGrid.TryGetGridCellState(gridPosition, out gridCellState);
     }
 
+    public static void SetGridCellState(GridPosition gridPosition, GridCellState gridCellState)
+    {
+        Instance._activeLevelGrid.SetGridCellState(gridPosition, gridCellState);
+    }
+
     public static bool TryGetGridObject(GridPosition gridPosition, out IGridObject gridObject)
     {
         return Instance._gridObjectMap.TryGetValue(gridPosition, out gridObject);
