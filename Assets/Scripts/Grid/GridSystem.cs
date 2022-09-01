@@ -38,17 +38,15 @@ public class GridSystem : MonoBehaviour
         Instance = this;
     }
 
-    private void OnValidate()
-    {
-        //if (Instance == null) Instance = this;
-    }
-
     /// <summary>
     /// Called on <c>LevelGrid.Awake()</c>.
     /// Registers a Room containing a LevelGrid object.
     /// </summary>
     public static void RegisterLevelGrid(LevelGrid levelGrid)
     {
+#if UNITY_EDITOR
+        if (Instance == null) Instance = FindObjectOfType<GridSystem>();
+#endif
         Instance._activeLevelGrid = levelGrid;
         Instance._gridObjectMap = new Dictionary<GridPosition, IGridObject>(levelGrid.GridCellStates.Length);
     }
