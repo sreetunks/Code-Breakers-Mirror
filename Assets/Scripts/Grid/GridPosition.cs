@@ -6,6 +6,8 @@ public struct GridPosition : IEquatable<GridPosition>
     public int X;
     public int Z;
 
+    public static GridPosition Invalid { get => new GridPosition(-1, -1); }
+
     public GridPosition(int x, int z)
     {
         X = x;

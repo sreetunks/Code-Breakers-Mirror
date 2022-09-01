@@ -1,67 +1,98 @@
-using System;
+using System.Collections.Generic;
 using UnityEngine;
 
+// NOTE: We might add more states to deal with special hazards cells and similar behaviour
+public enum GridCellState
+{
+    Impassable,
+    Walkable,
+    Occupied
+}
 
 // ReSharper disable once CheckNamespace
-public class GridSystem
+public class GridSystem : MonoBehaviour
 {
+    const float _cellSize = 2.0f;
     // ReSharper disable once FieldCanBeMadeReadOnly.Local
     private int _width;
     // ReSharper disable once FieldCanBeMadeReadOnly.Local
     private int _height;
     // ReSharper disable once FieldCanBeMadeReadOnly.Local
-    private float _cellSize;
-    // ReSharper disable once FieldCanBeMadeReadOnly.Local
-    private GridObject[,] _gridObjectArray;
+    private Dictionary<GridPosition, IGridObject> _gridObjectMap;
 
-    public GridSystem(int width, int height, float cellSize)
+    LevelGrid _activeLevelGrid;
+
+    public static LevelGrid ActiveLevelGrid { get => Instance._activeLevelGrid; }
+
+    public static GridSystem Instance { get; private set; }
+
+    private void Awake()
     {
-        _width = width;
-        _height = height;
-        _cellSize = cellSize;
-
-        _gridObjectArray = new GridObject[width, height];
-        
-        for (var x = 0; x < width; x++)
+        if (Instance != null)
         {
-            for (var z = 0; z < height; z++)
-            {
-                var gridPosition = new GridPosition(x, z);
-                _gridObjectArray[x, z] = new GridObject(this, gridPosition);
-            }
+            Debug.LogError("There's more than one GridSystem! " + transform + " - " + Instance);
+            Destroy(gameObject);
+            return;
         }
+
+        Instance = this;
     }
 
-    public Vector3 GetWorldPosition(GridPosition gridPosition)
+    private void OnValidate()
     {
-        return new Vector3(gridPosition.X, 0, gridPosition.Z) * _cellSize;
+        //if (Instance == null) Instance = this;
     }
 
-    public GridPosition GetGridPosition(Vector3 worldPosition)
+    /// <summary>
+    /// Called on <c>LevelGrid.Awake()</c>.
+    /// Registers a Room containing a LevelGrid object.
+    /// </summary>
+    public static void RegisterLevelGrid(LevelGrid levelGrid)
     {
+        Instance._activeLevelGrid = levelGrid;
+        Instance._gridObjectMap = new Dictionary<GridPosition, IGridObject>(levelGrid.GridCellStates.Length);
+    }
+
+    public static Vector3 GetWorldPosition(GridPosition gridPosition)
+    {
+        return ActiveLevelGrid.GridOffset + new Vector3(gridPosition.X, 0, gridPosition.Z) * Instance._activeLevelGrid.GridCellSize;
+    }
+
+    public static GridPosition GetGridPosition(Vector3 worldPosition)
+    {
+        worldPosition -= ActiveLevelGrid.GridOffset;
         return new GridPosition(
-            Mathf.RoundToInt(worldPosition.x / _cellSize), 
-            Mathf.RoundToInt(worldPosition.z / _cellSize)
+            Mathf.RoundToInt(worldPosition.x / Instance._activeLevelGrid.GridCellSize),
+            Mathf.RoundToInt(worldPosition.z / Instance._activeLevelGrid.GridCellSize)
         );
     }
 
-    public void CreateDebugObject(Transform debugPrefab)
+    public static bool TryGetGridCellState(GridPosition gridPosition, out GridCellState gridCellState)
     {
-        for (var x = 0; x < _width; x++)
-        {
-            for (var z = 0; z < _height; z++)
-            {
-                var gridPosition = new GridPosition(x, z);
-                // ReSharper disable once AccessToStaticMemberViaDerivedType
-                var debugTransform = GameObject.Instantiate(debugPrefab, GetWorldPosition(gridPosition), Quaternion.identity);
-                var gridDebugObject = debugTransform.GetComponent<GridDebugObject>();
-                gridDebugObject.SetGridObject(GetGridObject(gridPosition));
-            }
-        }
+        return Instance._activeLevelGrid.TryGetGridCellState(gridPosition, out gridCellState);
     }
 
-    public GridObject GetGridObject(GridPosition gridPosition)
+    public static bool TryGetGridObject(GridPosition gridPosition, out IGridObject gridObject)
     {
-        return _gridObjectArray[gridPosition.X, gridPosition.Z];
+        return Instance._gridObjectMap.TryGetValue(gridPosition, out gridObject);
+    }
+
+    public static bool CheckGridObjectMoveToPosition(IGridObject gridObject, GridPosition targetGridPosition)
+    {
+        if (TryGetGridCellState(targetGridPosition, out GridCellState newGridCellState) && newGridCellState != GridCellState.Impassable)
+        {
+            return !TryGetGridObject(targetGridPosition, out _);
+        }
+
+        return false;
+    }
+
+    public static void UpdateGridObjectPosition(IGridObject gridObject, GridPosition newGridPosition)
+    {
+        if (TryGetGridObject(newGridPosition, out _)) return;
+        Instance._gridObjectMap.Remove(gridObject.Position);
+        ActiveLevelGrid.SetGridCellState(gridObject.Position, GridCellState.Walkable);
+        Instance._gridObjectMap[newGridPosition] = gridObject;
+        ActiveLevelGrid.SetGridCellState(newGridPosition, GridCellState.Occupied);
     }
 }
