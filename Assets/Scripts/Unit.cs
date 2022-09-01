@@ -25,6 +25,8 @@ public class Unit : MonoBehaviour, IGridObject
     {
         _gridPosition = GridSystem.GetGridPosition(transform.position);
         GridSystem.UpdateGridObjectPosition(this, _gridPosition);
+        transform.position = GridSystem.GetWorldPosition(_gridPosition);
+        _targetPosition = transform.position;
     }
 
     private void Update()
