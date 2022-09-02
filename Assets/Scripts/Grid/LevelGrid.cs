@@ -188,15 +188,11 @@ public class LevelGrid : MonoBehaviour
 
     public void SetGridCellState(GridPosition gridPosition, GridCellState gridCellState)
     {
-        if (IsValidGridPosition(gridPosition))
-        {
-            gridCellStates[(gridPosition.Z * gridWidth) + gridPosition.X] = gridCellState;
-            if (Application.isPlaying)
-            {
-                float[] gridState = { (float)gridCellState };
-                _meshFilter.mesh.SetVertexBufferData(gridState, 0, GetCellStateVertexIndex(gridPosition.X, gridPosition.Z), 1, 2);
-            }
-        }
+        if (!IsValidGridPosition(gridPosition)) return;
+        gridCellStates[(gridPosition.Z * gridWidth) + gridPosition.X] = gridCellState;
+        if (!Application.isPlaying) return;
+        float[] gridState = { (float)gridCellState };
+        _meshFilter.mesh.SetVertexBufferData(gridState, 0, GetCellStateVertexIndex(gridPosition.X, gridPosition.Z), 1, 2);
     }
 
     public bool TryGetGridCellState(GridPosition gridPosition, out GridCellState gridCellState)

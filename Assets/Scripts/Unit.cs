@@ -9,12 +9,11 @@ public class Unit : MonoBehaviour, IGridObject
     [SerializeField] private Animator unitAnimator;
     
     private Vector3 _targetPosition;
-    private GridPosition _gridPosition;
     private GridPosition _targetGridPosition;
     
     private static readonly int IsWalking = Animator.StringToHash("IsWalking"); // Caching ID for Parameter
 
-    public GridPosition Position => _gridPosition;
+    public GridPosition Position { get; private set; }
 
     private void Awake()
     {
@@ -23,9 +22,9 @@ public class Unit : MonoBehaviour, IGridObject
 
     private void Start()
     {
-        _gridPosition = GridSystem.GetGridPosition(transform.position);
-        GridSystem.UpdateGridObjectPosition(this, _gridPosition);
-        transform.position = GridSystem.GetWorldPosition(_gridPosition);
+        Position = GridSystem.GetGridPosition(transform.position);
+        GridSystem.UpdateGridObjectPosition(this, Position);
+        transform.position = GridSystem.GetWorldPosition(Position);
         _targetPosition = transform.position;
     }
 
@@ -52,19 +51,17 @@ public class Unit : MonoBehaviour, IGridObject
             unitAnimator.SetBool(IsWalking, false); // Ends "Walk" Animations
 
         var newGridPosition = GridSystem.GetGridPosition(transform.position);
-        if (newGridPosition == _gridPosition) return;
+        if (newGridPosition == Position) return;
         GridSystem.UpdateGridObjectPosition(this, newGridPosition);
-        _gridPosition = newGridPosition;
+        Position = newGridPosition;
     }
 
     public void Move(Vector3 targetPosition)
     {
         var targetGridPosition = GridSystem.GetGridPosition(targetPosition);
-        if(GridSystem.TryGetGridCellState(targetGridPosition, out GridCellState targetCellState) &&
-            targetCellState == GridCellState.Walkable)
-        {
-            _targetGridPosition = targetGridPosition;
-            _targetPosition = GridSystem.GetWorldPosition(_targetGridPosition);
-        }
+        if (!GridSystem.TryGetGridCellState(targetGridPosition, out var targetCellState) ||
+            targetCellState != GridCellState.Walkable) return;
+        _targetGridPosition = targetGridPosition;
+        _targetPosition = GridSystem.GetWorldPosition(_targetGridPosition);
     }
 }

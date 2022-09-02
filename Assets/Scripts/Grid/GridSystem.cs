@@ -12,7 +12,7 @@ public enum GridCellState
 // ReSharper disable once CheckNamespace
 public class GridSystem : MonoBehaviour
 {
-    const float _cellSize = 2.0f;
+    private const float CellSize = 2.0f;
     // ReSharper disable once FieldCanBeMadeReadOnly.Local
     private int _width;
     // ReSharper disable once FieldCanBeMadeReadOnly.Local
@@ -82,7 +82,7 @@ public class GridSystem : MonoBehaviour
 
     public static bool CheckGridObjectMoveToPosition(IGridObject gridObject, GridPosition targetGridPosition)
     {
-        if (TryGetGridCellState(targetGridPosition, out GridCellState newGridCellState) && newGridCellState != GridCellState.Impassable)
+        if (TryGetGridCellState(targetGridPosition, out var newGridCellState) && newGridCellState != GridCellState.Impassable)
         {
             return !TryGetGridObject(targetGridPosition, out _);
         }
