@@ -6,10 +6,9 @@ public class LevelGridEditor : Editor
 {
     SerializedProperty gridWidth;
     SerializedProperty gridHeight;
-    SerializedProperty gridOffset;
     SerializedProperty gridCellSize;
     SerializedProperty gridCellStates;
-    GridPosition selectedGridTilePos = new GridPosition(-1, -1);
+    GridPosition selectedGridTilePos = GridPosition.Invalid;
     LevelGrid _levelGrid;
 
     private void OnEnable()
@@ -17,18 +16,38 @@ public class LevelGridEditor : Editor
         _levelGrid = (LevelGrid)serializedObject.targetObject;
         gridWidth = serializedObject.FindProperty("gridWidth");
         gridHeight = serializedObject.FindProperty("gridHeight");
-        gridOffset = serializedObject.FindProperty("gridOffset");
         gridCellSize = serializedObject.FindProperty("gridCellSize");
         gridCellStates = serializedObject.FindProperty("gridCellStates");
+
+        serializedObject.Update();
+        serializedObject.ApplyModifiedProperties();
+
+        GridSystem.RegisterLevelGrid(_levelGrid);
     }
 
     private void OnSceneGUI()
     {
-        if (Event.current.type == EventType.MouseDown)
+        if (Event.current.type == EventType.MouseDown && Event.current.button == 0)
         {
             Ray mouseDirRay = HandleUtility.GUIPointToWorldRay(Event.current.mousePosition);
-            if (Physics.Raycast(mouseDirRay, out RaycastHit hit))
+            if (Physics.Raycast(mouseDirRay, out RaycastHit hit, LayerMask.GetMask("MousePlane")))
             {
+                selectedGridTilePos = GridSystem.GetGridPosition(hit.point);
+            }
+        }
+        else if (Event.current.type == EventType.Repaint)
+        {
+            if (selectedGridTilePos != GridPosition.Invalid)
+            {
+                Handles.RectangleHandleCap(
+                    0,
+                    //(new Vector3(1, 0, 1) * GridSystem.ActiveLevelGrid.GridCellSize * 0.5f) +
+                    GridSystem.GetWorldPosition(selectedGridTilePos),
+                    Quaternion.LookRotation(Vector3.up),
+                    GridSystem.ActiveLevelGrid.GridCellSize * 0.5f,
+                    EventType.Repaint
+                    );
+                Repaint();
             }
         }
     }
@@ -40,19 +59,49 @@ public class LevelGridEditor : Editor
         EditorGUILayout.BeginVertical();
         EditorGUILayout.PropertyField(gridWidth);
         EditorGUILayout.PropertyField(gridHeight);
-        EditorGUILayout.PropertyField(gridOffset);
         EditorGUILayout.PropertyField(gridCellSize);
         EditorGUILayout.EndVertical();
 
-        if (selectedGridTilePos != GridPosition.Invalid) { }
+        EditorGUILayout.Space();
+
+        if (selectedGridTilePos != GridPosition.Invalid)
+        {
+            EditorGUILayout.BeginVertical();
+            using (new EditorGUI.DisabledScope(true))
+            {
+                EditorGUILayout.Vector2IntField(
+                "Selected Tile",
+                new Vector2Int(selectedGridTilePos.X, selectedGridTilePos.Z));
+            }
+
+            if (GridSystem.TryGetGridCellState(selectedGridTilePos, out GridCellState selectedGridCellState))
+            {
+                var newGridCellState = (GridCellState)EditorGUILayout.EnumFlagsField(selectedGridCellState);
+                if (newGridCellState != selectedGridCellState)
+                {
+                    GridSystem.SetGridCellState(selectedGridTilePos, newGridCellState);
+                    selectedGridCellState = newGridCellState;
+                }
+            }
+            EditorGUILayout.EndVertical();
+            EditorGUILayout.Space();
+        }
 
         serializedObject.ApplyModifiedProperties();
 
         if (GUI.Button(EditorGUILayout.GetControlRect(
             GUILayout.MinHeight(EditorGUIUtility.singleLineHeight * 1.5f)),
+            "Update"))
+        {
+            _levelGrid.UpdateGrid();
+        }
+
+        if (GUI.Button(EditorGUILayout.GetControlRect(
+            GUILayout.MinHeight(EditorGUIUtility.singleLineHeight * 1.5f)),
             "Reset"))
         {
-            //_levelGrid.Reset();
+            _levelGrid.ResetGrid();
+            selectedGridTilePos = GridPosition.Invalid;
         }
     }
 }

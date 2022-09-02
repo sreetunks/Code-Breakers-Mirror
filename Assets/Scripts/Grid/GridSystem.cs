@@ -22,7 +22,7 @@ public class GridSystem : MonoBehaviour
 
     LevelGrid _activeLevelGrid;
 
-    public static LevelGrid ActiveLevelGrid { get => Instance._activeLevelGrid; }
+    public static LevelGrid ActiveLevelGrid { get => Instance?._activeLevelGrid; }
 
     public static GridSystem Instance { get; private set; }
 
@@ -38,38 +38,41 @@ public class GridSystem : MonoBehaviour
         Instance = this;
     }
 
-    private void OnValidate()
-    {
-        //if (Instance == null) Instance = this;
-    }
-
     /// <summary>
     /// Called on <c>LevelGrid.Awake()</c>.
     /// Registers a Room containing a LevelGrid object.
     /// </summary>
     public static void RegisterLevelGrid(LevelGrid levelGrid)
     {
+#if UNITY_EDITOR
+        if (Instance == null) Instance = FindObjectOfType<GridSystem>();
+#endif
         Instance._activeLevelGrid = levelGrid;
-        Instance._gridObjectMap = new Dictionary<GridPosition, IGridObject>(levelGrid.GridCellStates.Length);
+        Instance._gridObjectMap = new Dictionary<GridPosition, IGridObject>(levelGrid.GridWidth * levelGrid.GridHeight);
     }
 
     public static Vector3 GetWorldPosition(GridPosition gridPosition)
     {
-        return ActiveLevelGrid.GridOffset + new Vector3(gridPosition.X, 0, gridPosition.Z) * Instance._activeLevelGrid.GridCellSize;
+        return ActiveLevelGrid.GridOffset + (new Vector3(gridPosition.X + 0.5f, 0, gridPosition.Z + 0.5f) * Instance._activeLevelGrid.GridCellSize);
     }
 
     public static GridPosition GetGridPosition(Vector3 worldPosition)
     {
         worldPosition -= ActiveLevelGrid.GridOffset;
         return new GridPosition(
-            Mathf.RoundToInt(worldPosition.x / Instance._activeLevelGrid.GridCellSize),
-            Mathf.RoundToInt(worldPosition.z / Instance._activeLevelGrid.GridCellSize)
+            Mathf.FloorToInt(worldPosition.x / Instance._activeLevelGrid.GridCellSize),
+            Mathf.FloorToInt(worldPosition.z / Instance._activeLevelGrid.GridCellSize)
         );
     }
 
     public static bool TryGetGridCellState(GridPosition gridPosition, out GridCellState gridCellState)
     {
         return Instance._activeLevelGrid.TryGetGridCellState(gridPosition, out gridCellState);
+    }
+
+    public static void SetGridCellState(GridPosition gridPosition, GridCellState gridCellState)
+    {
+        Instance._activeLevelGrid.SetGridCellState(gridPosition, gridCellState);
     }
 
     public static bool TryGetGridObject(GridPosition gridPosition, out IGridObject gridObject)

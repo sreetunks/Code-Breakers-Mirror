@@ -13,17 +13,7 @@ public class GridRendererFeature : ScriptableRendererFeature
         public static int _gridCellStatesShaderProperty;
         public static int _gridCellColorsShaderProperty;
 
-        List<float> gridCellStateList = new List<float>();
-
-        Vector4[] gridCellStateColors = new Vector4[4]
-        {
-            new Vector4(0.0f, 0.0f, 0.0f, 1.0f),
-            new Vector4(0.0f, 0.0f, 0.5f, 1.0f),
-            new Vector4(0.0f, 0.5f, 0.3f, 1.0f),
-            new Vector4(0.3f, 0.0f, 0.0f, 1.0f)
-        };
-
-        public GridRenderPass()
+        public GridRenderPass(Vector4[] gridCellStateColors)
         {
             _gridWidthShaderProperty = Shader.PropertyToID("_GridWidth");
             _gridHeightShaderProperty = Shader.PropertyToID("_GridHeight");
@@ -34,18 +24,11 @@ public class GridRendererFeature : ScriptableRendererFeature
             Shader.SetGlobalVectorArray(_gridCellColorsShaderProperty, gridCellStateColors);
         }
 
-        public override void OnCameraSetup(CommandBuffer cmd, ref RenderingData renderingData)
-        {
-        }
-
         public override void Execute(ScriptableRenderContext context, ref RenderingData renderingData)
         {
-            gridCellStateList.Clear();
             LevelGrid levelGrid = GridSystem.ActiveLevelGrid;
             if (levelGrid)
             {
-                foreach (GridCellState state in levelGrid.GridCellStates)
-                    gridCellStateList.Add((float)state);
                 Shader.SetGlobalFloat(_gridWidthShaderProperty, levelGrid.GridWidth);
                 Shader.SetGlobalFloat(_gridHeightShaderProperty, levelGrid.GridHeight);
                 Shader.SetGlobalVector(_gridCellUVSizeShaderProperty, new Vector4(
@@ -53,38 +36,35 @@ public class GridRendererFeature : ScriptableRendererFeature
                     levelGrid.GridCellSize / levelGrid.GridHeight,
                     levelGrid.GridWidth / levelGrid.GridCellSize,
                     levelGrid.GridHeight / levelGrid.GridCellSize));
-                Shader.SetGlobalFloatArray(_gridCellStatesShaderProperty, gridCellStateList);
             }
-            else
-            {
-                Shader.SetGlobalInt(_gridWidthShaderProperty, 0);
-                Shader.SetGlobalInt(_gridHeightShaderProperty, 0);
-                Shader.SetGlobalVector(_gridCellUVSizeShaderProperty, Vector4.one);
-                Shader.SetGlobalFloatArray(_gridCellStatesShaderProperty, gridCellStateList);
-            }
-
             var drawingSettings = CreateDrawingSettings(new ShaderTagId("Grid"), ref renderingData, SortingCriteria.CommonTransparent);
             var filteringSettings = FilteringSettings.defaultValue;
             context.DrawRenderers(renderingData.cullResults, ref drawingSettings, ref filteringSettings);
         }
-
-        public override void OnCameraCleanup(CommandBuffer cmd)
-        {
-        }
     }
+
+    [SerializeField]
+    Vector4[] gridCellStateColors = new Vector4[4]
+    {
+        new Vector4(0.0f, 0.0f, 0.0f, 1.0f),
+        new Vector4(0.0f, 0.0f, 0.5f, 1.0f),
+        new Vector4(0.0f, 0.5f, 0.3f, 1.0f),
+        new Vector4(0.3f, 0.0f, 0.3f, 1.0f)
+    };
 
     GridRenderPass m_ScriptablePass;
 
     /// <inheritdoc/>
     public override void Create()
     {
-        m_ScriptablePass = new GridRenderPass();
+        m_ScriptablePass = new GridRenderPass(gridCellStateColors);
         m_ScriptablePass.renderPassEvent = RenderPassEvent.AfterRenderingOpaques;
     }
 
     public override void AddRenderPasses(ScriptableRenderer renderer, ref RenderingData renderingData)
     {
-        renderer.EnqueuePass(m_ScriptablePass);
+        if(!renderingData.cameraData.isPreviewCamera)
+            renderer.EnqueuePass(m_ScriptablePass);
     }
 }
 
