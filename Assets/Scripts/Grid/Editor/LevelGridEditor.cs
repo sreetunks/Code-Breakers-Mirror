@@ -10,6 +10,7 @@ namespace Grid.Editor
         private SerializedProperty _gridWidth;
         private SerializedProperty _gridHeight;
         private SerializedProperty _gridCellSize;
+        private SerializedProperty _gridOffset;
         private SerializedProperty _gridCellStates;
         private GridPosition _selectedGridTilePos = GridPosition.Invalid;
         private LevelGrid _levelGrid;
@@ -19,6 +20,7 @@ namespace Grid.Editor
             _levelGrid = (LevelGrid)serializedObject.targetObject;
             _gridWidth = serializedObject.FindProperty("gridWidth");
             _gridHeight = serializedObject.FindProperty("gridHeight");
+            _gridOffset = serializedObject.FindProperty("gridOffset");
             _gridCellSize = serializedObject.FindProperty("gridCellSize");
             _gridCellStates = serializedObject.FindProperty("gridCellStates");
 
@@ -41,14 +43,16 @@ namespace Grid.Editor
             else if (Event.current.type == EventType.Repaint)
             {
                 if (_selectedGridTilePos == GridPosition.Invalid) return;
+                var handlesMatrix = Handles.matrix;
+                Handles.matrix = _levelGrid.transform.localToWorldMatrix;
                 Handles.RectangleHandleCap(
                     0,
-                    //(new Vector3(1, 0, 1) * GridSystem.ActiveLevelGrid.GridCellSize * 0.5f) +
-                    GridSystem.GetWorldPosition(_selectedGridTilePos),
+                    GridSystem.GetWorldPosition(_selectedGridTilePos) - _levelGrid.transform.position,
                     Quaternion.LookRotation(Vector3.up),
                     GridSystem.ActiveLevelGrid.GridCellSize * 0.5f,
                     EventType.Repaint
                 );
+                Handles.matrix = handlesMatrix;
                 Repaint();
             }
         }

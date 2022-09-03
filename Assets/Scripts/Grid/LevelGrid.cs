@@ -72,16 +72,17 @@ namespace Grid
             var posArray = new NativeArray<Vector3>(vertexCount, Allocator.Temp);
             var uvArray = new NativeArray<Vector2>(vertexCount, Allocator.Temp);
 
+            Vector3 gridVertexOffset = gridOffset - transform.position;
+
             for (var y = 0; y < (gridHeight * 2) + 1; ++y)
             {
                 for (var x = 0; x < (gridWidth * 2) + 1; ++x)
                 {
                     var idx = (y * ((gridWidth * 2) + 1)) + x;
-                    posArray[idx] = gridOffset + (new Vector3(x, 0, y) * (gridCellSize * 0.5f));
+                    posArray[idx] = gridVertexOffset + (new Vector3(x, 0, y) * gridCellSize * 0.5f);
                     uvArray[idx] = new Vector2((float)x / (gridWidth * 2), (float)y / (gridHeight * 2));
                 }
             }
-
 
             gridMesh.SetVertexBufferParams(vertexCount, vertexLayout);
             UpdateCellState(gridMesh);
@@ -156,7 +157,7 @@ namespace Grid
 
         public void ResetGrid()
         {
-            gridOffset = new Vector3(-0.5f * gridWidth, 0, -0.5f * gridHeight) * gridCellSize;
+            gridOffset = transform.position + (new Vector3(-0.5f * gridWidth, 0, -0.5f * gridHeight) * gridCellSize);
             if (gridWidth % 2.0f == 0) gridOffset.x += 0.5f * gridCellSize;
             if (gridHeight % 2.0f == 0) gridOffset.z += 0.5f * gridCellSize;
 
