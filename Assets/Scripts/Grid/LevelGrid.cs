@@ -174,6 +174,7 @@ namespace Grid
 #if UNITY_EDITOR
         public void UpdateGrid()
         {
+            GridSystem.RegisterLevelGrid(this);
             UpdateCellState(_meshFilter.sharedMesh);
         }
 #endif
