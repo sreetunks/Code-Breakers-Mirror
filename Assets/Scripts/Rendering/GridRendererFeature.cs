@@ -1,3 +1,4 @@
+using System;
 using Grid;
 using UnityEngine;
 using UnityEngine.Rendering;
@@ -9,31 +10,30 @@ namespace Rendering
     {
         private class GridRenderPass : ScriptableRenderPass
         {
-            public static int GridWidthShaderProperty;
-            public static int GridHeightShaderProperty;
-            public static int GridCellUVSizeShaderProperty;
-            public static int GridCellStatesShaderProperty;
-            public static int GridCellColorsShaderProperty;
+            private static int _gridWidthShaderProperty;
+            private static int _gridHeightShaderProperty;
+            private static int _gridCellUVSizeShaderProperty;
+            private static int _gridCellStatesShaderProperty;
 
             public GridRenderPass(Vector4[] gridCellStateColors)
             {
-                GridWidthShaderProperty = Shader.PropertyToID("_GridWidth");
-                GridHeightShaderProperty = Shader.PropertyToID("_GridHeight");
-                GridCellUVSizeShaderProperty = Shader.PropertyToID("_GridCellUVSize");
-                GridCellStatesShaderProperty = Shader.PropertyToID("_GridCellStates");
-                GridCellColorsShaderProperty = Shader.PropertyToID("_GridCellColors");
+                _gridWidthShaderProperty = Shader.PropertyToID("_GridWidth");
+                _gridHeightShaderProperty = Shader.PropertyToID("_GridHeight");
+                _gridCellUVSizeShaderProperty = Shader.PropertyToID("_GridCellUVSize");
+                _gridCellStatesShaderProperty = Shader.PropertyToID("_GridCellStates");
+                var gridCellColorsShaderProperty = Shader.PropertyToID("_GridCellColors");
 
-                Shader.SetGlobalVectorArray(GridCellColorsShaderProperty, gridCellStateColors);
+                Shader.SetGlobalVectorArray(gridCellColorsShaderProperty, gridCellStateColors);
             }
 
             public override void Execute(ScriptableRenderContext context, ref RenderingData renderingData)
             {
-                LevelGrid levelGrid = GridSystem.ActiveLevelGrid;
+                var levelGrid = GridSystem.ActiveLevelGrid;
                 if (levelGrid)
                 {
-                    Shader.SetGlobalFloat(GridWidthShaderProperty, levelGrid.GridWidth);
-                    Shader.SetGlobalFloat(GridHeightShaderProperty, levelGrid.GridHeight);
-                    Shader.SetGlobalVector(GridCellUVSizeShaderProperty, new Vector4(
+                    Shader.SetGlobalFloat(_gridWidthShaderProperty, levelGrid.GridWidth);
+                    Shader.SetGlobalFloat(_gridHeightShaderProperty, levelGrid.GridHeight);
+                    Shader.SetGlobalVector(_gridCellUVSizeShaderProperty, new Vector4(
                         levelGrid.GridCellSize / levelGrid.GridWidth,
                         levelGrid.GridCellSize / levelGrid.GridHeight,
                         levelGrid.GridWidth / levelGrid.GridCellSize,
@@ -45,28 +45,29 @@ namespace Rendering
             }
         }
 
-        [SerializeField]
-        Vector4[] gridCellStateColors = new Vector4[4]
+        [SerializeField] private Vector4[] gridCellStateColors = new Vector4[4]
         {
-            new Vector4(0.0f, 0.0f, 0.0f, 1.0f),
-            new Vector4(0.0f, 0.0f, 0.5f, 1.0f),
-            new Vector4(0.0f, 0.5f, 0.3f, 1.0f),
-            new Vector4(0.3f, 0.0f, 0.3f, 1.0f)
+            new(0.0f, 0.0f, 0.0f, 1.0f),
+            new(0.0f, 0.0f, 0.5f, 1.0f),
+            new(0.0f, 0.5f, 0.3f, 1.0f),
+            new(0.3f, 0.0f, 0.3f, 1.0f)
         };
 
-        GridRenderPass m_ScriptablePass;
+        private GridRenderPass _mScriptablePass;
 
         /// <inheritdoc/>
         public override void Create()
         {
-            m_ScriptablePass = new GridRenderPass(gridCellStateColors);
-            m_ScriptablePass.renderPassEvent = RenderPassEvent.AfterRenderingOpaques;
+            _mScriptablePass = new GridRenderPass(gridCellStateColors)
+            {
+                renderPassEvent = RenderPassEvent.AfterRenderingOpaques
+            };
         }
 
         public override void AddRenderPasses(ScriptableRenderer renderer, ref RenderingData renderingData)
         {
             if(!renderingData.cameraData.isPreviewCamera)
-                renderer.EnqueuePass(m_ScriptablePass);
+                renderer.EnqueuePass(_mScriptablePass);
         }
     }
 }

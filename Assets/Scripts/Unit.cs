@@ -23,10 +23,12 @@ public class Unit : MonoBehaviour, IGridObject
 
     private void Start()
     {
-        Position = GridSystem.GetGridPosition(transform.position);
+        var position = transform.position;
+        Position = GridSystem.GetGridPosition(position);
         GridSystem.UpdateGridObjectPosition(this, Position);
-        transform.position = GridSystem.GetWorldPosition(Position);
-        _targetPosition = transform.position;
+        position = GridSystem.GetWorldPosition(Position);
+        transform.position = position;
+        _targetPosition = position;
     }
 
     private void Update()

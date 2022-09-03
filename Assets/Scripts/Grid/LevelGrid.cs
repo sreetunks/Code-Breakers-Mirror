@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using Unity.Collections;
 using UnityEngine;
 using UnityEngine.Rendering;
@@ -13,13 +14,13 @@ namespace Grid
         [SerializeField] private int gridWidth;
         [SerializeField] private int gridHeight;
         [SerializeField] private float gridCellSize;
-        [SerializeField] GridCellState[] gridCellStates;
-        [SerializeField] Vector3 gridOffset;
+        [SerializeField] private GridCellState[] gridCellStates;
+        [SerializeField] private Vector3 gridOffset;
 
-        public int GridWidth { get => gridWidth; }
-        public int GridHeight { get => gridHeight; }
-        public float GridCellSize { get => gridCellSize; }
-        public Vector3 GridOffset { get => gridOffset; }
+        public int GridWidth => gridWidth;
+        public int GridHeight => gridHeight;
+        public float GridCellSize => gridCellSize;
+        public Vector3 GridOffset => gridOffset;
 
         private MeshFilter _meshFilter;
         private MeshCollider _meshCollider;
