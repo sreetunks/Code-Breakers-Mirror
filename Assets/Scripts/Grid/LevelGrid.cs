@@ -8,7 +8,7 @@ namespace Grid
     /// <summary>
     /// Contains the Grid Information for a Single Room.
     /// </summary>
-    [RequireComponent(typeof(MeshFilter))]
+    [RequireComponent(typeof(MeshFilter), typeof(MeshCollider))]
     public class LevelGrid : MonoBehaviour
     {
         [SerializeField] private int gridWidth;
@@ -30,6 +30,8 @@ namespace Grid
         {
             _meshFilter = GetComponent<MeshFilter>();
             _meshCollider = GetComponent<MeshCollider>();
+
+            GridSystem.RegisterLevelGrid(this);
         }
 
         private int GetCellStateVertexIndex(int x, int y)
@@ -148,13 +150,14 @@ namespace Grid
             gridMesh.subMeshCount = 1;
             gridMesh.SetSubMesh(0, subMeshDescriptor);
 
+            gridMesh.name = "Grid";
             gridMesh.RecalculateBounds();
             gridMesh.UploadMeshData(false);
 
             _meshFilter.sharedMesh = gridMesh;
             _meshCollider.sharedMesh = gridMesh;
         }
-
+#if UNITY_EDITOR
         public void ResetGrid()
         {
             gridOffset = transform.position + (new Vector3(-0.5f * gridWidth, 0, -0.5f * gridHeight) * gridCellSize);
@@ -174,12 +177,14 @@ namespace Grid
 
             GridSystem.RegisterLevelGrid(this);
         }
-#if UNITY_EDITOR
+
         public void UpdateGrid()
         {
             GridSystem.RegisterLevelGrid(this);
             if (_meshFilter == null) _meshFilter = GetComponent<MeshFilter>();
+            if (_meshCollider == null) _meshCollider = GetComponent<MeshCollider>();
             UpdateCellState(_meshFilter.sharedMesh);
+            _meshCollider.sharedMesh = _meshFilter.sharedMesh;
         }
 #endif
         public bool IsValidGridPosition(GridPosition gridPosition)
