@@ -42,8 +42,6 @@ Shader "TheHungrySwans/Grid"
                 float4 color : COLOR;
             };
 
-            float _GridWidth;
-            float _GridHeight;
             float4 _GridCellUVSize;
             float4 _GridCellColors[4];
 
