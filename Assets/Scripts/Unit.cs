@@ -39,24 +39,26 @@ public class Unit : MonoBehaviour, IGridObject
         if (dist > 0)
         {
             var move = moveSpeed * Time.deltaTime * toTarget.normalized; // Makes move speed the same for all frame-rate's
-            
+
             if (move.magnitude > dist)
                 move = toTarget;
-            
+
             transform.position += move; // Sets target move location, EXACTLY (L: 15 - 26)
             unitAnimator.SetBool(IsWalking, true); // Starts "Walk" Animations
-            
+
             var rotation = Quaternion.LookRotation(toTarget);
             var current = transform.localRotation;
             transform.localRotation = Quaternion.Slerp(current, rotation, Time.deltaTime * rotateSpeed); // Sets Rotation to be more Accurate (L: 34 - 36) for 180 Degree's
         }
         else
+        {
             unitAnimator.SetBool(IsWalking, false); // Ends "Walk" Animations
 
-        var newGridPosition = GridSystem.GetGridPosition(transform.position);
-        if (newGridPosition == Position) return;
-        GridSystem.UpdateGridObjectPosition(this, newGridPosition);
-        Position = newGridPosition;
+            var newGridPosition = GridSystem.GetGridPosition(transform.position);
+            if (newGridPosition == Position) return;
+            GridSystem.UpdateGridObjectPosition(this, newGridPosition);
+            Position = newGridPosition;
+        }
     }
 
     public void Move(Vector3 targetPosition)
