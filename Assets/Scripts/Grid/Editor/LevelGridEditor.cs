@@ -1,107 +1,108 @@
-using UnityEngine;
+using System;
 using UnityEditor;
+using UnityEngine;
 
-[CustomEditor(typeof(LevelGrid))]
-public class LevelGridEditor : Editor
+namespace Grid.Editor
 {
-    SerializedProperty gridWidth;
-    SerializedProperty gridHeight;
-    SerializedProperty gridCellSize;
-    SerializedProperty gridCellStates;
-    GridPosition selectedGridTilePos = GridPosition.Invalid;
-    LevelGrid _levelGrid;
-
-    private void OnEnable()
+    [CustomEditor(typeof(LevelGrid))]
+    public class LevelGridEditor : UnityEditor.Editor
     {
-        _levelGrid = (LevelGrid)serializedObject.targetObject;
-        gridWidth = serializedObject.FindProperty("gridWidth");
-        gridHeight = serializedObject.FindProperty("gridHeight");
-        gridCellSize = serializedObject.FindProperty("gridCellSize");
-        gridCellStates = serializedObject.FindProperty("gridCellStates");
+        private SerializedProperty _gridWidth;
+        private SerializedProperty _gridHeight;
+        private SerializedProperty _gridCellSize;
+        private SerializedProperty _gridCellStates;
+        private GridPosition _selectedGridTilePos = GridPosition.Invalid;
+        private LevelGrid _levelGrid;
 
-        serializedObject.Update();
-        serializedObject.ApplyModifiedProperties();
-
-        GridSystem.RegisterLevelGrid(_levelGrid);
-    }
-
-    private void OnSceneGUI()
-    {
-        if (Event.current.type == EventType.MouseDown && Event.current.button == 0)
+        private void OnEnable()
         {
-            Ray mouseDirRay = HandleUtility.GUIPointToWorldRay(Event.current.mousePosition);
-            if (Physics.Raycast(mouseDirRay, out RaycastHit hit, LayerMask.GetMask("MousePlane")))
-            {
-                selectedGridTilePos = GridSystem.GetGridPosition(hit.point);
-            }
+            _levelGrid = (LevelGrid)serializedObject.targetObject;
+            _gridWidth = serializedObject.FindProperty("gridWidth");
+            _gridHeight = serializedObject.FindProperty("gridHeight");
+            _gridCellSize = serializedObject.FindProperty("gridCellSize");
+            _gridCellStates = serializedObject.FindProperty("gridCellStates");
+
+            serializedObject.Update();
+            serializedObject.ApplyModifiedProperties();
+
+            GridSystem.RegisterLevelGrid(_levelGrid);
         }
-        else if (Event.current.type == EventType.Repaint)
+
+        private void OnSceneGUI()
         {
-            if (selectedGridTilePos != GridPosition.Invalid)
+            if (Event.current.type == EventType.MouseDown && Event.current.button == 0)
             {
+                var mouseDirRay = HandleUtility.GUIPointToWorldRay(Event.current.mousePosition);
+                if (Physics.Raycast(mouseDirRay, out var hit, LayerMask.GetMask("MousePlane")))
+                {
+                    _selectedGridTilePos = GridSystem.GetGridPosition(hit.point);
+                }
+            }
+            else if (Event.current.type == EventType.Repaint)
+            {
+                if (_selectedGridTilePos == GridPosition.Invalid) return;
                 Handles.RectangleHandleCap(
                     0,
                     //(new Vector3(1, 0, 1) * GridSystem.ActiveLevelGrid.GridCellSize * 0.5f) +
-                    GridSystem.GetWorldPosition(selectedGridTilePos),
+                    GridSystem.GetWorldPosition(_selectedGridTilePos),
                     Quaternion.LookRotation(Vector3.up),
                     GridSystem.ActiveLevelGrid.GridCellSize * 0.5f,
                     EventType.Repaint
-                    );
+                );
                 Repaint();
             }
         }
-    }
 
-    public override void OnInspectorGUI()
-    {
-        serializedObject.Update();
-
-        EditorGUILayout.BeginVertical();
-        EditorGUILayout.PropertyField(gridWidth);
-        EditorGUILayout.PropertyField(gridHeight);
-        EditorGUILayout.PropertyField(gridCellSize);
-        EditorGUILayout.EndVertical();
-
-        EditorGUILayout.Space();
-
-        if (selectedGridTilePos != GridPosition.Invalid)
+        public override void OnInspectorGUI()
         {
+            serializedObject.Update();
+
             EditorGUILayout.BeginVertical();
-            using (new EditorGUI.DisabledScope(true))
-            {
-                EditorGUILayout.Vector2IntField(
-                "Selected Tile",
-                new Vector2Int(selectedGridTilePos.X, selectedGridTilePos.Z));
-            }
-
-            if (GridSystem.TryGetGridCellState(selectedGridTilePos, out GridCellState selectedGridCellState))
-            {
-                var newGridCellState = (GridCellState)EditorGUILayout.EnumFlagsField(selectedGridCellState);
-                if (newGridCellState != selectedGridCellState)
-                {
-                    GridSystem.SetGridCellState(selectedGridTilePos, newGridCellState);
-                    selectedGridCellState = newGridCellState;
-                }
-            }
+            EditorGUILayout.PropertyField(_gridWidth);
+            EditorGUILayout.PropertyField(_gridHeight);
+            EditorGUILayout.PropertyField(_gridCellSize);
             EditorGUILayout.EndVertical();
+
             EditorGUILayout.Space();
-        }
 
-        serializedObject.ApplyModifiedProperties();
+            if (_selectedGridTilePos != GridPosition.Invalid)
+            {
+                EditorGUILayout.BeginVertical();
+                using (new EditorGUI.DisabledScope(true))
+                {
+                    EditorGUILayout.Vector2IntField(
+                        "Selected Tile",
+                        new Vector2Int(_selectedGridTilePos.X, _selectedGridTilePos.Z));
+                }
 
-        if (GUI.Button(EditorGUILayout.GetControlRect(
-            GUILayout.MinHeight(EditorGUIUtility.singleLineHeight * 1.5f)),
-            "Update"))
-        {
-            _levelGrid.UpdateGrid();
-        }
+                if (GridSystem.TryGetGridCellState(_selectedGridTilePos, out var selectedGridCellState))
+                {
+                    var newGridCellState = (GridCellState)EditorGUILayout.EnumFlagsField(selectedGridCellState);
+                    if (newGridCellState != selectedGridCellState)
+                    {
+                        GridSystem.SetGridCellState(_selectedGridTilePos, newGridCellState);
+                        selectedGridCellState = newGridCellState;
+                    }
+                }
 
-        if (GUI.Button(EditorGUILayout.GetControlRect(
-            GUILayout.MinHeight(EditorGUIUtility.singleLineHeight * 1.5f)),
-            "Reset"))
-        {
+                EditorGUILayout.EndVertical();
+                EditorGUILayout.Space();
+            }
+
+            serializedObject.ApplyModifiedProperties();
+
+            if (GUI.Button(EditorGUILayout.GetControlRect(
+                        GUILayout.MinHeight(EditorGUIUtility.singleLineHeight * 1.5f)),
+                    "Update"))
+            {
+                _levelGrid.UpdateGrid();
+            }
+
+            if (!GUI.Button(EditorGUILayout.GetControlRect(
+                        GUILayout.MinHeight(EditorGUIUtility.singleLineHeight * 1.5f)),
+                    "Reset")) return;
             _levelGrid.ResetGrid();
-            selectedGridTilePos = GridPosition.Invalid;
+            _selectedGridTilePos = GridPosition.Invalid;
         }
     }
 }
