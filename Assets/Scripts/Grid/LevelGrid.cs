@@ -21,6 +21,7 @@ namespace Grid
         public int GridHeight => gridHeight;
         public float GridCellSize => gridCellSize;
         public Vector3 GridOffset => gridOffset;
+        
 
         private MeshFilter _meshFilter;
         private MeshCollider _meshCollider;
@@ -176,6 +177,7 @@ namespace Grid
         public void UpdateGrid()
         {
             GridSystem.RegisterLevelGrid(this);
+            if (_meshFilter == null) _meshFilter = GetComponent<MeshFilter>();
             UpdateCellState(_meshFilter.sharedMesh);
         }
 #endif

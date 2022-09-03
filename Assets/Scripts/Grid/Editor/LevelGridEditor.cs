@@ -61,6 +61,7 @@ namespace Grid.Editor
             EditorGUILayout.PropertyField(_gridWidth);
             EditorGUILayout.PropertyField(_gridHeight);
             EditorGUILayout.PropertyField(_gridCellSize);
+            //EditorGUILayout.PropertyField(_gridCellStates); 
             EditorGUILayout.EndVertical();
 
             EditorGUILayout.Space();
@@ -81,7 +82,6 @@ namespace Grid.Editor
                     if (newGridCellState != selectedGridCellState)
                     {
                         GridSystem.SetGridCellState(_selectedGridTilePos, newGridCellState);
-                        selectedGridCellState = newGridCellState;
                     }
                 }
 
