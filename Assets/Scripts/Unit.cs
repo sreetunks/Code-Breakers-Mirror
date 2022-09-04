@@ -63,8 +63,50 @@ public class Unit : MonoBehaviour, IGridObject
 
     public void Move(Vector3 targetPosition)
     {
+        var position = Position;
         var targetGridPosition = GridSystem.GetGridPosition(targetPosition);
+        
         if (!GridSystem.TryGetGridCellState(targetGridPosition, out var targetCellState) || targetCellState != GridCellState.Walkable) return;
+        
+        print("Target: " + targetGridPosition); // TODO: Remove
+        
+        do
+        {
+            //Pathfinding Logic
+            var deltaX = targetGridPosition.X - position.X;
+            var deltaZ = targetGridPosition.Z - position.Z;
+
+            if (deltaX != 0) deltaX /= Mathf.Abs(deltaX);
+            if (deltaZ != 0) deltaZ /= Mathf.Abs(deltaZ);
+            
+            // X Logic
+            var gridPositionX = new GridPosition(position.X + deltaX, position.Z);
+            GridSystem.TryGetGridCellState(gridPositionX, out var cellState);
+            var newTpx = new Vector3(10000, 10000, 10000);
+            if (cellState == GridCellState.Walkable)
+            {
+                newTpx = targetPosition - GridSystem.GetWorldPosition(gridPositionX);
+            }
+
+            // Z Logic
+            var gridPositionZ = new GridPosition(position.X, position.Z + deltaZ);
+            GridSystem.TryGetGridCellState(gridPositionZ, out cellState);
+            var newTpz = new Vector3(10000, 10000, 10000);
+            if (cellState == GridCellState.Walkable)
+            {
+                newTpz = targetPosition - GridSystem.GetWorldPosition(gridPositionZ);
+            }
+
+            if (newTpx == new Vector3(10000, 10000, 10000) && newTpz == new Vector3(10000, 10000, 10000)) break; // NOTE: Simple path not found, this is where we expand the logic to find a path.
+            
+            // Compare Logic
+            position = newTpx.magnitude < newTpz.magnitude ? gridPositionX : gridPositionZ;
+            
+            print("Position: " + position); // TODO: Remove
+        } 
+        while (position != targetGridPosition);
+        
+        // Move Logic
         _targetGridPosition = targetGridPosition;
         _targetPosition = GridSystem.GetWorldPosition(_targetGridPosition);
     }

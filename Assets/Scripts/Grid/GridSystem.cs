@@ -11,7 +11,6 @@ namespace Grid
         Occupied
     }
 
-// ReSharper disable once CheckNamespace
     public class GridSystem : MonoBehaviour
     {
         private const float CellSize = 2.0f;

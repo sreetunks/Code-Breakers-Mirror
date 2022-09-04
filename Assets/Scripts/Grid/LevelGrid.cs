@@ -74,7 +74,7 @@ namespace Grid
             var posArray = new NativeArray<Vector3>(vertexCount, Allocator.Temp);
             var uvArray = new NativeArray<Vector2>(vertexCount, Allocator.Temp);
 
-            Vector3 gridVertexOffset = gridOffset - transform.position;
+            var gridVertexOffset = gridOffset - transform.position;
 
             for (var y = 0; y < (gridHeight * 2) + 1; ++y)
             {
@@ -187,7 +187,7 @@ namespace Grid
             _meshCollider.sharedMesh = _meshFilter.sharedMesh;
         }
 #endif
-        public bool IsValidGridPosition(GridPosition gridPosition)
+        private bool IsValidGridPosition(GridPosition gridPosition)
         {
             return (
                 gridPosition.X > -1 &&
