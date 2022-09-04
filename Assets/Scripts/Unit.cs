@@ -1,4 +1,4 @@
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using Grid;
 using UnityEngine;
 
@@ -64,8 +64,7 @@ public class Unit : MonoBehaviour, IGridObject
     public void Move(Vector3 targetPosition)
     {
         var targetGridPosition = GridSystem.GetGridPosition(targetPosition);
-        if (!GridSystem.TryGetGridCellState(targetGridPosition, out var targetCellState) ||
-            targetCellState != GridCellState.Walkable) return;
+        if (!GridSystem.TryGetGridCellState(targetGridPosition, out var targetCellState) || targetCellState != GridCellState.Walkable) return;
         _targetGridPosition = targetGridPosition;
         _targetPosition = GridSystem.GetWorldPosition(_targetGridPosition);
     }
