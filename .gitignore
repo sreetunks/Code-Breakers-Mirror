@@ -65,3 +65,6 @@ crashlytics-build.properties
 .erp
 /Assets/Plugins/
 /Assets/Plugins.meta
+
+#External
+/UserSettings/
