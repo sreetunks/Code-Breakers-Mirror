@@ -60,3 +60,8 @@ crashlytics-build.properties
 
 #Rider Files
 .idea/
+
+#Unity Plugins
+.erp
+/Assets/Plugins/
+/Assets/Plugins.meta
