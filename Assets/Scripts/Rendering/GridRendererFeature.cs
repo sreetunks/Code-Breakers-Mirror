@@ -10,15 +10,11 @@ namespace Rendering
     {
         private class GridRenderPass : ScriptableRenderPass
         {
-            private static int _gridWidthShaderProperty;
-            private static int _gridHeightShaderProperty;
             private static int _gridCellUVSizeShaderProperty;
             private static int _gridCellStatesShaderProperty;
 
             public GridRenderPass(Vector4[] gridCellStateColors)
             {
-                _gridWidthShaderProperty = Shader.PropertyToID("_GridWidth");
-                _gridHeightShaderProperty = Shader.PropertyToID("_GridHeight");
                 _gridCellUVSizeShaderProperty = Shader.PropertyToID("_GridCellUVSize");
                 _gridCellStatesShaderProperty = Shader.PropertyToID("_GridCellStates");
                 var gridCellColorsShaderProperty = Shader.PropertyToID("_GridCellColors");
@@ -31,11 +27,9 @@ namespace Rendering
                 var levelGrid = GridSystem.ActiveLevelGrid;
                 if (levelGrid)
                 {
-                    Shader.SetGlobalFloat(_gridWidthShaderProperty, levelGrid.GridWidth);
-                    Shader.SetGlobalFloat(_gridHeightShaderProperty, levelGrid.GridHeight);
                     Shader.SetGlobalVector(_gridCellUVSizeShaderProperty, new Vector4(
-                        levelGrid.GridCellSize / levelGrid.GridWidth,
-                        levelGrid.GridCellSize / levelGrid.GridHeight,
+                        (levelGrid.GridCellSize * 0.5f) / levelGrid.GridWidth,
+                        (levelGrid.GridCellSize * 0.5f) / levelGrid.GridHeight,
                         levelGrid.GridWidth / levelGrid.GridCellSize,
                         levelGrid.GridHeight / levelGrid.GridCellSize));
                 }
