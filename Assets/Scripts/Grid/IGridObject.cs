@@ -5,6 +5,7 @@ namespace Grid
     /// </summary>
     public interface IGridObject
     {
+        public GridCellState GridCellPreviousState { get; set; }
         public GridPosition Position { get; }
     }
 }

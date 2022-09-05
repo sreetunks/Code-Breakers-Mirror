@@ -96,9 +96,13 @@ namespace Grid
         public static void UpdateGridObjectPosition(IGridObject gridObject, GridPosition newGridPosition)
         {
             if (TryGetGridObject(newGridPosition, out _)) return;
+
             Instance._gridObjectMap.Remove(gridObject.Position);
-            ActiveLevelGrid.SetGridCellState(gridObject.Position, GridCellState.Walkable);
             Instance._gridObjectMap[newGridPosition] = gridObject;
+
+            ActiveLevelGrid.TryGetGridCellState(newGridPosition, out GridCellState newGridCellState);
+            ActiveLevelGrid.SetGridCellState(gridObject.Position, gridObject.GridCellPreviousState);
+            gridObject.GridCellPreviousState = newGridCellState;
             ActiveLevelGrid.SetGridCellState(newGridPosition, GridCellState.Occupied);
         }
     }

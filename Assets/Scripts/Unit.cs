@@ -14,6 +14,7 @@ public class Unit : MonoBehaviour, IGridObject
     
     private static readonly int IsWalking = Animator.StringToHash("IsWalking"); // Caching ID for Parameter
 
+    public GridCellState GridCellPreviousState { get; set; }
     public GridPosition Position { get; private set; }
 
     private void Awake()
@@ -25,6 +26,7 @@ public class Unit : MonoBehaviour, IGridObject
     {
         var position = transform.position;
         Position = GridSystem.GetGridPosition(position);
+        GridCellPreviousState = GridCellState.Impassable;
         GridSystem.UpdateGridObjectPosition(this, Position);
         position = GridSystem.GetWorldPosition(Position);
         transform.position = position;
