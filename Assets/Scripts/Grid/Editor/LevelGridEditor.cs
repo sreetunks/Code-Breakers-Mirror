@@ -24,7 +24,9 @@ namespace Grid.Editor
             _gridCellSize = serializedObject.FindProperty("gridCellSize");
             _gridCellStates = serializedObject.FindProperty("gridCellStates");
 
-            GridSystem.RegisterLevelGrid(_levelGrid);
+#if UNITY_EDITOR
+            if(!Application.isPlaying) GridSystem.RegisterLevelGrid(_levelGrid);
+#endif
         }
 
         private void OnSceneGUI()

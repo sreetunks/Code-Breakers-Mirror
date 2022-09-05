@@ -15,10 +15,9 @@ namespace Grid
     public class GridSystem : MonoBehaviour
     {
         private const float CellSize = 2.0f;
-        // ReSharper disable once FieldCanBeMadeReadOnly.Local
-        private int _width;
-        // ReSharper disable once FieldCanBeMadeReadOnly.Local
-        private int _height;
+
+        [SerializeField] private LevelGrid startingLevelGrid;
+
         // ReSharper disable once FieldCanBeMadeReadOnly.Local
         private Dictionary<GridPosition, IGridObject> _gridObjectMap;
 
@@ -38,6 +37,8 @@ namespace Grid
             }
 
             Instance = this;
+
+            RegisterLevelGrid(startingLevelGrid);
         }
 
         /// <summary>

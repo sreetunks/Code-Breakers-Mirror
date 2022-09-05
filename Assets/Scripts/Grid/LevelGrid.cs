@@ -30,8 +30,6 @@ namespace Grid
         {
             _meshFilter = GetComponent<MeshFilter>();
             _meshCollider = GetComponent<MeshCollider>();
-
-            GridSystem.RegisterLevelGrid(this);
         }
 
         private int GetCellStateVertexIndex(int x, int y)
@@ -174,13 +172,10 @@ namespace Grid
             }
 
             UpdateGridMeshData();
-
-            GridSystem.RegisterLevelGrid(this);
         }
 
         public void UpdateGrid()
         {
-            GridSystem.RegisterLevelGrid(this);
             if (_meshFilter == null) _meshFilter = GetComponent<MeshFilter>();
             if (_meshCollider == null) _meshCollider = GetComponent<MeshCollider>();
             UpdateCellState(_meshFilter.sharedMesh);
