@@ -16,6 +16,7 @@ public class Unit : MonoBehaviour, IGridObject
 
     public GridCellState GridCellPreviousState { get; set; }
     public GridPosition Position { get; private set; }
+    public bool IsOnDoorGridCell { get; private set; }
 
     private void Awake()
     {
@@ -31,6 +32,7 @@ public class Unit : MonoBehaviour, IGridObject
         position = GridSystem.GetWorldPosition(Position);
         transform.position = position;
         _targetPosition = position;
+        IsOnDoorGridCell = CheckIsOnDoorGridCell(GridCellPreviousState);
     }
 
     private void Update()
@@ -60,15 +62,30 @@ public class Unit : MonoBehaviour, IGridObject
             if (newGridPosition == Position) return;
             GridSystem.UpdateGridObjectPosition(this, newGridPosition);
             Position = newGridPosition;
+            IsOnDoorGridCell = CheckIsOnDoorGridCell(GridCellPreviousState);
         }
     }
 
-    public void Move(Vector3 targetPosition)
+    private bool CheckIsOnDoorGridCell(GridCellState gridCellState)
+    {
+        return (gridCellState == GridCellState.DoorNorth ||
+                gridCellState == GridCellState.DoorEast ||
+                gridCellState == GridCellState.DoorSouth ||
+                gridCellState == GridCellState.DoorWest);
+    }
+
+    public void Move(Vector3 targetPosition, bool forceMove = false)
     {
         var targetGridPosition = GridSystem.GetGridPosition(targetPosition);
-        if (!GridSystem.TryGetGridCellState(targetGridPosition, out var targetCellState) ||
-            targetCellState != GridCellState.Walkable) return;
+        GridSystem.TryGetGridCellState(targetGridPosition, out var targetCellState);
+        if (!forceMove && (targetCellState == GridCellState.Impassable || targetCellState == GridCellState.Occupied))
+            return;
         _targetGridPosition = targetGridPosition;
         _targetPosition = GridSystem.GetWorldPosition(_targetGridPosition);
+        if (forceMove)
+        {
+            Position = targetGridPosition;
+            IsOnDoorGridCell = CheckIsOnDoorGridCell(targetCellState);
+        }
     }
 }

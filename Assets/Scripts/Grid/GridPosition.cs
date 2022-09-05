@@ -1,6 +1,7 @@
 using System;
 
 // ReSharper disable once CheckNamespace
+[Serializable]
 public struct GridPosition : IEquatable<GridPosition>
 {
     public int X;

@@ -8,7 +8,11 @@ namespace Grid
     {
         Impassable,
         Walkable,
-        Occupied
+        Occupied,
+        DoorNorth,
+        DoorEast,
+        DoorSouth,
+        DoorWest
     }
 
 // ReSharper disable once CheckNamespace
@@ -104,6 +108,29 @@ namespace Grid
             ActiveLevelGrid.SetGridCellState(gridObject.Position, gridObject.GridCellPreviousState);
             gridObject.GridCellPreviousState = newGridCellState;
             ActiveLevelGrid.SetGridCellState(newGridPosition, GridCellState.Occupied);
+        }
+
+        public static GridPosition SwitchLevelGrid(GridPosition doorGridCellPosition, GridCellState doorGridCellState)
+        {
+            LevelGrid newLevelGrid = ActiveLevelGrid.GetRoomAdjacentToDoor(doorGridCellState);
+            GridPosition adjacentGridDoorPosition = GridPosition.Invalid;
+            if (newLevelGrid)
+            {
+                Instance._gridObjectMap.Remove(doorGridCellPosition);
+                ActiveLevelGrid.SetGridCellState(doorGridCellPosition, doorGridCellState);
+                RegisterLevelGrid(newLevelGrid);
+
+                if (doorGridCellState == GridCellState.DoorNorth)
+                    adjacentGridDoorPosition = newLevelGrid.DoorSouth;
+                else if (doorGridCellState == GridCellState.DoorEast)
+                    adjacentGridDoorPosition = newLevelGrid.DoorWest;
+                else if (doorGridCellState == GridCellState.DoorSouth)
+                    adjacentGridDoorPosition = newLevelGrid.DoorNorth;
+                else if (doorGridCellState == GridCellState.DoorWest)
+                    adjacentGridDoorPosition = newLevelGrid.DoorEast;
+            }
+
+            return adjacentGridDoorPosition;
         }
     }
 }

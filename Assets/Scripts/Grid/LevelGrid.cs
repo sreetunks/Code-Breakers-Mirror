@@ -17,14 +17,31 @@ namespace Grid
         [SerializeField] private GridCellState[] gridCellStates;
         [SerializeField] private Vector3 gridOffset;
 
+        [SerializeField] private LevelGrid adjacentGridNorth;
+        [SerializeField] private LevelGrid adjacentGridEast;
+        [SerializeField] private LevelGrid adjacentGridSouth;
+        [SerializeField] private LevelGrid adjacentGridWest;
+
+        [SerializeField] private GridPosition northDoorGridPosition = GridPosition.Invalid;
+        [SerializeField] private GridPosition eastDoorGridPosition = GridPosition.Invalid;
+        [SerializeField] private GridPosition southDoorGridPosition = GridPosition.Invalid;
+        [SerializeField] private GridPosition westDoorGridPosition = GridPosition.Invalid;
+
         public int GridWidth => gridWidth;
         public int GridHeight => gridHeight;
         public float GridCellSize => gridCellSize;
         public Vector3 GridOffset => gridOffset;
-        
+
+        public GridPosition DoorNorth => northDoorGridPosition;
+        public GridPosition DoorEast => eastDoorGridPosition;
+        public GridPosition DoorSouth => southDoorGridPosition;
+        public GridPosition DoorWest => westDoorGridPosition;
+
+        public bool AreDoorsLocked => _areDoorsLocked;
 
         private MeshFilter _meshFilter;
         private MeshCollider _meshCollider;
+        private bool _areDoorsLocked = false;
 
         private void Awake()
         {
@@ -182,6 +199,24 @@ namespace Grid
             _meshCollider.sharedMesh = _meshFilter.sharedMesh;
         }
 #endif
+        public void SetDoorLock(bool shouldLock)
+        {
+            _areDoorsLocked = shouldLock;
+            // TODO: If locked, hide Door UI elements if any
+        }
+
+        public LevelGrid GetRoomAdjacentToDoor(GridCellState doorCellState)
+        {
+            switch (doorCellState)
+            {
+                case GridCellState.DoorNorth: return adjacentGridNorth;
+                case GridCellState.DoorEast: return adjacentGridEast;
+                case GridCellState.DoorSouth: return adjacentGridSouth;
+                case GridCellState.DoorWest: return adjacentGridWest;
+                default: return null;
+            }
+        }
+
         public bool IsValidGridPosition(GridPosition gridPosition)
         {
             return (
@@ -194,10 +229,49 @@ namespace Grid
         public void SetGridCellState(GridPosition gridPosition, GridCellState gridCellState)
         {
             if (!IsValidGridPosition(gridPosition)) return;
+
             gridCellStates[(gridPosition.Z * gridWidth) + gridPosition.X] = gridCellState;
-            if (!Application.isPlaying) return;
-            float[] gridState = { (float)gridCellState };
-            _meshFilter.mesh.SetVertexBufferData(gridState, 0, GetCellStateVertexIndex(gridPosition.X, gridPosition.Z), 1, 2);
+
+            if (Application.isPlaying)
+            {
+                float[] gridState = { (float)gridCellState };
+                _meshFilter.mesh.SetVertexBufferData(gridState, 0, GetCellStateVertexIndex(gridPosition.X, gridPosition.Z), 1, 2);
+
+                return;
+            }
+
+            if (gridCellState == GridCellState.DoorNorth)
+            {
+                if (northDoorGridPosition != GridPosition.Invalid)
+                {
+                    gridCellStates[(northDoorGridPosition.Z * gridWidth) + northDoorGridPosition.X] = GridCellState.Walkable;
+                }
+                northDoorGridPosition = gridPosition;
+            }
+            if (gridCellState == GridCellState.DoorEast)
+            {
+                if (eastDoorGridPosition != GridPosition.Invalid)
+                {
+                    gridCellStates[(eastDoorGridPosition.Z * gridWidth) + eastDoorGridPosition.X] = GridCellState.Walkable;
+                }
+                eastDoorGridPosition = gridPosition;
+            }
+            if (gridCellState == GridCellState.DoorSouth)
+            {
+                if (southDoorGridPosition != GridPosition.Invalid)
+                {
+                    gridCellStates[(southDoorGridPosition.Z * gridWidth) + southDoorGridPosition.X] = GridCellState.Walkable;
+                }
+                southDoorGridPosition = gridPosition;
+            }
+            if (gridCellState == GridCellState.DoorWest)
+            {
+                if (westDoorGridPosition != GridPosition.Invalid)
+                {
+                    gridCellStates[(westDoorGridPosition.Z * gridWidth) + westDoorGridPosition.X] = GridCellState.Walkable;
+                }
+                westDoorGridPosition = gridPosition;
+            }
         }
 
         public bool TryGetGridCellState(GridPosition gridPosition, out GridCellState gridCellState)
