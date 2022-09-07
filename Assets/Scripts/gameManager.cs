@@ -12,6 +12,9 @@ public class GameManager : MonoBehaviour
     [SerializeField] public AudioSource mainMenuTheme;
     [SerializeField] public AudioSource mainMenuSFX;
 
+    public static PlayerScript player;
+    public bool isPaused = false;
+
     void Awake()
     {
         if (Instance == null)
@@ -23,24 +26,20 @@ public class GameManager : MonoBehaviour
         {
             Destroy(gameObject);
         }
+
+        player = new PlayerScript();
     }
 
     public void ToggleSaveMenu()
     {
         saveMenu.SetActive(!saveMenu.activeInHierarchy);
+        mainMenuTheme.Stop();
         StartCoroutine(MenuSoundEffect());
     }
 
     public void ToggleSettingsMenu()
-    public static gameManager instance;
-    public static PlayerScript player;
-    public bool isPaused = false;
-
-    // Start is called before the first frame update
-    void Awake()
     {
         settingsMenu.SetActive(!settingsMenu.activeInHierarchy);
-        mainMenuTheme.Stop();
         StartCoroutine(MenuSoundEffect());
     }
 
