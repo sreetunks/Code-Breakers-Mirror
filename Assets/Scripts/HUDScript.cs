@@ -44,7 +44,7 @@ public class HUDScript : MonoBehaviour
     public void UpdateHack()
     {
         //When multiple hacks are avalible the center button can switch between them.
-        if (gameManager.player.HackLearned)
+        if (GameManager.player.HackLearned)
         {
             HackImageLeft.enabled = true;
             HackImageRight.enabled = true;
