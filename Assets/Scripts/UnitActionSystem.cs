@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.EventSystems;
 using Grid;
 
 public class UnitActionSystem : MonoBehaviour
@@ -29,7 +30,7 @@ public class UnitActionSystem : MonoBehaviour
     private void Update()
     {
         // ReSharper disable once InvertIf
-        if (Input.GetMouseButtonDown(0))
+        if (Input.GetMouseButtonDown(0) && !EventSystem.current.IsPointerOverGameObject())
         {
             // ReSharper disable once Unity.PerformanceCriticalCodeInvocation
             if (TryHandleUnitSelection()) return;

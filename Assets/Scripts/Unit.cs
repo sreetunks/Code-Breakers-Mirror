@@ -78,6 +78,8 @@ public class Unit : MonoBehaviour, IGridObject
                 gridCellState == GridCellState.DoorEast ||
                 gridCellState == GridCellState.DoorSouth ||
                 gridCellState == GridCellState.DoorWest);
+        _targetPosition = targetPosition;
+        HUDScript.HUD.ActionLogEvent("Unit Moved");
     }
 
     public void Move(Vector3 targetPosition, bool forceMove = false)
