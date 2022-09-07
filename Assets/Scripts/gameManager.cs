@@ -32,6 +32,12 @@ public class GameManager : MonoBehaviour
     }
 
     public void ToggleSettingsMenu()
+    public static gameManager instance;
+    public static PlayerScript player;
+    public bool isPaused = false;
+
+    // Start is called before the first frame update
+    void Awake()
     {
         settingsMenu.SetActive(!settingsMenu.activeInHierarchy);
         mainMenuTheme.Stop();

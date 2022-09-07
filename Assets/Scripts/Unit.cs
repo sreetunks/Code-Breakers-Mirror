@@ -59,6 +59,7 @@ public class Unit : MonoBehaviour
 
     public void Move(Vector3 targetPosition)
     {
-        _targetPosition = targetPosition; 
+        _targetPosition = targetPosition;
+        HUDScript.HUD.ActionLogEvent("Unit Moved");
     }
 }
