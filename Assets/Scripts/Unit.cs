@@ -86,7 +86,17 @@ public class Unit : MonoBehaviour, IGridObject
         var targetGridPosition = GridSystem.GetGridPosition(targetPosition);
         
         GridSystem.TryGetGridCellState(targetGridPosition, out var targetCellState);
-        if (!forceMove && targetCellState is GridCellState.Impassable or GridCellState.Occupied) return;
+        if (forceMove)
+        {
+            _targetGridPosition = targetGridPosition;
+            _targetPosition = GridSystem.GetWorldPosition(_targetGridPosition);
+            Position = targetGridPosition;
+            IsOnDoorGridCell = CheckIsOnDoorGridCell(targetCellState);
+
+            return;
+        }
+        else if (targetCellState is GridCellState.Impassable or GridCellState.Occupied)
+            return;
 
         do
         {
@@ -131,8 +141,5 @@ public class Unit : MonoBehaviour, IGridObject
         // Move Logic - TODO: Update to use Pathfinding
         _targetGridPosition = targetGridPosition;
         _targetPosition = GridSystem.GetWorldPosition(_targetGridPosition);
-        if (!forceMove) return;
-        Position = targetGridPosition;
-        IsOnDoorGridCell = CheckIsOnDoorGridCell(targetCellState);
     }
 }
