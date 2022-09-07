@@ -78,22 +78,16 @@ public class Unit : MonoBehaviour, IGridObject
                 gridCellState == GridCellState.DoorEast ||
                 gridCellState == GridCellState.DoorSouth ||
                 gridCellState == GridCellState.DoorWest);
-        _targetPosition = targetPosition;
-        HUDScript.HUD.ActionLogEvent("Unit Moved");
     }
 
     public void Move(Vector3 targetPosition, bool forceMove = false)
     {
         var position = Position;
         var targetGridPosition = GridSystem.GetGridPosition(targetPosition);
+        
         GridSystem.TryGetGridCellState(targetGridPosition, out var targetCellState);
-        if (!forceMove && (targetCellState == GridCellState.Impassable || targetCellState == GridCellState.Occupied))
-            return;
+        if (!forceMove && targetCellState is GridCellState.Impassable or GridCellState.Occupied)return;
 
-        if (!GridSystem.TryGetGridCellState(targetGridPosition, out var targetCellState) || targetCellState != GridCellState.Walkable) return;
-        
-        print("Target: " + targetGridPosition); // TODO: Remove
-        
         do
         {
             // TODO: Implement Dijkstra Pathfinding
@@ -129,9 +123,7 @@ public class Unit : MonoBehaviour, IGridObject
             // Compare Logic
             position = newTargetPositionX.magnitude < newTargetPositionZ.magnitude ? gridPositionX : gridPositionZ;
             _path.Add(GridSystem.GetWorldPosition(position));
-            
-            print("Position: " + position); // TODO: Remove
-            _path.ForEach(p => print("Path: " + p)); // TODO: Remove
+           
             // TODO: Get 4 Way Pathfinding to work
         } 
         while (position != targetGridPosition);
@@ -139,10 +131,8 @@ public class Unit : MonoBehaviour, IGridObject
         // Move Logic - TODO: Update to use Pathfinding
         _targetGridPosition = targetGridPosition;
         _targetPosition = GridSystem.GetWorldPosition(_targetGridPosition);
-        if (forceMove)
-        {
-            Position = targetGridPosition;
-            IsOnDoorGridCell = CheckIsOnDoorGridCell(targetCellState);
-        }
+        if (!forceMove) return;
+        Position = targetGridPosition;
+        IsOnDoorGridCell = CheckIsOnDoorGridCell(targetCellState);
     }
 }
