@@ -9,7 +9,13 @@ public class VolumeSlider : MonoBehaviour
 
     void Start()
     {
-        if(_slider = GameObject.FindGameObjectWithTag("MasterSlider").GetComponent<Slider>())
+        _slider.value = 0.5f;
+
+        SoundManager.Instance.ChangeMasterVolume(_slider.value);
+        SoundManager.Instance.ChangeMusicVolume(_slider.value);
+        SoundManager.Instance.ChangeSFXVolume(_slider.value);
+
+        if (_slider = GameObject.FindGameObjectWithTag("MasterSlider").GetComponent<Slider>())
         {
             _slider.onValueChanged.AddListener(val => SoundManager.Instance.ChangeMasterVolume(val));
             _slider.onValueChanged.AddListener(val => SoundManager.Instance.ChangeMusicVolume(val));
