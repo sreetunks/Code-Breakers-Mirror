@@ -2,6 +2,8 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.EventSystems;
+using Grid;
 
 public class UnitActionSystem : MonoBehaviour
 {
@@ -28,12 +30,23 @@ public class UnitActionSystem : MonoBehaviour
     private void Update()
     {
         // ReSharper disable once InvertIf
-        if (Input.GetMouseButtonDown(0))
+        if (Input.GetMouseButtonDown(0) && !EventSystem.current.IsPointerOverGameObject())
         {
             // ReSharper disable once Unity.PerformanceCriticalCodeInvocation
             if (TryHandleUnitSelection()) return;
             // ReSharper disable once Unity.PerformanceCriticalCodeInvocation
             selectedUnit.Move(MouseWorld.GetPosition()); // Move's Unit based on Left Mouse Button Down
+        }
+        else if (Input.GetMouseButtonDown(1) &&
+            selectedUnit &&
+            selectedUnit.IsOnDoorGridCell &&
+            !GridSystem.ActiveLevelGrid.AreDoorsLocked)
+        {
+            var newGridPosition = GridSystem.SwitchLevelGrid(selectedUnit.Position, selectedUnit.GridCellPreviousState);
+            var targetPosition = GridSystem.GetWorldPosition(newGridPosition);
+            selectedUnit.Move(targetPosition, forceMove: true);
+            selectedUnit.transform.position = targetPosition;
+            GridSystem.UpdateGridObjectPosition(selectedUnit, newGridPosition);
         }
     }
 

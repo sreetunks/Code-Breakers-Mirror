@@ -1,11 +1,9 @@
-using System;
-using System.Collections;
+﻿using System.Collections;
 using System.Collections.Generic;
-using Unity.VisualScripting;
+using Grid;
 using UnityEngine;
-using UnityEngine.Serialization;
 
-public class Unit : MonoBehaviour
+public class Unit : MonoBehaviour, IGridObject
 {
     
     [SerializeField] private float moveSpeed = 4f;
@@ -13,52 +11,138 @@ public class Unit : MonoBehaviour
     [SerializeField] private Animator unitAnimator;
     
     private Vector3 _targetPosition;
-    private GridPosition _gridPosition;
+    private GridPosition _targetGridPosition;
+    private List<Vector3> _path;
     
     private static readonly int IsWalking = Animator.StringToHash("IsWalking"); // Caching ID for Parameter
 
+    public GridCellState GridCellPreviousState { get; set; }
+    public GridPosition Position { get; private set; }
+    public bool IsOnDoorGridCell { get; private set; }
+
     private void Awake()
     {
+        _path = new List<Vector3>();
         _targetPosition = transform.position; // Makes sure the unit does not walk to Vector3(0, 0, 0) upon load.
     }
 
     private void Start()
     {
-        _gridPosition = LevelGrid.Instance.GetGridPosition((transform.position));
-        LevelGrid.Instance.AddUnitAtGridPosition(_gridPosition, this);
+        var position = transform.position;
+        Position = GridSystem.GetGridPosition(position);
+        GridCellPreviousState = GridCellState.Impassable;
+        GridSystem.UpdateGridObjectPosition(this, Position);
+        position = GridSystem.GetWorldPosition(Position);
+        transform.position = position;
+        _targetPosition = position;
+        IsOnDoorGridCell = CheckIsOnDoorGridCell(GridCellPreviousState);
     }
 
     private void Update()
     {
-        var toTarget = _targetPosition - transform.position;
+        if (_path.Count <= 0) return;
+        print(_path.Count);
+        var toTarget = _path[0] - transform.position;
         var dist = toTarget.magnitude;
-        
+
         if (dist > 0)
         {
             var move = moveSpeed * Time.deltaTime * toTarget.normalized; // Makes move speed the same for all frame-rate's
-            
+
             if (move.magnitude > dist)
                 move = toTarget;
-            
+
             transform.position += move; // Sets target move location, EXACTLY (L: 15 - 26)
             unitAnimator.SetBool(IsWalking, true); // Starts "Walk" Animations
-            
+
             var rotation = Quaternion.LookRotation(toTarget);
             var current = transform.localRotation;
             transform.localRotation = Quaternion.Slerp(current, rotation, Time.deltaTime * rotateSpeed); // Sets Rotation to be more Accurate (L: 34 - 36) for 180 Degree's
         }
         else
+        {
             unitAnimator.SetBool(IsWalking, false); // Ends "Walk" Animations
-        
-        
-        var newGridPosition = LevelGrid.Instance.GetGridPosition((transform.position));
-        if (newGridPosition == _gridPosition) return;
-        LevelGrid.Instance.UnitMovedGridPosition(this, _gridPosition, newGridPosition);
-        _gridPosition = newGridPosition;
+
+            var newGridPosition = GridSystem.GetGridPosition(transform.position);
+            if (newGridPosition == Position) return;
+            GridSystem.UpdateGridObjectPosition(this, newGridPosition);
+            Position = newGridPosition;
+            IsOnDoorGridCell = CheckIsOnDoorGridCell(GridCellPreviousState);
+            _path.RemoveAt(0);
+        }
     }
 
-    public void Move(Vector3 targetPosition)
+    private bool CheckIsOnDoorGridCell(GridCellState gridCellState)
     {
-        _targetPosition = targetPosition; 
+        return (gridCellState == GridCellState.DoorNorth ||
+                gridCellState == GridCellState.DoorEast ||
+                gridCellState == GridCellState.DoorSouth ||
+                gridCellState == GridCellState.DoorWest);
+        _targetPosition = targetPosition;
+        HUDScript.HUD.ActionLogEvent("Unit Moved");
+    }
+
+    public void Move(Vector3 targetPosition, bool forceMove = false)
+    {
+        var position = Position;
+        var targetGridPosition = GridSystem.GetGridPosition(targetPosition);
+        GridSystem.TryGetGridCellState(targetGridPosition, out var targetCellState);
+        if (!forceMove && (targetCellState == GridCellState.Impassable || targetCellState == GridCellState.Occupied))
+            return;
+
+        if (!GridSystem.TryGetGridCellState(targetGridPosition, out var targetCellState) || targetCellState != GridCellState.Walkable) return;
+        
+        print("Target: " + targetGridPosition); // TODO: Remove
+        
+        do
+        {
+            // TODO: Implement Dijkstra Pathfinding
+            // Currently just moves in a simplistic way
+            
+            //Pathfinding Logic
+            var deltaX = targetGridPosition.X - position.X;
+            var deltaZ = targetGridPosition.Z - position.Z;
+
+            if (deltaX != 0) deltaX /= Mathf.Abs(deltaX);
+            if (deltaZ != 0) deltaZ /= Mathf.Abs(deltaZ);
+            
+            // X Logic
+            var gridPositionX = new GridPosition(position.X + deltaX, position.Z);
+            GridSystem.TryGetGridCellState(gridPositionX, out var cellState);
+            var newTargetPositionX = new Vector3(10000, 10000, 10000);
+            if (cellState == GridCellState.Walkable)
+            {
+                newTargetPositionX = targetPosition - GridSystem.GetWorldPosition(gridPositionX);
+            }
+
+            // Z Logic
+            var gridPositionZ = new GridPosition(position.X, position.Z + deltaZ);
+            GridSystem.TryGetGridCellState(gridPositionZ, out cellState);
+            var newTargetPositionZ = new Vector3(10000, 10000, 10000);
+            if (cellState == GridCellState.Walkable)
+            {
+                newTargetPositionZ = targetPosition - GridSystem.GetWorldPosition(gridPositionZ);
+            }
+
+            if (newTargetPositionX == new Vector3(10000, 10000, 10000) && newTargetPositionZ == new Vector3(10000, 10000, 10000)) break; // NOTE: Simple path not found, this is where we expand the logic to find a path.
+            
+            // Compare Logic
+            position = newTargetPositionX.magnitude < newTargetPositionZ.magnitude ? gridPositionX : gridPositionZ;
+            _path.Add(GridSystem.GetWorldPosition(position));
+            
+            print("Position: " + position); // TODO: Remove
+            _path.ForEach(p => print("Path: " + p)); // TODO: Remove
+            // TODO: Get 4 Way Pathfinding to work
+        } 
+        while (position != targetGridPosition);
+        
+        // Move Logic - TODO: Update to use Pathfinding
+        _targetGridPosition = targetGridPosition;
+        _targetPosition = GridSystem.GetWorldPosition(_targetGridPosition);
+        if (forceMove)
+        {
+            Position = targetGridPosition;
+            IsOnDoorGridCell = CheckIsOnDoorGridCell(targetCellState);
+        }
     }
 }
