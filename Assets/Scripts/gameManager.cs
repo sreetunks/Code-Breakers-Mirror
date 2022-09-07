@@ -33,13 +33,13 @@ public class GameManager : MonoBehaviour
     public void ToggleSaveMenu()
     {
         saveMenu.SetActive(!saveMenu.activeInHierarchy);
-        mainMenuTheme.Stop();
         StartCoroutine(MenuSoundEffect());
     }
 
     public void ToggleSettingsMenu()
     {
         settingsMenu.SetActive(!settingsMenu.activeInHierarchy);
+        mainMenuTheme.Stop();
         StartCoroutine(MenuSoundEffect());
     }
 
