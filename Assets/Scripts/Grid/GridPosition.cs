@@ -2,6 +2,7 @@ using System;
 
 namespace Grid
 {
+    [Serializable]
     public struct GridPosition : IEquatable<GridPosition>
     {
         public int X;

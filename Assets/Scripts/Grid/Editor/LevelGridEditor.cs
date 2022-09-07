@@ -12,6 +12,17 @@ namespace Grid.Editor
         private SerializedProperty _gridCellSize;
         private SerializedProperty _gridOffset;
         private SerializedProperty _gridCellStates;
+
+        private SerializedProperty _adjacentGridNorth;
+        private SerializedProperty _adjacentGridEast;
+        private SerializedProperty _adjacentGridSouth;
+        private SerializedProperty _adjacentGridWest;
+
+        private SerializedProperty _northDoorGridPosition;
+        private SerializedProperty _eastDoorGridPosition;
+        private SerializedProperty _southDoorGridPosition;
+        private SerializedProperty _westDoorGridPosition;
+
         private GridPosition _selectedGridTilePos = GridPosition.Invalid;
         private LevelGrid _levelGrid;
 
@@ -24,7 +35,18 @@ namespace Grid.Editor
             _gridCellSize = serializedObject.FindProperty("gridCellSize");
             _gridCellStates = serializedObject.FindProperty("gridCellStates");
 
-            GridSystem.RegisterLevelGrid(_levelGrid);
+            _adjacentGridNorth = serializedObject.FindProperty("adjacentGridNorth");
+            _adjacentGridEast = serializedObject.FindProperty("adjacentGridEast");
+            _adjacentGridSouth = serializedObject.FindProperty("adjacentGridSouth");
+            _adjacentGridWest = serializedObject.FindProperty("adjacentGridWest");
+
+            _northDoorGridPosition = serializedObject.FindProperty("northDoorGridPosition");
+            _eastDoorGridPosition = serializedObject.FindProperty("eastDoorGridPosition");
+            _southDoorGridPosition = serializedObject.FindProperty("southDoorGridPosition");
+            _westDoorGridPosition = serializedObject.FindProperty("westDoorGridPosition");
+#if UNITY_EDITOR
+            if(!Application.isPlaying) GridSystem.RegisterLevelGrid(_levelGrid);
+#endif
         }
 
         private void OnSceneGUI()
@@ -59,11 +81,18 @@ namespace Grid.Editor
             serializedObject.Update();
 
             EditorGUILayout.BeginVertical();
-            EditorGUILayout.PropertyField(_gridWidth);
-            EditorGUILayout.PropertyField(_gridHeight);
-            EditorGUILayout.PropertyField(_gridCellSize);
+            EditorGUILayout.PropertyField(_adjacentGridNorth);
+            EditorGUILayout.PropertyField(_adjacentGridEast);
+            EditorGUILayout.PropertyField(_adjacentGridSouth);
+            EditorGUILayout.PropertyField(_adjacentGridWest);
             EditorGUILayout.EndVertical();
+            EditorGUILayout.Space();
 
+            EditorGUILayout.BeginVertical();
+            var tempGridWidth = EditorGUILayout.IntField(_gridWidth.intValue);
+            var tempGridHeight = EditorGUILayout.IntField(_gridHeight.intValue);
+            var tempGridCellSize = EditorGUILayout.FloatField(_gridCellSize.floatValue);
+            EditorGUILayout.EndVertical();
             EditorGUILayout.Space();
 
             if (_selectedGridTilePos != GridPosition.Invalid)
@@ -75,22 +104,55 @@ namespace Grid.Editor
                         "Selected Tile",
                         new Vector2Int(_selectedGridTilePos.X, _selectedGridTilePos.Z));
                 }
-
                 if (GridSystem.TryGetGridCellState(_selectedGridTilePos, out var selectedGridCellState))
                 {
-                    var newGridCellState = (GridCellState)EditorGUILayout.EnumFlagsField(selectedGridCellState);
+                    var newGridCellState = (GridCellState)EditorGUILayout.EnumPopup(selectedGridCellState);
                     if (newGridCellState != selectedGridCellState)
                     {
+                        var additionalGridCellModified = GridPosition.Invalid;
+                        SerializedProperty additionalGridCellPosition = null;
+
+                        if (newGridCellState == GridCellState.DoorNorth)
+                        {
+                            additionalGridCellModified = _levelGrid.DoorNorth;
+                            additionalGridCellPosition = _northDoorGridPosition;
+                        }
+                        else if (newGridCellState == GridCellState.DoorEast)
+                        {
+                            additionalGridCellModified = _levelGrid.DoorEast;
+                            additionalGridCellPosition = _eastDoorGridPosition;
+                        }
+                        else if (newGridCellState == GridCellState.DoorSouth)
+                        {
+                            additionalGridCellModified = _levelGrid.DoorSouth;
+                            additionalGridCellPosition = _southDoorGridPosition;
+                        }
+                        else if (newGridCellState == GridCellState.DoorWest)
+                        {
+                            additionalGridCellModified = _levelGrid.DoorWest;
+                            additionalGridCellPosition = _westDoorGridPosition;
+                        }
+
                         GridSystem.SetGridCellState(_selectedGridTilePos, newGridCellState);
-                        selectedGridCellState = newGridCellState;
                         _levelGrid.UpdateGrid();
                         var gridCellIndex = (_selectedGridTilePos.Z * _levelGrid.GridWidth) + _selectedGridTilePos.X;
                         var gridCellState = _gridCellStates.GetArrayElementAtIndex(gridCellIndex);
                         gridCellState.enumValueIndex = (int)newGridCellState;
-                        serializedObject.ApplyModifiedProperties();
+
+                        if (additionalGridCellModified != GridPosition.Invalid)
+                        {
+                            var additionalGridCellIndex = (additionalGridCellModified.Z * _levelGrid.GridWidth) + additionalGridCellModified.X;
+                            var additionalGridCellState = _gridCellStates.GetArrayElementAtIndex(additionalGridCellIndex);
+                            additionalGridCellState.enumValueIndex = (int)GridCellState.Walkable;
+                        }
+
+                        if (additionalGridCellPosition != null)
+                        {
+                            additionalGridCellPosition.FindPropertyRelative("X").intValue = _selectedGridTilePos.X;
+                            additionalGridCellPosition.FindPropertyRelative("Z").intValue = _selectedGridTilePos.Z;
+                        }
                     }
                 }
-
                 EditorGUILayout.EndVertical();
                 EditorGUILayout.Space();
             }
@@ -99,12 +161,16 @@ namespace Grid.Editor
                 GUILayout.MinHeight(EditorGUIUtility.singleLineHeight * 1.5f)),
                 "Reset"))
             {
+                _gridWidth.intValue = tempGridWidth;
+                _gridHeight.intValue = tempGridHeight;
+                _gridCellSize.floatValue = tempGridCellSize;
+
                 _levelGrid.ResetGrid();
                 _selectedGridTilePos = GridPosition.Invalid;
                 _gridOffset.vector3Value = _levelGrid.GridOffset;
-                serializedObject.ApplyModifiedProperties();
-                serializedObject.Update();
             }
+
+            serializedObject.ApplyModifiedProperties();
         }
 
     }

@@ -16,7 +16,9 @@ public class Unit : MonoBehaviour, IGridObject
     
     private static readonly int IsWalking = Animator.StringToHash("IsWalking"); // Caching ID for Parameter
 
+    public GridCellState GridCellPreviousState { get; set; }
     public GridPosition Position { get; private set; }
+    public bool IsOnDoorGridCell { get; private set; }
 
     private void Awake()
     {
@@ -28,9 +30,12 @@ public class Unit : MonoBehaviour, IGridObject
     {
         var position = transform.position;
         Position = GridSystem.GetGridPosition(position);
+        GridCellPreviousState = GridCellState.Impassable;
         GridSystem.UpdateGridObjectPosition(this, Position);
         position = GridSystem.GetWorldPosition(Position);
         transform.position = position;
+        _targetPosition = position;
+        IsOnDoorGridCell = CheckIsOnDoorGridCell(GridCellPreviousState);
     }
 
     private void Update()
@@ -62,14 +67,26 @@ public class Unit : MonoBehaviour, IGridObject
             if (newGridPosition == Position) return;
             GridSystem.UpdateGridObjectPosition(this, newGridPosition);
             Position = newGridPosition;
+            IsOnDoorGridCell = CheckIsOnDoorGridCell(GridCellPreviousState);
             _path.RemoveAt(0);
         }
     }
 
-    public void Move(Vector3 targetPosition)
+    private bool CheckIsOnDoorGridCell(GridCellState gridCellState)
+    {
+        return (gridCellState == GridCellState.DoorNorth ||
+                gridCellState == GridCellState.DoorEast ||
+                gridCellState == GridCellState.DoorSouth ||
+                gridCellState == GridCellState.DoorWest);
+    }
+
+    public void Move(Vector3 targetPosition, bool forceMove = false)
     {
         var position = Position;
         var targetGridPosition = GridSystem.GetGridPosition(targetPosition);
+        GridSystem.TryGetGridCellState(targetGridPosition, out var targetCellState);
+        if (!forceMove && (targetCellState == GridCellState.Impassable || targetCellState == GridCellState.Occupied))
+            return;
 
         if (!GridSystem.TryGetGridCellState(targetGridPosition, out var targetCellState) || targetCellState != GridCellState.Walkable) return;
         
@@ -119,5 +136,11 @@ public class Unit : MonoBehaviour, IGridObject
         
         // Move Logic - TODO: Update to use Pathfinding
         _targetGridPosition = targetGridPosition;
+        _targetPosition = GridSystem.GetWorldPosition(_targetGridPosition);
+        if (forceMove)
+        {
+            Position = targetGridPosition;
+            IsOnDoorGridCell = CheckIsOnDoorGridCell(targetCellState);
+        }
     }
 }

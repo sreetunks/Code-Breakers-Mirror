@@ -8,16 +8,19 @@ namespace Grid
     {
         Impassable,
         Walkable,
-        Occupied
+        Occupied,
+        DoorNorth,
+        DoorEast,
+        DoorSouth,
+        DoorWest
     }
 
     public class GridSystem : MonoBehaviour
     {
         private const float CellSize = 2.0f;
-        // ReSharper disable once FieldCanBeMadeReadOnly.Local
-        private int _width;
-        // ReSharper disable once FieldCanBeMadeReadOnly.Local
-        private int _height;
+
+        [SerializeField] private LevelGrid startingLevelGrid;
+
         // ReSharper disable once FieldCanBeMadeReadOnly.Local
         private Dictionary<GridPosition, IGridObject> _gridObjectMap;
 
@@ -37,6 +40,8 @@ namespace Grid
             }
 
             Instance = this;
+
+            RegisterLevelGrid(startingLevelGrid);
         }
 
         /// <summary>
@@ -94,10 +99,37 @@ namespace Grid
         public static void UpdateGridObjectPosition(IGridObject gridObject, GridPosition newGridPosition)
         {
             if (TryGetGridObject(newGridPosition, out _)) return;
+
             Instance._gridObjectMap.Remove(gridObject.Position);
-            ActiveLevelGrid.SetGridCellState(gridObject.Position, GridCellState.Walkable);
             Instance._gridObjectMap[newGridPosition] = gridObject;
+
+            ActiveLevelGrid.TryGetGridCellState(newGridPosition, out GridCellState newGridCellState);
+            ActiveLevelGrid.SetGridCellState(gridObject.Position, gridObject.GridCellPreviousState);
+            gridObject.GridCellPreviousState = newGridCellState;
             ActiveLevelGrid.SetGridCellState(newGridPosition, GridCellState.Occupied);
+        }
+
+        public static GridPosition SwitchLevelGrid(GridPosition doorGridCellPosition, GridCellState doorGridCellState)
+        {
+            LevelGrid newLevelGrid = ActiveLevelGrid.GetRoomAdjacentToDoor(doorGridCellState);
+            GridPosition adjacentGridDoorPosition = GridPosition.Invalid;
+            if (newLevelGrid)
+            {
+                Instance._gridObjectMap.Remove(doorGridCellPosition);
+                ActiveLevelGrid.SetGridCellState(doorGridCellPosition, doorGridCellState);
+                RegisterLevelGrid(newLevelGrid);
+
+                if (doorGridCellState == GridCellState.DoorNorth)
+                    adjacentGridDoorPosition = newLevelGrid.DoorSouth;
+                else if (doorGridCellState == GridCellState.DoorEast)
+                    adjacentGridDoorPosition = newLevelGrid.DoorWest;
+                else if (doorGridCellState == GridCellState.DoorSouth)
+                    adjacentGridDoorPosition = newLevelGrid.DoorNorth;
+                else if (doorGridCellState == GridCellState.DoorWest)
+                    adjacentGridDoorPosition = newLevelGrid.DoorEast;
+            }
+
+            return adjacentGridDoorPosition;
         }
     }
 }

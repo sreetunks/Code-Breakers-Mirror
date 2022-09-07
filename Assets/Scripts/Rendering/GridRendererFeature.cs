@@ -12,18 +12,22 @@ namespace Rendering
         {
             private static int _gridCellUVSizeShaderProperty;
             private static int _gridCellStatesShaderProperty;
+            private static int _gridCellColorsShaderProperty;
+
+            Vector4[] cellStateColors;
 
             public GridRenderPass(Vector4[] gridCellStateColors)
             {
                 _gridCellUVSizeShaderProperty = Shader.PropertyToID("_GridCellUVSize");
                 _gridCellStatesShaderProperty = Shader.PropertyToID("_GridCellStates");
-                var gridCellColorsShaderProperty = Shader.PropertyToID("_GridCellColors");
+                _gridCellColorsShaderProperty = Shader.PropertyToID("_GridCellColors");
 
-                Shader.SetGlobalVectorArray(gridCellColorsShaderProperty, gridCellStateColors);
+                cellStateColors = gridCellStateColors;
             }
 
             public override void Execute(ScriptableRenderContext context, ref RenderingData renderingData)
             {
+                Shader.SetGlobalVectorArray(_gridCellColorsShaderProperty, cellStateColors);
                 var levelGrid = GridSystem.ActiveLevelGrid;
                 if (levelGrid)
                 {
