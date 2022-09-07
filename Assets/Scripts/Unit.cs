@@ -86,7 +86,7 @@ public class Unit : MonoBehaviour, IGridObject
         var targetGridPosition = GridSystem.GetGridPosition(targetPosition);
         
         GridSystem.TryGetGridCellState(targetGridPosition, out var targetCellState);
-        if (!forceMove && targetCellState is GridCellState.Impassable or GridCellState.Occupied)return;
+        if (!forceMove && targetCellState is GridCellState.Impassable or GridCellState.Occupied) return;
 
         do
         {
@@ -104,7 +104,7 @@ public class Unit : MonoBehaviour, IGridObject
             var gridPositionX = new GridPosition(position.X + deltaX, position.Z);
             GridSystem.TryGetGridCellState(gridPositionX, out var cellState);
             var newTargetPositionX = new Vector3(10000, 10000, 10000);
-            if (cellState == GridCellState.Walkable)
+            if (cellState is GridCellState.Impassable or GridCellState.Occupied)
             {
                 newTargetPositionX = targetPosition - GridSystem.GetWorldPosition(gridPositionX);
             }
@@ -113,7 +113,7 @@ public class Unit : MonoBehaviour, IGridObject
             var gridPositionZ = new GridPosition(position.X, position.Z + deltaZ);
             GridSystem.TryGetGridCellState(gridPositionZ, out cellState);
             var newTargetPositionZ = new Vector3(10000, 10000, 10000);
-            if (cellState == GridCellState.Walkable)
+            if (cellState is GridCellState.Impassable or GridCellState.Occupied)
             {
                 newTargetPositionZ = targetPosition - GridSystem.GetWorldPosition(gridPositionZ);
             }
