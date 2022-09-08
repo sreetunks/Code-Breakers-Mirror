@@ -12,7 +12,8 @@ namespace Grid
         DoorNorth,
         DoorEast,
         DoorSouth,
-        DoorWest
+        DoorWest,
+        LevelExit
     }
 
     public class GridSystem : MonoBehaviour

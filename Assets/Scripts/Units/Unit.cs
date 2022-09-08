@@ -26,6 +26,9 @@ public class Unit : MonoBehaviour, IGridObject, IDamageable
     public delegate void OnUnitAPChangedEventHandler();
     public OnUnitAPChangedEventHandler OnUnitAPChanged;
 
+    public delegate void OnUnitReachedLevelExitEventHandler();
+    public OnUnitReachedLevelExitEventHandler OnUnitReachedLevelExit;
+
     [SerializeField] private float moveSpeed = 4f;
     [SerializeField] private float rotateSpeed = 10f;
     [SerializeField] private Animator unitAnimator;
@@ -113,6 +116,9 @@ public class Unit : MonoBehaviour, IGridObject, IDamageable
             _path.RemoveAt(0);
 
             if (_path.Count == 0) unitAnimator.SetBool(IsWalking, false); // Ends "Walk" Animations^M
+
+            if (GridCellPreviousState == GridCellState.LevelExit)
+                OnUnitReachedLevelExit?.Invoke();
         }
     }
 

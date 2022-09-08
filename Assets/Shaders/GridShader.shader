@@ -43,7 +43,7 @@ Shader "TheHungrySwans/Grid"
             };
 
             float4 _GridCellUVSize;
-            float4 _GridCellColors[7];
+            float4 _GridCellColors[8];
 
             // The vertex shader definition with properties defined in the Varyings 
             // structure. The type of the vert function must match the type (struct)
