@@ -22,6 +22,8 @@ public class Unit : MonoBehaviour, IGridObject, IDamageable
 
     private static readonly int IsWalking = Animator.StringToHash("IsWalking"); // Caching ID for Parameter
 
+    public Controller Controller { get; set; }
+
     public GridCellState GridCellPreviousState { get; set; }
     public GridPosition Position { get; private set; }
     public bool IsOnDoorGridCell { get; private set; }
