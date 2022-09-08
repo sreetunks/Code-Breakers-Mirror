@@ -71,6 +71,7 @@ public class PlayerScript : Controller
         if (_selectedUnit)
         {
             _selectedUnit.OnUnitDamaged -= UpdateSelectedUnitHealth;
+            _selectedUnit.OnUnitAPChanged -= UpdateSelectedUnitAP;
             _selectedUnit.OnUnitDeath -= OnSelectedUnitDeath;
 
             _selectedUnit.GetComponentInChildren<UnitSelectedVisual>().UpdateVisual(false);
@@ -78,6 +79,7 @@ public class PlayerScript : Controller
 
         _selectedUnit = unit;
         _selectedUnit.OnUnitDamaged += UpdateSelectedUnitHealth;
+        _selectedUnit.OnUnitAPChanged += UpdateSelectedUnitAP;
         _selectedUnit.OnUnitDeath += OnSelectedUnitDeath;
 
         playerHUD.UpdateSelectedUnit(_selectedUnit);
@@ -99,9 +101,16 @@ public class PlayerScript : Controller
         playerHUD.UpdateHealth();
     }
 
+    void UpdateSelectedUnitAP()
+    {
+        playerHUD.UpdateActionPoints();
+    }
+
     public override void BeginTurn()
     {
         _isTurnActive = true;
+        foreach (var controlledUnit in _controlledUnits)
+            controlledUnit.BeginTurn();
     }
 
     public void EndTurn()

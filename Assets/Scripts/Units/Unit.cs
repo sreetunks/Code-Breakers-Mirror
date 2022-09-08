@@ -10,15 +10,21 @@ public class Unit : MonoBehaviour, IGridObject, IDamageable
     public delegate void OnUnitDamagedEventHandler(int damageDealt);
     public OnUnitDamagedEventHandler OnUnitDamaged;
 
+    public delegate void OnUnitAPChangedEventHandler();
+    public OnUnitAPChangedEventHandler OnUnitAPChanged;
+
     [SerializeField] private float moveSpeed = 4f;
     [SerializeField] private float rotateSpeed = 10f;
     [SerializeField] private Animator unitAnimator;
 
     [SerializeField] private int maximumHealth = 4;
+    [SerializeField] private int maximumAP = 6;
+    [SerializeField] private int apGainPerRound = 3;
 
     private List<Vector3> _path;
 
     private int _currentHealth;
+    private int _currentAP;
 
     private static readonly int IsWalking = Animator.StringToHash("IsWalking"); // Caching ID for Parameter
 
@@ -30,6 +36,9 @@ public class Unit : MonoBehaviour, IGridObject, IDamageable
 
     public int MaximumHealth => maximumHealth;
     public int CurrentHealth => _currentHealth;
+
+    public int MaximumAP => maximumAP;
+    public int CurrentAP => _currentAP;
 
     private void Awake()
     {
@@ -166,5 +175,12 @@ public class Unit : MonoBehaviour, IGridObject, IDamageable
     {
         _currentHealth = Mathf.Min(maximumHealth, _currentHealth + healthRestored);
         OnUnitDamaged?.Invoke(-healthRestored);
+    }
+
+    public void BeginTurn()
+    {
+        _currentAP = Mathf.Min(maximumAP, _currentAP + apGainPerRound);
+
+        OnUnitAPChanged?.Invoke();
     }
 }

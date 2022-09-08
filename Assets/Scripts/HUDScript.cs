@@ -8,6 +8,8 @@ public class HUDScript : MonoBehaviour
 {
     [SerializeField] private Image healthBarImage;
     [SerializeField] private TMP_Text healthBarText;
+    [SerializeField] private Image actionPointBarImage;
+    [SerializeField] private TMP_Text actionPointBarText;
     [SerializeField] private TMP_Text turnFactionLabel;
 
     public GameObject ActionLog;
@@ -38,12 +40,19 @@ public class HUDScript : MonoBehaviour
         _selectedUnit = unit;
 
         UpdateHealth();
+        UpdateActionPoints();
     }
 
     public void UpdateHealth()
     {
         healthBarText.text = string.Format("{0} / {1}", _selectedUnit.CurrentHealth, _selectedUnit.MaximumHealth);
         healthBarImage.fillAmount = (float)_selectedUnit.CurrentHealth / _selectedUnit.MaximumHealth;
+    }
+
+    public void UpdateActionPoints()
+    {
+        actionPointBarText.text = string.Format("{0} / {1}", _selectedUnit.CurrentAP, _selectedUnit.MaximumAP);
+        actionPointBarImage.fillAmount = (float)_selectedUnit.CurrentAP / _selectedUnit.MaximumAP;
     }
 
     public void UpdateTurnLabel(string labelString)
