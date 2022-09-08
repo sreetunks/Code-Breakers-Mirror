@@ -14,6 +14,10 @@ public class PlayerScript : Controller
     [SerializeField] private LayerMask unitLayerMask;
     [SerializeField] private HUDScript playerHUD;
 
+    PositionTargetedAbility _positionTargetedAbility;
+    UnitTargetedAbility _unitTargetedAbility;
+    Unit _currentTargetingUnit;
+
     Unit _selectedUnit;
     List<Unit> _controlledUnits = new List<Unit>();
     bool _isTurnActive = false;
@@ -44,7 +48,26 @@ public class PlayerScript : Controller
     {
         if (!_isTurnActive) return;
 
-        if (Input.GetMouseButtonDown(0) && !EventSystem.current.IsPointerOverGameObject())
+        if (_positionTargetedAbility != null && Input.GetMouseButton(0) && !EventSystem.current.IsPointerOverGameObject())
+        {
+            var targetGridPosition = Grid.GridSystem.GetGridPosition(MouseWorld.GetPosition());
+            _positionTargetedAbility.Use(_currentTargetingUnit, targetGridPosition);
+            _positionTargetedAbility = null;
+            _currentTargetingUnit = null;
+        }
+        else if (_unitTargetedAbility != null && Input.GetMouseButton(0) && !EventSystem.current.IsPointerOverGameObject())
+        {
+            var targetGridPosition = GridSystem.GetGridPosition(MouseWorld.GetPosition());
+            GridSystem.TryGetGridObject(targetGridPosition, out var targetObject);
+            var targetUnit = targetObject as Unit;
+            if (targetUnit)
+            {
+                _unitTargetedAbility.Use(_currentTargetingUnit, targetUnit);
+                _unitTargetedAbility = null;
+                _currentTargetingUnit = null;
+            }
+        }
+        else if (Input.GetMouseButtonDown(0) && !EventSystem.current.IsPointerOverGameObject())
         {
             var targetGridPosition = GridSystem.GetGridPosition(MouseWorld.GetPosition());
             GridSystem.TryGetGridObject(targetGridPosition, out var targetObject);
@@ -122,5 +145,17 @@ public class PlayerScript : Controller
     public void UpdateTurnLabel(FactionType factionType)
     {
         playerHUD.UpdateTurnLabel(factionType.ToString());
+    }
+
+    public override void TargetAbility(Unit owningUnit, PositionTargetedAbility ability)
+    {
+        _positionTargetedAbility = ability;
+        _currentTargetingUnit = owningUnit;
+    }
+
+    public override void TargetAbility(Unit owningUnit, UnitTargetedAbility ability)
+    {
+        _unitTargetedAbility = ability;
+        _currentTargetingUnit = owningUnit;
     }
 }
