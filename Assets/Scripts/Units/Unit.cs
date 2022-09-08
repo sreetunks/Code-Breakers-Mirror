@@ -39,6 +39,7 @@ public class Unit : MonoBehaviour, IGridObject, IDamageable
 
     private void Start()
     {
+        GetComponentInChildren<UnitSelectedVisual>().UpdateVisual(false);
         Position = GridSystem.GetGridPosition(transform.position);
         GridCellPreviousState = GridCellState.Impassable;
         GridSystem.UpdateGridObjectPosition(this, Position);

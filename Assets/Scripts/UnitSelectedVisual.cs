@@ -12,23 +12,8 @@ public class UnitSelectedVisual : MonoBehaviour
         _meshRenderer = GetComponent<MeshRenderer>();
     }
 
-    private void Start()
+    public void UpdateVisual(bool value)
     {
-        UnitActionSystem.Instance.OnSelectedUnitChanged += UnitActionSystem_OnSelectedUnitChanged;
-        
-        UpdateVisual();
-    }
-
-    private void UnitActionSystem_OnSelectedUnitChanged(object sender, EventArgs empty)
-    {
-        UpdateVisual();
-    }
-
-    private void UpdateVisual()
-    {
-        if (UnitActionSystem.Instance.GetSelectedUnit() == unit)
-            _meshRenderer.enabled = true;
-        else
-            _meshRenderer.enabled = false;
+        _meshRenderer.enabled = value;
     }
 }
