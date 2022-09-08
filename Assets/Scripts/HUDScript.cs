@@ -15,6 +15,8 @@ public class HUDScript : MonoBehaviour
     public GameObject ActionLog;
     public TMP_Text ALText;
 
+    [SerializeField] private List<AbilityButton> abilityButtons;
+
     public bool DropDown;
     private Vector3 ActionLogOrigin;
     private List<string> ActionLogText;
@@ -39,6 +41,20 @@ public class HUDScript : MonoBehaviour
     {
         _selectedUnit = unit;
 
+        foreach (var abilityButton in abilityButtons)
+        {
+            abilityButton.DisableButton();
+            abilityButton.ResetButton();
+        }
+
+        for (var i = 0; i < unit.AbilityList.Count; ++i)
+        {
+            abilityButtons[i].Initialize(unit.AbilityList[i].ability);
+
+            if (unit.Controller == PlayerScript.Instance)
+                abilityButtons[i].EnableButton();
+        }
+
         UpdateHealth();
         UpdateActionPoints();
     }
@@ -53,6 +69,22 @@ public class HUDScript : MonoBehaviour
     {
         actionPointBarText.text = string.Format("{0} / {1}", _selectedUnit.CurrentAP, _selectedUnit.MaximumAP);
         actionPointBarImage.fillAmount = (float)_selectedUnit.CurrentAP / _selectedUnit.MaximumAP;
+
+        if (_selectedUnit.Controller != PlayerScript.Instance) return;
+
+        for (var i = 0; i < _selectedUnit.AbilityList.Count; ++i)
+        {
+            if(_selectedUnit.GetAbilityCooldown(abilityButtons[i].Ability) > 0)
+                abilityButtons[i].UpdateCooldown();
+
+            if (_selectedUnit.GetAbilityCooldown(abilityButtons[i].Ability) == 0)
+            {
+                if(_selectedUnit.CurrentAP < abilityButtons[i].Ability.ActionPointCost)
+                    abilityButtons[i].DisableButton();
+                else
+                    abilityButtons[i].EnableButton();
+            }
+        }
     }
 
     public void UpdateTurnLabel(string labelString)

@@ -4,6 +4,19 @@ using Grid;
 
 public class Unit : MonoBehaviour, IGridObject, IDamageable
 {
+    [System.Serializable]
+    public class AbilityData
+    {
+        public AbilityBase ability;
+        public int cooldownDuration;
+
+        public AbilityData(AbilityBase ability)
+        {
+            this.ability = ability;
+            this.cooldownDuration = 0;
+        }
+    }
+
     public delegate void OnUnitDeathEventHandler();
     public OnUnitDeathEventHandler OnUnitDeath;
 
@@ -17,6 +30,8 @@ public class Unit : MonoBehaviour, IGridObject, IDamageable
     [SerializeField] private float rotateSpeed = 10f;
     [SerializeField] private Animator unitAnimator;
 
+    [SerializeField] private List<AbilityBase> unitAbilities;
+
     [SerializeField] private int maximumHealth = 4;
     [SerializeField] private int maximumAP = 6;
     [SerializeField] private int apGainPerRound = 3;
@@ -25,10 +40,13 @@ public class Unit : MonoBehaviour, IGridObject, IDamageable
 
     private int _currentHealth;
     private int _currentAP;
+    private List<AbilityData> unitAbilityDataList;
 
     private static readonly int IsWalking = Animator.StringToHash("IsWalking"); // Caching ID for Parameter
 
     public Controller Controller { get; set; }
+
+    public List<AbilityData> AbilityList => unitAbilityDataList;
 
     public GridCellState GridCellPreviousState { get; set; }
     public GridPosition Position { get; private set; }
@@ -44,6 +62,10 @@ public class Unit : MonoBehaviour, IGridObject, IDamageable
     {
         _currentHealth = maximumHealth;
         _path = new List<Vector3>();
+
+        unitAbilityDataList = new List<AbilityData>();
+        foreach (var ability in unitAbilities)
+            unitAbilityDataList.Add(new AbilityData(ability));
     }
 
     private void Start()
@@ -177,9 +199,29 @@ public class Unit : MonoBehaviour, IGridObject, IDamageable
         OnUnitDamaged?.Invoke(-healthRestored);
     }
 
+    public void OnAbilityUsed(AbilityBase ability)
+    {
+        int idx = unitAbilityDataList.FindIndex(abilityData => abilityData.ability == ability);
+        if (idx < 0) return;
+        _currentAP -= ability.ActionPointCost;
+        unitAbilityDataList[idx].cooldownDuration = ability.CooldownDuration;
+
+        OnUnitAPChanged?.Invoke();
+    }
+
+    public int GetAbilityCooldown(AbilityBase ability)
+    {
+        int idx = unitAbilityDataList.FindIndex(abilityData => abilityData.ability == ability);
+        if (idx < 0) return -1;
+        return unitAbilityDataList[idx].cooldownDuration;
+    }
+
     public void BeginTurn()
     {
         _currentAP = Mathf.Min(maximumAP, _currentAP + apGainPerRound);
+
+        foreach (var abilityData in unitAbilityDataList)
+            if (abilityData.cooldownDuration > 0) --abilityData.cooldownDuration;
 
         OnUnitAPChanged?.Invoke();
     }
