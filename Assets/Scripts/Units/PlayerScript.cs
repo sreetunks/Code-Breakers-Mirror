@@ -12,6 +12,7 @@ public class PlayerScript : Controller
 
     [SerializeField] private Unit playerCharacter;
     [SerializeField] private LayerMask unitLayerMask;
+    [SerializeField] private HUDScript playerHUD;
 
     Unit _selectedUnit;
     List<Unit> _controlledUnits = new List<Unit>();
@@ -95,6 +96,7 @@ public class PlayerScript : Controller
 
     void UpdateSelectedUnitHealth(int damage)
     {
+        playerHUD.UpdateHealth();
     }
 
     public override void BeginTurn()

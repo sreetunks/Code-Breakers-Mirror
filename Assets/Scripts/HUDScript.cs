@@ -6,6 +6,9 @@ using TMPro;
 [RequireComponent(typeof(Canvas))]
 public class HUDScript : MonoBehaviour
 {
+    [SerializeField] private Image healthBarImage;
+    [SerializeField] private TMP_Text healthBarText;
+
     public GameObject ActionLog;
     public TMP_Text ALText;
 
@@ -13,6 +16,7 @@ public class HUDScript : MonoBehaviour
     private Vector3 ActionLogOrigin;
     private List<string> ActionLogText;
 
+    private Unit _selectedUnit;
     private Canvas _hudCanvas;
 
     void Awake()
@@ -27,6 +31,19 @@ public class HUDScript : MonoBehaviour
     public void Show() { _hudCanvas.enabled = true; }
 
     public void Hide() { _hudCanvas.enabled = false; }
+
+    public void UpdateSelectedUnit(Unit unit)
+    {
+        _selectedUnit = unit;
+
+        UpdateHealth();
+    }
+
+    public void UpdateHealth()
+    {
+        healthBarText.text = string.Format("{0} / {1}", _selectedUnit.CurrentHealth, _selectedUnit.MaximumHealth);
+        healthBarImage.fillAmount = (float)_selectedUnit.CurrentHealth / _selectedUnit.MaximumHealth;
+    }
 
     public void ActionLogEvent(string LogMessage)
     {
