@@ -119,6 +119,7 @@ public class PlayerScript : Controller
     void OnPlayerCharacterDeath()
     {
         _selectedUnit.OnUnitDeath -= OnSelectedUnitDeath;
+        playerHUD.ShowDefeatedScreen();
     }
 
     void UpdateSelectedUnitHealth(int damage)

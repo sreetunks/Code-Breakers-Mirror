@@ -12,6 +12,9 @@ public class HUDScript : MonoBehaviour
     [SerializeField] private TMP_Text actionPointBarText;
     [SerializeField] private TMP_Text turnFactionLabel;
 
+    [SerializeField] private CanvasGroup ingameHUDScreen;
+    [SerializeField] private CanvasGroup defeatedScreen;
+
     public GameObject ActionLog;
     public TMP_Text ALText;
 
@@ -121,5 +124,26 @@ public class HUDScript : MonoBehaviour
             ActionLog.transform.localPosition = TempTransform;
         }
         DropDown = !DropDown;
+    }
+
+    public void ShowDefeatedScreen()
+    {
+        defeatedScreen.alpha = 1;
+        defeatedScreen.interactable = true;
+        defeatedScreen.blocksRaycasts = true;
+
+        ingameHUDScreen.alpha = 0;
+        ingameHUDScreen.interactable = false;
+        ingameHUDScreen.blocksRaycasts = false;
+    }
+
+    public void ReloadLevel()
+    {
+        GameManager.Instance.LoadGameScene();
+    }
+
+    public void LoadMainMenu()
+    {
+        GameManager.Instance.LoadMainMenuScene();
     }
 }
