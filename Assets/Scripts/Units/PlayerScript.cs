@@ -13,6 +13,7 @@ public class PlayerScript : Controller
     [SerializeField] private Unit playerCharacter;
     [SerializeField] private LayerMask unitLayerMask;
     [SerializeField] private HUDScript playerHUD;
+    [SerializeField] private CameraSmoothPan mainCamera;
 
     PositionTargetedAbility _positionTargetedAbility;
     UnitTargetedAbility _unitTargetedAbility;
@@ -82,6 +83,7 @@ public class PlayerScript : Controller
             _selectedUnit.Move(targetPosition, forceMove: true);
             _selectedUnit.transform.position = targetPosition;
             GridSystem.UpdateGridObjectPosition(_selectedUnit, newGridPosition);
+            mainCamera.UpdateTarget(GridSystem.ActiveLevelGrid.transform);
         }
         else if (Input.GetKeyDown(KeyCode.K))
         {
