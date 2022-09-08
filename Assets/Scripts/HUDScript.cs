@@ -13,6 +13,7 @@ public class HUDScript : MonoBehaviour
     [SerializeField] private TMP_Text turnFactionLabel;
 
     [SerializeField] private CanvasGroup ingameHUDScreen;
+    [SerializeField] private CanvasGroup levelCompleteScreen;
     [SerializeField] private CanvasGroup defeatedScreen;
 
     public GameObject ActionLog;
@@ -124,6 +125,17 @@ public class HUDScript : MonoBehaviour
             ActionLog.transform.localPosition = TempTransform;
         }
         DropDown = !DropDown;
+    }
+
+    public void ShowLevelCompleteScreen()
+    {
+        levelCompleteScreen.alpha = 1;
+        levelCompleteScreen.interactable = true;
+        levelCompleteScreen.blocksRaycasts = true;
+
+        ingameHUDScreen.alpha = 0;
+        ingameHUDScreen.interactable = false;
+        ingameHUDScreen.blocksRaycasts = false;
     }
 
     public void ShowDefeatedScreen()

@@ -42,6 +42,7 @@ public class PlayerScript : Controller
     private void Start()
     {
         playerCharacter.OnUnitDeath += OnPlayerCharacterDeath;
+        playerCharacter.OnUnitReachedLevelExit += OnReachedLevelExit;
         SelectUnit(playerCharacter);
     }
 
@@ -89,6 +90,11 @@ public class PlayerScript : Controller
         {
             _selectedUnit.TakeDamage(1);
         }
+    }
+
+    void OnReachedLevelExit()
+    {
+        playerHUD.ShowLevelCompleteScreen();
     }
 
     void SelectUnit(Unit unit)
