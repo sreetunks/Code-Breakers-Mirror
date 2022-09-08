@@ -2,13 +2,23 @@ using System.Collections.Generic;
 using UnityEngine;
 using Grid;
 
-public class Unit : MonoBehaviour, IGridObject
+public class Unit : MonoBehaviour, IGridObject, IDamageable
 {
+    public delegate void OnUnitDeathEventHandler();
+    public OnUnitDeathEventHandler OnUnitDeath;
+
+    public delegate void OnUnitDamagedEventHandler(int damageDealt);
+    public OnUnitDamagedEventHandler OnUnitDamaged;
+
     [SerializeField] private float moveSpeed = 4f;
     [SerializeField] private float rotateSpeed = 10f;
     [SerializeField] private Animator unitAnimator;
 
+    [SerializeField] private int maximumHealth = 4;
+
     private List<Vector3> _path;
+
+    private int _currentHealth;
 
     private static readonly int IsWalking = Animator.StringToHash("IsWalking"); // Caching ID for Parameter
 
@@ -16,8 +26,12 @@ public class Unit : MonoBehaviour, IGridObject
     public GridPosition Position { get; private set; }
     public bool IsOnDoorGridCell { get; private set; }
 
+    public int MaximumHealth => maximumHealth;
+    public int CurrentHealth => _currentHealth;
+
     private void Awake()
     {
+        _currentHealth = maximumHealth;
         _path = new List<Vector3>();
     }
 
@@ -133,5 +147,21 @@ public class Unit : MonoBehaviour, IGridObject
             // TODO: Get 4 Way Pathfinding to work
         }
         while (position != targetGridPosition);
+
+        // Move Logic - TODO: Update to use Pathfinding
+    }
+
+    public void TakeDamage(int damageDealt)
+    {
+        _currentHealth = Mathf.Max(0, _currentHealth - damageDealt);
+        OnUnitDamaged?.Invoke(damageDealt);
+        if (_currentHealth == 0)
+            OnUnitDeath?.Invoke();
+    }
+
+    public void Heal(int healthRestored)
+    {
+        _currentHealth = Mathf.Min(maximumHealth, _currentHealth + healthRestored);
+        OnUnitDamaged?.Invoke(-healthRestored);
     }
 }
