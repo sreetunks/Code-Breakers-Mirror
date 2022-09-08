@@ -106,6 +106,12 @@ public class PlayerScript : Controller
 
     public void EndTurn()
     {
+        if(_isTurnActive) TurnOrderSystem.MoveNext();
         _isTurnActive = false;
+    }
+
+    public void UpdateTurnLabel(FactionType factionType)
+    {
+        playerHUD.UpdateTurnLabel(factionType.ToString());
     }
 }

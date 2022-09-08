@@ -8,6 +8,7 @@ public class HUDScript : MonoBehaviour
 {
     [SerializeField] private Image healthBarImage;
     [SerializeField] private TMP_Text healthBarText;
+    [SerializeField] private TMP_Text turnFactionLabel;
 
     public GameObject ActionLog;
     public TMP_Text ALText;
@@ -43,6 +44,11 @@ public class HUDScript : MonoBehaviour
     {
         healthBarText.text = string.Format("{0} / {1}", _selectedUnit.CurrentHealth, _selectedUnit.MaximumHealth);
         healthBarImage.fillAmount = (float)_selectedUnit.CurrentHealth / _selectedUnit.MaximumHealth;
+    }
+
+    public void UpdateTurnLabel(string labelString)
+    {
+        turnFactionLabel.text = string.Format("Current Turn: {0}", labelString);
     }
 
     public void ActionLogEvent(string LogMessage)
