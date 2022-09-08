@@ -55,6 +55,10 @@ public class GameManager : MonoBehaviour
         StartCoroutine(MenuSoundEffect());
     }
 
+    public void LoadGameScene() { SceneManager.LoadScene(1); }
+
+    public void LoadMainMenuScene() { SceneManager.LoadScene(0); }
+
     public IEnumerator MenuSoundEffect()
     {
         mainMenuSFX.mute = false;

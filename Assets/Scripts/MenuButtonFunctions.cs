@@ -5,7 +5,7 @@ public class MenuButtonFunctions : MonoBehaviour
     // Button to load the last saved game
     public void Continue()
     {
-        StartCoroutine(GameManager.Instance.MenuSoundEffect());
+        GameManager.Instance.LoadGameScene();
     }
 
     // Button to start a new game
