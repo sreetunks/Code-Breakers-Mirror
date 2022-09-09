@@ -14,5 +14,7 @@ public class UnitHealAbility : AbilityBase
     public override void Use(Unit owningUnit)
     {
         owningUnit.Heal(healAmount);
+        owningUnit.ConsumeAP(actionPointCost);
+        owningUnit.OnAbilityUsed(this);
     }
 }

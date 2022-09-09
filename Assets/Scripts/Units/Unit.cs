@@ -157,14 +157,17 @@ public class Unit : MonoBehaviour, IGridObject, IDamageable
         OnUnitDamaged?.Invoke(-healthRestored);
     }
 
+    public void ConsumeAP(int apToConsume)
+    {
+        _currentAP -= apToConsume;
+        OnUnitAPChanged?.Invoke();
+    }
+
     public void OnAbilityUsed(AbilityBase ability)
     {
         int idx = unitAbilityDataList.FindIndex(abilityData => abilityData.ability == ability);
         if (idx < 0) return;
-        _currentAP -= ability.ActionPointCost;
         unitAbilityDataList[idx].cooldownDuration = ability.CooldownDuration;
-
-        OnUnitAPChanged?.Invoke();
     }
 
     public int GetAbilityCooldown(AbilityBase ability)

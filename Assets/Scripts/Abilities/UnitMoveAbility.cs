@@ -6,7 +6,7 @@ public class UnitMoveAbility : PositionTargetedAbility
 {
     public override int CooldownDuration => 0;
 
-    public override int ActionPointCost => 0;
+    public override int ActionPointCost => 1;
 
     public override bool Use(Unit owningUnit, GridPosition targetPosition)
     {

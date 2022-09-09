@@ -41,7 +41,6 @@ public class AbilityButton : MonoBehaviour
     public void TriggerAbility()
     {
         _abilityToTrigger.Use(PlayerScript.CurrentlySelectedUnit);
-        PlayerScript.CurrentlySelectedUnit.OnAbilityUsed(_abilityToTrigger);
     }
 
     public void UpdateCooldown()
