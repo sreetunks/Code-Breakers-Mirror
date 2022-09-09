@@ -39,7 +39,7 @@ public class Unit : MonoBehaviour, IGridObject, IDamageable
     [SerializeField] private int maximumAP = 6;
     [SerializeField] private int apGainPerRound = 3;
 
-    private List<Vector3> _path;
+    private List<GridPosition> _path;
 
     private int _currentHealth;
     private int _currentAP;
@@ -64,7 +64,7 @@ public class Unit : MonoBehaviour, IGridObject, IDamageable
     private void Awake()
     {
         _currentHealth = maximumHealth;
-        _path = new List<Vector3>();
+        _path = new List<GridPosition>();
 
         unitAbilityDataList = new List<AbilityData>();
         foreach (var ability in unitAbilities)
@@ -89,7 +89,7 @@ public class Unit : MonoBehaviour, IGridObject, IDamageable
     void UpdateMove()
     {
         if (_path.Count <= 0) return;
-        var toTarget = _path[0] - transform.position;
+        var toTarget = GridSystem.GetWorldPosition(_path[0]) - transform.position;
         var dist = toTarget.magnitude;
 
         if (dist > 0.01)
@@ -130,65 +130,17 @@ public class Unit : MonoBehaviour, IGridObject, IDamageable
                 gridCellState == GridCellState.DoorWest);
     }
 
-    public void Move(Vector3 targetPosition, bool forceMove = false)
+    public void ForceMove(Vector3 targetPosition)
     {
-        var position = Position;
         var targetGridPosition = GridSystem.GetGridPosition(targetPosition);
-
         GridSystem.TryGetGridCellState(targetGridPosition, out var targetCellState);
-        if (forceMove)
-        {
-            Position = targetGridPosition;
-            IsOnDoorGridCell = CheckIsOnDoorGridCell(targetCellState);
+        Position = targetGridPosition;
+        IsOnDoorGridCell = CheckIsOnDoorGridCell(targetCellState);
+    }
 
-            return;
-        }
-        else if (targetCellState is GridCellState.Impassable or GridCellState.Occupied)
-            return;
-
-        int numIterations = 0;
-        do
-        {
-            if (numIterations++ > 32) return;
-            // TODO: Implement Dijkstra Pathfinding
-            // Currently just moves in a simplistic way
-
-            //Pathfinding Logic
-            var deltaX = targetGridPosition.X - position.X;
-            var deltaZ = targetGridPosition.Z - position.Z;
-
-            if (deltaX != 0) deltaX /= Mathf.Abs(deltaX);
-            if (deltaZ != 0) deltaZ /= Mathf.Abs(deltaZ);
-
-            // X Logic
-            var gridPositionX = new GridPosition(position.X + deltaX, position.Z);
-            GridSystem.TryGetGridCellState(gridPositionX, out var cellState);
-            var newTargetPositionX = new Vector3(10000, 10000, 10000);
-            if (cellState != GridCellState.Impassable && cellState != GridCellState.Occupied)
-            {
-                newTargetPositionX = targetPosition - GridSystem.GetWorldPosition(gridPositionX);
-            }
-
-            // Z Logic
-            var gridPositionZ = new GridPosition(position.X, position.Z + deltaZ);
-            GridSystem.TryGetGridCellState(gridPositionZ, out cellState);
-            var newTargetPositionZ = new Vector3(10000, 10000, 10000);
-            if (cellState != GridCellState.Impassable && cellState != GridCellState.Occupied)
-            {
-                newTargetPositionZ = targetPosition - GridSystem.GetWorldPosition(gridPositionZ);
-            }
-
-            if (newTargetPositionX == new Vector3(10000, 10000, 10000) && newTargetPositionZ == new Vector3(10000, 10000, 10000)) break; // NOTE: Simple path not found, this is where we expand the logic to find a path.
-
-            // Compare Logic
-            position = newTargetPositionX.magnitude < newTargetPositionZ.magnitude ? gridPositionX : gridPositionZ;
-            _path.Add(GridSystem.GetWorldPosition(position));
-
-            // TODO: Get 4 Way Pathfinding to work
-        }
-        while (position != targetGridPosition);
-
-        // Move Logic - TODO: Update to use Pathfinding
+    public void Move(List<GridPosition> inPath)
+    {
+        _path = inPath;
     }
 
     public void TakeDamage(int damageDealt)
