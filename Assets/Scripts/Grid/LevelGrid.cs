@@ -51,12 +51,12 @@ namespace Grid
 
         private int GetCellStateVertexIndex(int x, int y)
         {
-            return ((((y * 2) + 1) * (gridWidth * 2)) + ((x + y + 1) * 2));
+            return ((y * gridWidth) + x) * 4;
         }
 
         private void UpdateCellState(Mesh mesh)
         {
-            var vertexCount = ((gridWidth * 2) + 1) * ((gridHeight * 2) + 1);
+            var vertexCount = gridWidth * gridHeight * 4;
             var cellStateArray = new NativeArray<float>(vertexCount, Allocator.Temp);
             for (var y = 0; y < gridHeight; ++y)
             {
@@ -64,6 +64,9 @@ namespace Grid
                 {
                     var idx = GetCellStateVertexIndex(x, y);
                     cellStateArray[idx] = (float)gridCellStates[(y  * gridWidth) + x] + 0.5f;
+                    cellStateArray[idx + 1] = (float)gridCellStates[(y  * gridWidth) + x] + 0.5f;
+                    cellStateArray[idx + 2] = (float)gridCellStates[(y  * gridWidth) + x] + 0.5f;
+                    cellStateArray[idx + 3] = (float)gridCellStates[(y  * gridWidth) + x] + 0.5f;
                 }
             }
             mesh.SetVertexBufferData(cellStateArray, 0, 0, vertexCount, 2);
@@ -77,80 +80,67 @@ namespace Grid
             var gridMesh = new Mesh();
             gridMesh.Clear();
 
-            var vertexCount = ((gridWidth * 2) + 1) * ((gridHeight * 2) + 1);
-            var quadCount = gridWidth * gridHeight * 4;
+            var vertexCount = gridWidth * gridHeight * 4;
+            var quadCount = gridWidth * gridHeight;
             var vertexLayout = new[]
             {
                 new VertexAttributeDescriptor(VertexAttribute.Position, VertexAttributeFormat.Float32, 3),
                 new VertexAttributeDescriptor(VertexAttribute.TexCoord0, VertexAttributeFormat.Float32, 2, 1),
                 new VertexAttributeDescriptor(VertexAttribute.Color, VertexAttributeFormat.Float32, 1, 2)
             };
+            gridMesh.SetVertexBufferParams(vertexCount, vertexLayout);
 
             var posArray = new NativeArray<Vector3>(vertexCount, Allocator.Temp);
             var uvArray = new NativeArray<Vector2>(vertexCount, Allocator.Temp);
 
             var gridVertexOffset = gridOffset - transform.position;
 
-            for (var y = 0; y < (gridHeight * 2) + 1; ++y)
+            for (var y = 0; y < gridHeight; ++y)
             {
-                for (var x = 0; x < (gridWidth * 2) + 1; ++x)
+                for (var x = 0; x < gridWidth; ++x)
                 {
-                    var idx = (y * ((gridWidth * 2) + 1)) + x;
-                    posArray[idx] = gridVertexOffset + (new Vector3(x, 0, y) * gridCellSize * 0.5f);
-                    uvArray[idx] = new Vector2((float)x / (gridWidth * 2), (float)y / (gridHeight * 2));
+                    Vector3 cellCenter = new Vector3(x, 0, y) * gridCellSize;
+                    var idx = ((y * gridWidth) + x) * 4;
+
+                    posArray[idx] = gridVertexOffset + cellCenter;
+                    uvArray[idx] = new Vector2((float)x / gridWidth, (float)y / gridHeight);
+
+                    posArray[idx + 1] = gridVertexOffset + cellCenter + new Vector3(0, 0, gridCellSize);
+                    uvArray[idx + 1] = new Vector2((float)x / gridWidth, (float)(y + 1) / gridHeight);
+
+                    posArray[idx + 2] = gridVertexOffset + cellCenter + new Vector3(gridCellSize, 0, gridCellSize);
+                    uvArray[idx + 2] = new Vector2((float)(x + 1) / gridWidth, (float)(y + 1) / gridHeight);
+
+                    posArray[idx + 3] = gridVertexOffset + cellCenter + new Vector3(gridCellSize, 0, 0);
+                    uvArray[idx + 3] = new Vector2((float)(x + 1) / gridWidth, (float)y / gridHeight);
                 }
             }
 
-            gridMesh.SetVertexBufferParams(vertexCount, vertexLayout);
             UpdateCellState(gridMesh);
             gridMesh.SetVertexBufferData(posArray, 0, 0, vertexCount, 0);
             gridMesh.SetVertexBufferData(uvArray, 0, 0, vertexCount, 1);
 
             var indices = new NativeArray<ushort>(quadCount * 6, Allocator.Temp);
 
-            var vertIndex = (ushort)((gridWidth + 1) * 2);
+            ushort vertIndex = 0;
 
             for (var y = 0; y < gridHeight; ++y)
             {
                 for (var x = 0; x < gridWidth; ++x)
                 {
-                    var idx = (((y * 2) * gridWidth) + (x * 2) + 1) * 12;
 
-                    indices[idx - 12] = (ushort)(vertIndex - 1);
-                    indices[idx - 11] = (ushort)(vertIndex - ((gridWidth * 2) + 1));
-                    indices[idx - 10] = (ushort)(vertIndex - ((gridWidth * 2) + 1) - 1);
+                    var idx = ((y * gridWidth) + x) * 6;
+                    indices[idx] = vertIndex;
+                    indices[idx + 1] = (ushort)(vertIndex + 1);
+                    indices[idx + 2] = (ushort)(vertIndex + 2);
 
-                    indices[idx - 9] = (ushort)(vertIndex - 1);
-                    indices[idx - 8] = vertIndex;
-                    indices[idx - 7] = (ushort)(vertIndex - ((gridWidth * 2) + 1));
+                    indices[idx + 3] = (ushort)(vertIndex + 2);
+                    indices[idx + 4] = (ushort)(vertIndex + 3);
+                    indices[idx + 5] = vertIndex;
 
-                    indices[idx - 6] = vertIndex;
-                    indices[idx - 5] = (ushort)(vertIndex + 1);
-                    indices[idx - 4] = (ushort)(vertIndex - ((gridWidth * 2) + 1));
+                    vertIndex += 4;
 
-                    indices[idx - 3] = (ushort)(vertIndex + 1);
-                    indices[idx - 2] = (ushort)(vertIndex - ((gridWidth * 2) + 1) + 1);
-                    indices[idx - 1] = (ushort)(vertIndex - ((gridWidth * 2) + 1));
-
-                    indices[idx] = (ushort)(vertIndex - 1);
-                    indices[idx + 1] = (ushort)(vertIndex + ((gridWidth * 2) + 1) - 1);
-                    indices[idx + 2] = (ushort)(vertIndex + ((gridWidth * 2) + 1));
-
-                    indices[idx + 3] = (ushort)(vertIndex + ((gridWidth * 2) + 1));
-                    indices[idx + 4] = vertIndex;
-                    indices[idx + 5] = (ushort)(vertIndex - 1);
-
-                    indices[idx + 6] = vertIndex;
-                    indices[idx + 7] = (ushort)(vertIndex + ((gridWidth * 2) + 1));
-                    indices[idx + 8] = (ushort)(vertIndex + 1);
-
-                    indices[idx + 9] = (ushort)(vertIndex + ((gridWidth * 2) + 1));
-                    indices[idx + 10] = (ushort)(vertIndex + ((gridWidth * 2) + 1) + 1);
-                    indices[idx + 11] = (ushort)(vertIndex + 1);
-
-                    vertIndex += 2;
                 }
-                vertIndex += (ushort)((gridWidth + 1) * 2);
             }
 
             gridMesh.SetIndexBufferParams(quadCount * 6, IndexFormat.UInt16);
@@ -184,9 +174,14 @@ namespace Grid
             {
                 for (var j = 0; j < gridHeight; ++j)
                 {
-                    gridCellStates[(i * gridHeight) + j] = GridCellState.Impassable;
+                    gridCellStates[(i * gridHeight) + j] = GridCellState.Walkable;
                 }
             }
+
+            northDoorGridPosition = GridPosition.Invalid;
+            eastDoorGridPosition = GridPosition.Invalid;
+            southDoorGridPosition = GridPosition.Invalid;
+            westDoorGridPosition = GridPosition.Invalid;
 
             UpdateGridMeshData();
         }
@@ -234,8 +229,8 @@ namespace Grid
 
             if (Application.isPlaying)
             {
-                float[] gridState = { (float)gridCellState };
-                _meshFilter.mesh.SetVertexBufferData(gridState, 0, GetCellStateVertexIndex(gridPosition.X, gridPosition.Z), 1, 2);
+                float[] gridState = { (float)gridCellState + 0.5f, (float)gridCellState + 0.5f, (float)gridCellState + 0.5f, (float)gridCellState + 0.5f };
+                _meshFilter.mesh.SetVertexBufferData(gridState, 0, GetCellStateVertexIndex(gridPosition.X, gridPosition.Z), 4, 2);
 
                 return;
             }

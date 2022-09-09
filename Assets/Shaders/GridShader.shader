@@ -32,7 +32,7 @@ Shader "TheHungrySwans/Grid"
             {
                 float4 positionOS   : POSITION;
                 float2 uv : TEXCOORD0;
-                float cellState : COLOR;
+                nointerpolation float cellState : COLOR;
             };
 
             struct Varyings
@@ -65,10 +65,11 @@ Shader "TheHungrySwans/Grid"
                     smoothstep(0.0f, _GridCellUVSize.x, IN.uv.x % _GridCellUVSize.x),
                     smoothstep(0.0f, _GridCellUVSize.y, IN.uv.y % _GridCellUVSize.y));
                 float2 radialUV = abs(perCellUV - float2(0.5, 0.5));
-                float alpha = length(radialUV);
+                float alpha = (radialUV.x * radialUV.x) + (radialUV.y * radialUV.y);// length(radialUV);
                 alpha = saturate(alpha + smoothstep(0.498, 0.5, radialUV.x));
                 alpha = saturate(alpha + smoothstep(0.498, 0.5, radialUV.y));
-                return half4(IN.color.xyz, lerp(alpha, smoothstep(0.5, 1, IN.color.a), sign(length(IN.color.xyz))));
+                half4 outColor =  half4(IN.color.xyz, lerp(alpha, smoothstep(0.5, 1, IN.color.a), 1 - sign(length(IN.color.xyz))));
+                return outColor;
             }
             ENDHLSL
         }
