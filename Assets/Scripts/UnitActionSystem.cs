@@ -29,6 +29,7 @@ public class UnitActionSystem : MonoBehaviour
 
     private void Update()
     {
+#if false
         // ReSharper disable once InvertIf
         if (Input.GetMouseButtonDown(0) && !EventSystem.current.IsPointerOverGameObject())
         {
@@ -48,6 +49,7 @@ public class UnitActionSystem : MonoBehaviour
             selectedUnit.transform.position = targetPosition;
             GridSystem.UpdateGridObjectPosition(selectedUnit, newGridPosition);
         }
+#endif
     }
 
     private bool TryHandleUnitSelection()

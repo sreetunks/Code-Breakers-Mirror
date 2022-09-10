@@ -2350,6 +2350,7 @@ GameObject:
   - component: {fileID: 3638957679980480155}
   - component: {fileID: 3638957679980480154}
   - component: {fileID: 3638957679980480157}
+  - component: {fileID: 2623149768420341880}
   m_Layer: 5
   m_Name: Main Menu
   m_TagString: Untagged
@@ -2383,7 +2384,7 @@ RectTransform:
   - {fileID: 3638957680420294705}
   - {fileID: 3638957679536030827}
   m_Father: {fileID: 0}
-  m_RootOrder: 2
+  m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 0, y: 0}
@@ -2452,6 +2453,22 @@ MonoBehaviour:
   m_BlockingMask:
     serializedVersion: 2
     m_Bits: 4294967295
+--- !u!114 &2623149768420341880
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3638957679980480156}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 52cbf0f42ba6c5243a733c4f05b96382, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  saveMenu: {fileID: 3638957679732253656}
+  settingsMenu: {fileID: 3638957678993520852}
+  creditsMenu: {fileID: 3638957680420294704}
+  exitMenu: {fileID: 3638957679536030826}
 --- !u!1 &3638957680040057724
 GameObject:
   m_ObjectHideFlags: 0

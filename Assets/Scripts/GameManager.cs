@@ -1,18 +1,19 @@
 using System.Collections;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 public class GameManager : MonoBehaviour
 {
     public static GameManager Instance;
 
-    [SerializeField] public GameObject saveMenu;
-    [SerializeField] public GameObject settingsMenu;
-    [SerializeField] public GameObject creditsMenu;
-    [SerializeField] public GameObject exitMenu;
-    [SerializeField] public AudioSource mainMenuTheme;
-    [SerializeField] public AudioSource mainMenuSFX;
+    public AudioSource mainMenuTheme;
+    public AudioSource mainMenuSFX;
 
-    public static PlayerScript player;
+    public GameObject saveMenu;
+    public GameObject settingsMenu;
+    public GameObject creditsMenu;
+    public GameObject exitMenu;
+
     public bool isPaused = false;
 
     void Awake()
@@ -20,14 +21,13 @@ public class GameManager : MonoBehaviour
         if (Instance == null)
         {
             Instance = this;
+            transform.parent = null;
             DontDestroyOnLoad(gameObject);
         }
         else
         {
             Destroy(gameObject);
         }
-
-        player = new PlayerScript();
     }
 
     public void ToggleSaveMenu()
@@ -54,6 +54,10 @@ public class GameManager : MonoBehaviour
         exitMenu.SetActive(!exitMenu.activeInHierarchy);
         StartCoroutine(MenuSoundEffect());
     }
+
+    public void LoadGameScene() { SceneManager.LoadScene(1); }
+
+    public void LoadMainMenuScene() { SceneManager.LoadScene(0); }
 
     public IEnumerator MenuSoundEffect()
     {

@@ -12,7 +12,8 @@ namespace Grid
         DoorNorth,
         DoorEast,
         DoorSouth,
-        DoorWest
+        DoorWest,
+        LevelExit
     }
 
     public class GridSystem : MonoBehaviour
@@ -27,6 +28,8 @@ namespace Grid
         private LevelGrid _activeLevelGrid;
 
         public static LevelGrid ActiveLevelGrid { get => Instance?._activeLevelGrid; }
+        public static GridPosition HighlightPosition { get; set; } = GridPosition.Invalid;
+        public static int HighlightRange { get; set; } = -1;
 
         private static GridSystem Instance { get; set; }
 
@@ -109,6 +112,62 @@ namespace Grid
             ActiveLevelGrid.SetGridCellState(newGridPosition, GridCellState.Occupied);
         }
 
+        public static void GetPath(GridPosition start, GridPosition target, ref List<GridPosition> outPath)
+        {
+            outPath.Clear();
+            TryGetGridCellState(target, out var targetCellState);
+            if (targetCellState is GridCellState.Impassable or GridCellState.Occupied)
+                return;
+            var position = start;
+            var targetPosition = GetWorldPosition(target);
+            int numIterations = 0;
+            do
+            {
+                if (numIterations++ > 32) return;
+                // TODO: Implement Dijkstra Pathfinding
+                // Currently just moves in a simplistic way
+
+                //Pathfinding Logic
+                var deltaX = target.X - position.X;
+                var deltaZ = target.Z - position.Z;
+
+                if (deltaX != 0) deltaX /= Mathf.Abs(deltaX);
+                if (deltaZ != 0) deltaZ /= Mathf.Abs(deltaZ);
+
+                // X Logic
+                var gridPositionX = new GridPosition(position.X + deltaX, position.Z);
+                TryGetGridCellState(gridPositionX, out var cellState);
+                var newTargetPositionX = new Vector3(10000, 10000, 10000);
+                if (cellState != GridCellState.Impassable && cellState != GridCellState.Occupied)
+                {
+                    newTargetPositionX = targetPosition - GetWorldPosition(gridPositionX);
+                }
+
+                // Z Logic
+                var gridPositionZ = new GridPosition(position.X, position.Z + deltaZ);
+                TryGetGridCellState(gridPositionZ, out cellState);
+                var newTargetPositionZ = new Vector3(10000, 10000, 10000);
+                if (cellState != GridCellState.Impassable && cellState != GridCellState.Occupied)
+                {
+                    newTargetPositionZ = targetPosition - GetWorldPosition(gridPositionZ);
+                }
+
+                if (newTargetPositionX == new Vector3(10000, 10000, 10000) && newTargetPositionZ == new Vector3(10000, 10000, 10000))
+                {
+                    outPath.Clear();
+                    break; // NOTE: Simple path not found, this is where we expand the logic to find a path.
+                }
+
+                // Compare Logic
+                position = newTargetPositionX.magnitude < newTargetPositionZ.magnitude ? gridPositionX : gridPositionZ;
+                outPath.Add(position);
+
+                // TODO: Get 4 Way Pathfinding to work
+            }
+            while (position != target);
+
+            // Move Logic - TODO: Update to use Pathfinding
+        }
         public static GridPosition SwitchLevelGrid(GridPosition doorGridCellPosition, GridCellState doorGridCellState)
         {
             LevelGrid newLevelGrid = ActiveLevelGrid.GetRoomAdjacentToDoor(doorGridCellState);

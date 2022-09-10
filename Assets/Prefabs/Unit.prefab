@@ -147,6 +147,12 @@ MonoBehaviour:
   moveSpeed: 4
   rotateSpeed: 10
   unitAnimator: {fileID: 6923566292944824247}
+  unitAbilities:
+  - {fileID: 11400000, guid: 4bbdbcfc7d39dc24eb5b981a5c7dcb3e, type: 2}
+  - {fileID: 11400000, guid: 9cc23574993e4c940a913643cc872c9b, type: 2}
+  maximumHealth: 4
+  maximumAP: 6
+  apGainPerRound: 3
 --- !u!65 &5778599720466075167
 BoxCollider:
   m_ObjectHideFlags: 0

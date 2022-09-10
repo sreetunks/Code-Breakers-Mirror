@@ -1,54 +1,99 @@
-using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
 
+[RequireComponent(typeof(Canvas))]
 public class HUDScript : MonoBehaviour
 {
-    public static HUDScript HUD;
+    [SerializeField] private Image healthBarImage;
+    [SerializeField] private TMP_Text healthBarText;
+    [SerializeField] private Image actionPointBarImage;
+    [SerializeField] private TMP_Text actionPointBarText;
+    [SerializeField] private TMP_Text turnFactionLabel;
 
-    public Image HPBar;
-    public Image APBar;
-    //Status List
+    [SerializeField] private CanvasGroup ingameHUDScreen;
+    [SerializeField] private CanvasGroup levelCompleteScreen;
+    [SerializeField] private CanvasGroup defeatedScreen;
 
-    public Image Ability1Image;
-    public Image Ability2Image;
-    public Image HackImage;
-    public Image Ability4Image;
-    public Image Ability5Image;
-    public Image HackImageLeft;
-    public Image HackImageRight;
     public GameObject ActionLog;
     public TMP_Text ALText;
-    public TMP_Text HealthNumber;
-    public TMP_Text APNumber;
+
+    [SerializeField] private List<AbilityButton> abilityButtons;
 
     public bool DropDown;
     private Vector3 ActionLogOrigin;
-    //Turn Order List
-    //Turn Order Icons
-
     private List<string> ActionLogText;
-    // Start is called before the first frame update
+
+    private Unit _selectedUnit;
+    private Canvas _hudCanvas;
+
     void Awake()
     {
-        HUD = this;
-        HackImageLeft.enabled = false;
-        HackImageRight.enabled = false;
+        _hudCanvas = GetComponent<Canvas>();
+
         DropDown = false;
         ActionLogOrigin = ActionLog.transform.localPosition;
         ActionLogText = new List<string>();
     }
 
-    public void UpdateHack()
+    public void Show() { _hudCanvas.enabled = true; }
+
+    public void Hide() { _hudCanvas.enabled = false; }
+
+    public void UpdateSelectedUnit(Unit unit)
     {
-        //When multiple hacks are avalible the center button can switch between them.
-        if (GameManager.player.HackLearned)
+        _selectedUnit = unit;
+
+        foreach (var abilityButton in abilityButtons)
         {
-            HackImageLeft.enabled = true;
-            HackImageRight.enabled = true;
+            abilityButton.DisableButton();
+            abilityButton.ResetButton();
         }
+
+        for (var i = 0; i < unit.AbilityList.Count; ++i)
+        {
+            abilityButtons[i].Initialize(unit.AbilityList[i].ability);
+
+            if (unit.Controller == PlayerScript.Instance)
+                abilityButtons[i].EnableButton();
+        }
+
+        UpdateHealth();
+        UpdateActionPoints();
+    }
+
+    public void UpdateHealth()
+    {
+        healthBarText.text = string.Format("{0} / {1}", _selectedUnit.CurrentHealth, _selectedUnit.MaximumHealth);
+        healthBarImage.fillAmount = (float)_selectedUnit.CurrentHealth / _selectedUnit.MaximumHealth;
+    }
+
+    public void UpdateActionPoints()
+    {
+        actionPointBarText.text = string.Format("{0} / {1}", _selectedUnit.CurrentAP, _selectedUnit.MaximumAP);
+        actionPointBarImage.fillAmount = (float)_selectedUnit.CurrentAP / _selectedUnit.MaximumAP;
+
+        if (_selectedUnit.Controller != PlayerScript.Instance) return;
+
+        for (var i = 0; i < _selectedUnit.AbilityList.Count; ++i)
+        {
+            if(_selectedUnit.GetAbilityCooldown(abilityButtons[i].Ability) > 0)
+                abilityButtons[i].UpdateCooldown();
+
+            if (_selectedUnit.GetAbilityCooldown(abilityButtons[i].Ability) == 0)
+            {
+                if(_selectedUnit.CurrentAP < abilityButtons[i].Ability.ActionPointCost)
+                    abilityButtons[i].DisableButton();
+                else
+                    abilityButtons[i].EnableButton();
+            }
+        }
+    }
+
+    public void UpdateTurnLabel(string labelString)
+    {
+        turnFactionLabel.text = string.Format("Current Turn: {0}", labelString);
     }
 
     public void ActionLogEvent(string LogMessage)
@@ -65,18 +110,52 @@ public class HUDScript : MonoBehaviour
         }
         //TODO Add small text box that displays the added message outside of the drop down -Atticus
     }
+
     public void ToggleLog()
-    {        
+    {
         var TempTransform = ActionLog.transform.localPosition;
         if (!DropDown)
         {
-            TempTransform.y += -510;
-            ActionLog.transform.localPosition =  TempTransform * 4 * Time.deltaTime;
+            TempTransform.y -= 510;
+            ActionLog.transform.localPosition =  TempTransform;
         }
         else
         {
-            ActionLog.transform.localPosition = ActionLogOrigin;
+            TempTransform.y += 510;
+            ActionLog.transform.localPosition = TempTransform;
         }
         DropDown = !DropDown;
+    }
+
+    public void ShowLevelCompleteScreen()
+    {
+        levelCompleteScreen.alpha = 1;
+        levelCompleteScreen.interactable = true;
+        levelCompleteScreen.blocksRaycasts = true;
+
+        ingameHUDScreen.alpha = 0;
+        ingameHUDScreen.interactable = false;
+        ingameHUDScreen.blocksRaycasts = false;
+    }
+
+    public void ShowDefeatedScreen()
+    {
+        defeatedScreen.alpha = 1;
+        defeatedScreen.interactable = true;
+        defeatedScreen.blocksRaycasts = true;
+
+        ingameHUDScreen.alpha = 0;
+        ingameHUDScreen.interactable = false;
+        ingameHUDScreen.blocksRaycasts = false;
+    }
+
+    public void ReloadLevel()
+    {
+        GameManager.Instance.LoadGameScene();
+    }
+
+    public void LoadMainMenu()
+    {
+        GameManager.Instance.LoadMainMenuScene();
     }
 }
