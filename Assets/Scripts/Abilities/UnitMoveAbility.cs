@@ -33,7 +33,7 @@ public class UnitMoveAbility : PositionTargetedAbility
             distanceMoved = range;
         }
 
-        owningUnit.ConsumeAP(distanceMoved / apCostPerTile);
+        owningUnit.ConsumeAP(distanceMoved * apCostPerTile);
         owningUnit.Move(movePath);
 
         return true;
