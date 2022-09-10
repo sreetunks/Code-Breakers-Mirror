@@ -158,12 +158,6 @@ namespace Grid.Editor
             if (_selectedGridTiles.Count > 0)
             {
                 EditorGUILayout.BeginVertical();
-                using (new EditorGUI.DisabledScope(true))
-                {
-                    //EditorGUILayout.Vector2IntField(
-                    //    "Selected Tile",
-                    //    new Vector2Int(_selectedGridTilePos.X, _selectedGridTilePos.Z));
-                }
                 var selectedGridCellState = (GridCellState)(-1);
                 foreach (var gridTile in _selectedGridTiles)
                 {
