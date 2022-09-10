@@ -17,7 +17,7 @@ public class TestEnemyController : Controller
         TurnOrderSystem.MoveNext();
     }
 
-    public override void TargetAbility(Unit owningUnit, PositionTargetedAbility ability)
+    public override void TargetAbility(Unit owningUnit, PositionTargetedAbility ability, int range)
     {
     }
 
