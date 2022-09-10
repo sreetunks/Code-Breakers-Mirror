@@ -28,6 +28,8 @@ namespace Grid
         private LevelGrid _activeLevelGrid;
 
         public static LevelGrid ActiveLevelGrid { get => Instance?._activeLevelGrid; }
+        public static GridPosition HighlightPosition { get; set; } = GridPosition.Invalid;
+        public static int HighlightRange { get; set; } = -1;
 
         private static GridSystem Instance { get; set; }
 

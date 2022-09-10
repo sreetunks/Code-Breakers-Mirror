@@ -1,7 +1,9 @@
 Shader "TheHungrySwans/Grid"
 {
     Properties
-    { }
+    {
+        _HighlightColor("Highlight Color", Color) = (0,1,0,1)
+    }
  
     SubShader
     {
@@ -42,7 +44,9 @@ Shader "TheHungrySwans/Grid"
                 float4 color : COLOR;
             };
 
+            half4 _HighlightColor;
             float4 _GridCellUVSize;
+            float4 _GridHighlightInfo;
             float4 _GridCellColors[8];
 
             // The vertex shader definition with properties defined in the Varyings 
@@ -69,7 +73,14 @@ Shader "TheHungrySwans/Grid"
                 alpha = saturate(alpha + smoothstep(0.498, 0.5, radialUV.x));
                 alpha = saturate(alpha + smoothstep(0.498, 0.5, radialUV.y));
                 half4 outColor =  half4(IN.color.xyz, lerp(alpha, smoothstep(0.5, 1, IN.color.a), 1 - sign(length(IN.color.xyz))));
-                return outColor;
+
+                float2 gridCellPosition = float2((int)(IN.uv.x / _GridCellUVSize.x), (int)(IN.uv.y / _GridCellUVSize.y));
+                float distance = max(abs(gridCellPosition.x - (_GridHighlightInfo.z)), abs(gridCellPosition.y - (_GridHighlightInfo.w)));
+                float inRange = smoothstep(0, _GridHighlightInfo.y + 1, distance);
+                float lerpFactor = sign(1 - inRange) * sign(inRange);
+                half4 highlightColor = lerp(outColor, half4(_HighlightColor.xyz, lerp(alpha, smoothstep(0.5, 1, IN.color.a), 1 - sign(length(IN.color.xyz)))), lerpFactor);
+
+                return lerp(outColor, highlightColor, _GridHighlightInfo.x);
             }
             ENDHLSL
         }
