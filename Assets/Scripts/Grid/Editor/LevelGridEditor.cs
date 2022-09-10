@@ -70,6 +70,35 @@ namespace Grid.Editor
                     _selectedGridTiles.Clear();
                 Event.current.Use();
             }
+            else if (Event.current.type == EventType.ScrollWheel)
+            {
+                if (_selectedGridTiles.Count > 0)
+                {
+                    var selectedGridCellState = (GridCellState)(-1);
+                    foreach (var gridTile in _selectedGridTiles)
+                    {
+                        GridSystem.TryGetGridCellState(gridTile, out var tempSelectedGridCellState);
+                        if (selectedGridCellState == (GridCellState)(-1))
+                        {
+                            selectedGridCellState = tempSelectedGridCellState;
+                        }
+                        else if (tempSelectedGridCellState != selectedGridCellState)
+                        {
+                            selectedGridCellState = (GridCellState)(-1);
+                            break;
+                        }
+                    }
+                    if (selectedGridCellState == (GridCellState)(-1)) selectedGridCellState = GridCellState.Impassable;
+                    var newGridCellState = (GridCellState)((((int)selectedGridCellState + (int)Mathf.Sign(Event.current.delta.y)) + ((int)GridCellState.LevelExit + 1)) % ((int)GridCellState.LevelExit + 1));
+                    foreach (var gridTile in _selectedGridTiles)
+                        UpdateGridCellState(gridTile, newGridCellState);
+
+                    if (serializedObject.ApplyModifiedProperties())
+                        EditorUtility.SetDirty(target);
+
+                    Event.current.Use();
+                }
+            }
             else if (Event.current.type == EventType.Repaint)
             {
                 if (_selectedGridTiles.Count == 0) return;
@@ -122,15 +151,17 @@ namespace Grid.Editor
             var gridCellState = _gridCellStates.GetArrayElementAtIndex(gridCellIndex);
             gridCellState.enumValueIndex = (int)state;
 
-            if (additionalGridCellModified != GridPosition.Invalid)
+            if (additionalGridCellModified == position)
+            {
+                additionalGridCellPosition.FindPropertyRelative("X").intValue = -1;
+                additionalGridCellPosition.FindPropertyRelative("Z").intValue = -1;
+            }
+            else if (additionalGridCellModified != GridPosition.Invalid)
             {
                 var additionalGridCellIndex = (additionalGridCellModified.Z * _levelGrid.GridWidth) + additionalGridCellModified.X;
                 var additionalGridCellState = _gridCellStates.GetArrayElementAtIndex(additionalGridCellIndex);
                 additionalGridCellState.enumValueIndex = (int)GridCellState.Walkable;
-            }
 
-            if (additionalGridCellPosition != null)
-            {
                 additionalGridCellPosition.FindPropertyRelative("X").intValue = position.X;
                 additionalGridCellPosition.FindPropertyRelative("Z").intValue = position.Z;
             }
@@ -200,6 +231,5 @@ namespace Grid.Editor
             if(serializedObject.ApplyModifiedProperties())
                 EditorUtility.SetDirty(target);
         }
-
     }
 }
