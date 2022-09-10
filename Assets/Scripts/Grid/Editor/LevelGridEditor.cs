@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using UnityEditor;
 using UnityEngine;
 
@@ -23,7 +24,7 @@ namespace Grid.Editor
         private SerializedProperty _southDoorGridPosition;
         private SerializedProperty _westDoorGridPosition;
 
-        private GridPosition _selectedGridTilePos = GridPosition.Invalid;
+        private HashSet<GridPosition> _selectedGridTiles = new HashSet<GridPosition>();
         private LevelGrid _levelGrid;
 
         private void OnEnable()
@@ -56,23 +57,82 @@ namespace Grid.Editor
                 var mouseDirRay = HandleUtility.GUIPointToWorldRay(Event.current.mousePosition);
                 if (Physics.Raycast(mouseDirRay, out var hit, LayerMask.GetMask("MousePlane")))
                 {
-                    _selectedGridTilePos = GridSystem.GetGridPosition(hit.point);
+                    if (!Event.current.shift) _selectedGridTiles.Clear();
+
+                    var selectedGridTilePos = GridSystem.GetGridPosition(hit.point);
+
+                    if (_selectedGridTiles.Contains(selectedGridTilePos))
+                        _selectedGridTiles.Remove(selectedGridTilePos);
+                    else
+                        _selectedGridTiles.Add(selectedGridTilePos);
                 }
+                else
+                    _selectedGridTiles.Clear();
+                Event.current.Use();
             }
             else if (Event.current.type == EventType.Repaint)
             {
-                if (_selectedGridTilePos == GridPosition.Invalid) return;
+                if (_selectedGridTiles.Count == 0) return;
                 var handlesMatrix = Handles.matrix;
                 Handles.matrix = _levelGrid.transform.localToWorldMatrix;
-                Handles.RectangleHandleCap(
+                foreach (var gridTile in _selectedGridTiles)
+                {
+                    Handles.RectangleHandleCap(
                     0,
-                    GridSystem.GetWorldPosition(_selectedGridTilePos) - _levelGrid.transform.position,
+                    GridSystem.GetWorldPosition(gridTile) - _levelGrid.transform.position,
                     Quaternion.LookRotation(Vector3.up),
                     GridSystem.ActiveLevelGrid.GridCellSize * 0.5f,
                     EventType.Repaint
-                );
+                    );
+                }
                 Handles.matrix = handlesMatrix;
                 Repaint();
+            }
+        }
+
+        private void UpdateGridCellState(GridPosition position, GridCellState state)
+        {
+            var additionalGridCellModified = GridPosition.Invalid;
+            SerializedProperty additionalGridCellPosition = null;
+
+            if (state == GridCellState.DoorNorth)
+            {
+                additionalGridCellModified = _levelGrid.DoorNorth;
+                additionalGridCellPosition = _northDoorGridPosition;
+            }
+            else if (state == GridCellState.DoorEast)
+            {
+                additionalGridCellModified = _levelGrid.DoorEast;
+                additionalGridCellPosition = _eastDoorGridPosition;
+            }
+            else if (state == GridCellState.DoorSouth)
+            {
+                additionalGridCellModified = _levelGrid.DoorSouth;
+                additionalGridCellPosition = _southDoorGridPosition;
+            }
+            else if (state == GridCellState.DoorWest)
+            {
+                additionalGridCellModified = _levelGrid.DoorWest;
+                additionalGridCellPosition = _westDoorGridPosition;
+            }
+
+            GridSystem.SetGridCellState(position, state);
+            _levelGrid.UpdateGrid();
+            var gridCellIndex = (position.Z * _levelGrid.GridWidth) + position.X;
+            var gridCellState = _gridCellStates.GetArrayElementAtIndex(gridCellIndex);
+            gridCellState.enumValueIndex = (int)state;
+
+            if (additionalGridCellModified != GridPosition.Invalid)
+            {
+                var additionalGridCellIndex = (additionalGridCellModified.Z * _levelGrid.GridWidth) + additionalGridCellModified.X;
+                var additionalGridCellState = _gridCellStates.GetArrayElementAtIndex(additionalGridCellIndex);
+                additionalGridCellState.enumValueIndex = (int)GridCellState.Walkable;
+            }
+
+            if (additionalGridCellPosition != null)
+            {
+                additionalGridCellPosition.FindPropertyRelative("X").intValue = position.X;
+                additionalGridCellPosition.FindPropertyRelative("Z").intValue = position.Z;
             }
         }
 
@@ -95,63 +155,36 @@ namespace Grid.Editor
             EditorGUILayout.EndVertical();
             EditorGUILayout.Space();
 
-            if (_selectedGridTilePos != GridPosition.Invalid)
+            if (_selectedGridTiles.Count > 0)
             {
                 EditorGUILayout.BeginVertical();
                 using (new EditorGUI.DisabledScope(true))
                 {
-                    EditorGUILayout.Vector2IntField(
-                        "Selected Tile",
-                        new Vector2Int(_selectedGridTilePos.X, _selectedGridTilePos.Z));
+                    //EditorGUILayout.Vector2IntField(
+                    //    "Selected Tile",
+                    //    new Vector2Int(_selectedGridTilePos.X, _selectedGridTilePos.Z));
                 }
-                if (GridSystem.TryGetGridCellState(_selectedGridTilePos, out var selectedGridCellState))
+                var selectedGridCellState = (GridCellState)(-1);
+                foreach (var gridTile in _selectedGridTiles)
                 {
-                    var newGridCellState = (GridCellState)EditorGUILayout.EnumPopup(selectedGridCellState);
-                    if (newGridCellState != selectedGridCellState)
+                    GridSystem.TryGetGridCellState(gridTile, out var tempSelectedGridCellState);
+                    if (selectedGridCellState == (GridCellState)(-1))
                     {
-                        var additionalGridCellModified = GridPosition.Invalid;
-                        SerializedProperty additionalGridCellPosition = null;
-
-                        if (newGridCellState == GridCellState.DoorNorth)
-                        {
-                            additionalGridCellModified = _levelGrid.DoorNorth;
-                            additionalGridCellPosition = _northDoorGridPosition;
-                        }
-                        else if (newGridCellState == GridCellState.DoorEast)
-                        {
-                            additionalGridCellModified = _levelGrid.DoorEast;
-                            additionalGridCellPosition = _eastDoorGridPosition;
-                        }
-                        else if (newGridCellState == GridCellState.DoorSouth)
-                        {
-                            additionalGridCellModified = _levelGrid.DoorSouth;
-                            additionalGridCellPosition = _southDoorGridPosition;
-                        }
-                        else if (newGridCellState == GridCellState.DoorWest)
-                        {
-                            additionalGridCellModified = _levelGrid.DoorWest;
-                            additionalGridCellPosition = _westDoorGridPosition;
-                        }
-
-                        GridSystem.SetGridCellState(_selectedGridTilePos, newGridCellState);
-                        _levelGrid.UpdateGrid();
-                        var gridCellIndex = (_selectedGridTilePos.Z * _levelGrid.GridWidth) + _selectedGridTilePos.X;
-                        var gridCellState = _gridCellStates.GetArrayElementAtIndex(gridCellIndex);
-                        gridCellState.enumValueIndex = (int)newGridCellState;
-
-                        if (additionalGridCellModified != GridPosition.Invalid)
-                        {
-                            var additionalGridCellIndex = (additionalGridCellModified.Z * _levelGrid.GridWidth) + additionalGridCellModified.X;
-                            var additionalGridCellState = _gridCellStates.GetArrayElementAtIndex(additionalGridCellIndex);
-                            additionalGridCellState.enumValueIndex = (int)GridCellState.Walkable;
-                        }
-
-                        if (additionalGridCellPosition != null)
-                        {
-                            additionalGridCellPosition.FindPropertyRelative("X").intValue = _selectedGridTilePos.X;
-                            additionalGridCellPosition.FindPropertyRelative("Z").intValue = _selectedGridTilePos.Z;
-                        }
+                        selectedGridCellState = tempSelectedGridCellState;
                     }
+                    else if (tempSelectedGridCellState != selectedGridCellState)
+                    {
+                        selectedGridCellState = (GridCellState)(-1);
+                        break;
+                    }
+                }
+                if (selectedGridCellState == (GridCellState)(-1)) EditorGUI.showMixedValue = true;
+                var newGridCellState = (GridCellState)EditorGUILayout.EnumPopup("Cell State: ", selectedGridCellState);
+                EditorGUI.showMixedValue = false;
+                if (newGridCellState != selectedGridCellState)
+                {
+                    foreach (var gridTile in _selectedGridTiles)
+                        UpdateGridCellState(gridTile, newGridCellState);
                 }
                 EditorGUILayout.EndVertical();
                 EditorGUILayout.Space();
@@ -166,11 +199,12 @@ namespace Grid.Editor
                 _gridCellSize.floatValue = tempGridCellSize;
 
                 _levelGrid.ResetGrid();
-                _selectedGridTilePos = GridPosition.Invalid;
+                _selectedGridTiles.Clear();
                 _gridOffset.vector3Value = _levelGrid.GridOffset;
             }
 
-            serializedObject.ApplyModifiedProperties();
+            if(serializedObject.ApplyModifiedProperties())
+                EditorUtility.SetDirty(target);
         }
 
     }
