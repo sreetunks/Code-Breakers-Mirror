@@ -14,6 +14,7 @@ public class PlayerScript : Controller
     }
 
     public static PlayerScript Instance { get; private set; }
+    public static Unit PlayerCharacter => Instance.playerCharacter;
     public static Unit CurrentlySelectedUnit => Instance._selectedUnit;
 
     public override FactionType Faction => FactionType.Player;
