@@ -26,6 +26,9 @@ public class Unit : MonoBehaviour, IGridObject, IDamageable
     public delegate void OnUnitAPChangedEventHandler();
     public OnUnitAPChangedEventHandler OnUnitAPChanged;
 
+    public delegate void OnUnitMoveFinishedEventHandler();
+    public OnUnitMoveFinishedEventHandler OnUnitMoveFinished;
+
     public delegate void OnUnitReachedLevelExitEventHandler();
     public OnUnitReachedLevelExitEventHandler OnUnitReachedLevelExit;
 
@@ -115,7 +118,12 @@ public class Unit : MonoBehaviour, IGridObject, IDamageable
             IsOnDoorGridCell = CheckIsOnDoorGridCell(GridCellPreviousState);
             _path.RemoveAt(0);
 
-            if (_path.Count == 0) unitAnimator.SetBool(IsWalking, false); // Ends "Walk" Animations^M
+            if (_path.Count == 0)
+            {
+                OnUnitMoveFinished?.Invoke();
+
+                unitAnimator.SetBool(IsWalking, false); // Ends "Walk" Animations^M
+            }
 
             if (GridCellPreviousState == GridCellState.LevelExit)
                 OnUnitReachedLevelExit?.Invoke();
