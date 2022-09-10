@@ -11,7 +11,6 @@ namespace Rendering
         private class GridRenderPass : ScriptableRenderPass
         {
             private static int _gridCellUVSizeShaderProperty;
-            private static int _gridCellStatesShaderProperty;
             private static int _gridCellColorsShaderProperty;
 
             Vector4[] cellStateColors;
@@ -19,7 +18,6 @@ namespace Rendering
             public GridRenderPass(Vector4[] gridCellStateColors)
             {
                 _gridCellUVSizeShaderProperty = Shader.PropertyToID("_GridCellUVSize");
-                _gridCellStatesShaderProperty = Shader.PropertyToID("_GridCellStates");
                 _gridCellColorsShaderProperty = Shader.PropertyToID("_GridCellColors");
 
                 cellStateColors = gridCellStateColors;
@@ -32,10 +30,10 @@ namespace Rendering
                 if (levelGrid)
                 {
                     Shader.SetGlobalVector(_gridCellUVSizeShaderProperty, new Vector4(
-                        (levelGrid.GridCellSize * 0.5f) / levelGrid.GridWidth,
-                        (levelGrid.GridCellSize * 0.5f) / levelGrid.GridHeight,
-                        levelGrid.GridWidth / levelGrid.GridCellSize,
-                        levelGrid.GridHeight / levelGrid.GridCellSize));
+                        1.0f / levelGrid.GridWidth,
+                        1.0f / levelGrid.GridHeight,
+                        0,
+                        0));
                 }
                 var drawingSettings = CreateDrawingSettings(new ShaderTagId("Grid"), ref renderingData, SortingCriteria.CommonTransparent);
                 var filteringSettings = FilteringSettings.defaultValue;
@@ -43,13 +41,7 @@ namespace Rendering
             }
         }
 
-        [SerializeField] private Vector4[] gridCellStateColors = new Vector4[4]
-        {
-            new(0.0f, 0.0f, 0.0f, 1.0f),
-            new(0.0f, 0.0f, 0.5f, 1.0f),
-            new(0.0f, 0.5f, 0.3f, 1.0f),
-            new(0.3f, 0.0f, 0.3f, 1.0f)
-        };
+        [SerializeField] private Vector4[] gridCellStateColors;
 
         private GridRenderPass _mScriptablePass;
 

@@ -71,8 +71,8 @@ namespace Grid
             }
             mesh.SetVertexBufferData(cellStateArray, 0, 0, vertexCount, 2);
         }
-
-        private void UpdateGridMeshData()
+#if UNITY_EDITOR
+        public void UpdateGridMeshData()
         {
             if (_meshFilter == null) _meshFilter = GetComponent<MeshFilter>();
             if (_meshCollider == null) _meshCollider = GetComponent<MeshCollider>();
@@ -162,7 +162,7 @@ namespace Grid
             _meshFilter.sharedMesh = gridMesh;
             _meshCollider.sharedMesh = gridMesh;
         }
-#if UNITY_EDITOR
+
         public void ResetGrid()
         {
             gridOffset = transform.position + (new Vector3(-0.5f * gridWidth, 0, -0.5f * gridHeight) * gridCellSize);

@@ -27,6 +27,10 @@ namespace Grid.Editor
         private HashSet<GridPosition> _selectedGridTiles = new HashSet<GridPosition>();
         private LevelGrid _levelGrid;
 
+        private int _newGridWidth;
+        private int _newGridHeight;
+        private float _newGridCellSize;
+
         private void OnEnable()
         {
             _levelGrid = (LevelGrid)serializedObject.targetObject;
@@ -45,9 +49,12 @@ namespace Grid.Editor
             _eastDoorGridPosition = serializedObject.FindProperty("eastDoorGridPosition");
             _southDoorGridPosition = serializedObject.FindProperty("southDoorGridPosition");
             _westDoorGridPosition = serializedObject.FindProperty("westDoorGridPosition");
-#if UNITY_EDITOR
+
+            _newGridWidth = _gridWidth.intValue;
+            _newGridHeight = _gridHeight.intValue;
+            _newGridCellSize = _gridCellSize.floatValue;
+
             if(!Application.isPlaying) GridSystem.RegisterLevelGrid(_levelGrid);
-#endif
         }
 
         private void OnSceneGUI()
@@ -156,11 +163,14 @@ namespace Grid.Editor
                 additionalGridCellPosition.FindPropertyRelative("X").intValue = -1;
                 additionalGridCellPosition.FindPropertyRelative("Z").intValue = -1;
             }
-            else if (additionalGridCellModified != GridPosition.Invalid)
+            else
             {
-                var additionalGridCellIndex = (additionalGridCellModified.Z * _levelGrid.GridWidth) + additionalGridCellModified.X;
-                var additionalGridCellState = _gridCellStates.GetArrayElementAtIndex(additionalGridCellIndex);
-                additionalGridCellState.enumValueIndex = (int)GridCellState.Walkable;
+                if (additionalGridCellModified != GridPosition.Invalid)
+                {
+                    var additionalGridCellIndex = (additionalGridCellModified.Z * _levelGrid.GridWidth) + additionalGridCellModified.X;
+                    var additionalGridCellState = _gridCellStates.GetArrayElementAtIndex(additionalGridCellIndex);
+                    additionalGridCellState.enumValueIndex = (int)GridCellState.Walkable;
+                }
 
                 additionalGridCellPosition.FindPropertyRelative("X").intValue = position.X;
                 additionalGridCellPosition.FindPropertyRelative("Z").intValue = position.Z;
@@ -180,9 +190,15 @@ namespace Grid.Editor
             EditorGUILayout.Space();
 
             EditorGUILayout.BeginVertical();
-            var tempGridWidth = EditorGUILayout.IntField(_gridWidth.intValue);
-            var tempGridHeight = EditorGUILayout.IntField(_gridHeight.intValue);
-            var tempGridCellSize = EditorGUILayout.FloatField(_gridCellSize.floatValue);
+            var tempGridWidth = EditorGUILayout.IntField(_newGridWidth);
+            if (tempGridWidth != _gridWidth.intValue)
+                _newGridWidth = tempGridWidth;
+            var tempGridHeight = EditorGUILayout.IntField(_newGridHeight);
+            if (tempGridHeight != _gridHeight.intValue)
+                _newGridHeight = tempGridHeight;
+            var tempGridCellSize = EditorGUILayout.FloatField(_newGridCellSize);
+            if (tempGridCellSize != _gridCellSize.floatValue)
+                _newGridCellSize = tempGridCellSize;
             EditorGUILayout.EndVertical();
             EditorGUILayout.Space();
 
@@ -210,6 +226,8 @@ namespace Grid.Editor
                 {
                     foreach (var gridTile in _selectedGridTiles)
                         UpdateGridCellState(gridTile, newGridCellState);
+                    if (serializedObject.ApplyModifiedProperties())
+                        EditorUtility.SetDirty(target);
                 }
                 EditorGUILayout.EndVertical();
                 EditorGUILayout.Space();
@@ -219,17 +237,35 @@ namespace Grid.Editor
                 GUILayout.MinHeight(EditorGUIUtility.singleLineHeight * 1.5f)),
                 "Reset"))
             {
-                _gridWidth.intValue = tempGridWidth;
-                _gridHeight.intValue = tempGridHeight;
-                _gridCellSize.floatValue = tempGridCellSize;
+                _gridWidth.intValue = _newGridWidth;
+                _gridHeight.intValue = _newGridHeight;
+                _gridCellSize.floatValue = _newGridCellSize;
+
+                serializedObject.ApplyModifiedProperties();
 
                 _levelGrid.ResetGrid();
+
+                serializedObject.Update();
+                _gridCellStates = serializedObject.FindProperty("gridCellStates");
+
                 _selectedGridTiles.Clear();
                 _gridOffset.vector3Value = _levelGrid.GridOffset;
+
+                if (serializedObject.ApplyModifiedProperties())
+                    EditorUtility.SetDirty(target);
             }
 
-            if(serializedObject.ApplyModifiedProperties())
-                EditorUtility.SetDirty(target);
+            if (GUI.Button(EditorGUILayout.GetControlRect(
+                GUILayout.MinHeight(EditorGUIUtility.singleLineHeight * 1.5f)),
+                "Regenerate Mesh"))
+            {
+                _levelGrid.UpdateGridMeshData();
+
+                _selectedGridTiles.Clear();
+
+                if (serializedObject.ApplyModifiedProperties())
+                    EditorUtility.SetDirty(target);
+            }
         }
     }
 }
