@@ -93,6 +93,8 @@ public class WiperEnemyController : Controller
                     }
                 }
             }
+
+            ability.Use(controlledUnit, targetGridPosition);
         }
     }
 
