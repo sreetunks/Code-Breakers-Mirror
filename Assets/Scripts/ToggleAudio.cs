@@ -4,16 +4,16 @@ using UnityEngine;
 
 public class ToggleAudio : MonoBehaviour
 {
-    [SerializeField] private bool _toggleMusic, _toggleEffects;
+    [SerializeField] private bool toggleMusic, toggleEffects;
 
     public void Toggle()
     {
-        if(_toggleMusic)
+        if(toggleMusic)
         {
             SoundManager.Instance.ToggleMusic();
         }
 
-        if(_toggleEffects)
+        if(toggleEffects)
         {
             SoundManager.Instance.ToggleEffects();
         }

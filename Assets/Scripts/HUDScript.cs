@@ -2,6 +2,8 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
+using UI;
+using Units;
 
 [RequireComponent(typeof(Canvas))]
 public class HUDScript : MonoBehaviour
@@ -16,14 +18,14 @@ public class HUDScript : MonoBehaviour
     [SerializeField] private CanvasGroup levelCompleteScreen;
     [SerializeField] private CanvasGroup defeatedScreen;
 
-    public GameObject ActionLog;
-    public TMP_Text ALText;
+    public GameObject actionLog;
+    public TMP_Text alText;
 
     [SerializeField] private List<AbilityButton> abilityButtons;
 
-    public bool DropDown;
-    private Vector3 ActionLogOrigin;
-    private List<string> ActionLogText;
+    public bool dropDown;
+    private Vector3 _actionLogOrigin;
+    private List<string> _actionLogText;
 
     private Unit _selectedUnit;
     private Canvas _hudCanvas;
@@ -32,9 +34,9 @@ public class HUDScript : MonoBehaviour
     {
         _hudCanvas = GetComponent<Canvas>();
 
-        DropDown = false;
-        ActionLogOrigin = ActionLog.transform.localPosition;
-        ActionLogText = new List<string>();
+        dropDown = false;
+        _actionLogOrigin = actionLog.transform.localPosition;
+        _actionLogText = new List<string>();
     }
 
     public void Show() { _hudCanvas.enabled = true; }
@@ -65,13 +67,13 @@ public class HUDScript : MonoBehaviour
 
     public void UpdateHealth()
     {
-        healthBarText.text = string.Format("{0} / {1}", _selectedUnit.CurrentHealth, _selectedUnit.MaximumHealth);
+        healthBarText.text = $"{_selectedUnit.CurrentHealth} / {_selectedUnit.MaximumHealth}";
         healthBarImage.fillAmount = (float)_selectedUnit.CurrentHealth / _selectedUnit.MaximumHealth;
     }
 
     public void UpdateActionPoints()
     {
-        actionPointBarText.text = string.Format("{0} / {1}", _selectedUnit.CurrentAP, _selectedUnit.MaximumAP);
+        actionPointBarText.text = $"{_selectedUnit.CurrentAP} / {_selectedUnit.MaximumAP}";
         actionPointBarImage.fillAmount = (float)_selectedUnit.CurrentAP / _selectedUnit.MaximumAP;
 
         if (_selectedUnit.Controller != PlayerScript.Instance) return;
@@ -93,38 +95,38 @@ public class HUDScript : MonoBehaviour
 
     public void UpdateTurnLabel(string labelString)
     {
-        turnFactionLabel.text = string.Format("Current Turn: {0}", labelString);
+        turnFactionLabel.text = $"Current Turn: {labelString}";
     }
 
-    public void ActionLogEvent(string LogMessage)
+    public void ActionLogEvent(string logMessage)
     {
-        ALText.text = "";
-        ActionLogText.Add(LogMessage);
-        foreach(string msg in ActionLogText)
+        alText.text = "";
+        _actionLogText.Add(logMessage);
+        foreach(string msg in _actionLogText)
         {
-            ALText.text += msg + "\n";
+            alText.text += msg + "\n";
         }
-        if(ActionLogText.Count > 10)
+        if(_actionLogText.Count > 10)
         {
-            ActionLogText.RemoveAt(0);
+            _actionLogText.RemoveAt(0);
         }
         //TODO Add small text box that displays the added message outside of the drop down -Atticus
     }
 
     public void ToggleLog()
     {
-        var TempTransform = ActionLog.transform.localPosition;
-        if (!DropDown)
+        var tempTransform = actionLog.transform.localPosition;
+        if (!dropDown)
         {
-            TempTransform.y -= 510;
-            ActionLog.transform.localPosition =  TempTransform;
+            tempTransform.y -= 510;
+            actionLog.transform.localPosition =  tempTransform;
         }
         else
         {
-            TempTransform.y += 510;
-            ActionLog.transform.localPosition = TempTransform;
+            tempTransform.y += 510;
+            actionLog.transform.localPosition = tempTransform;
         }
-        DropDown = !DropDown;
+        dropDown = !dropDown;
     }
 
     public void ShowLevelCompleteScreen()

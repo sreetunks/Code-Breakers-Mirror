@@ -54,7 +54,7 @@ namespace Grid
         public static void RegisterLevelGrid(LevelGrid levelGrid)
         {
 #if UNITY_EDITOR
-            if (Instance == null) Instance = FindObjectOfType<GridSystem>();
+            if (Instance == null) Instance = FindObjectOfType<GridSystem>(); // Comparison with null & Find Object Of Type is considered Expensive
 #endif
             Instance._activeLevelGrid = levelGrid;
             Instance._gridObjectMap = new Dictionary<GridPosition, IGridObject>(levelGrid.GridWidth * levelGrid.GridHeight);
@@ -111,82 +111,29 @@ namespace Grid
             gridObject.GridCellPreviousState = newGridCellState;
             ActiveLevelGrid.SetGridCellState(newGridPosition, GridCellState.Occupied);
         }
-
-        public static void GetPath(GridPosition start, GridPosition target, ref List<GridPosition> outPath)
+        
+        public static float GetDistance(GridPosition start, GridPosition end)
         {
-            outPath.Clear();
-            TryGetGridCellState(target, out var targetCellState);
-            
-            if (targetCellState is GridCellState.Impassable or GridCellState.Occupied) return;
-            
-            var position = start;
-            var targetPosition = GetWorldPosition(target);
-            var numIterations = 0;
-            
-            do
-            {
-                if (numIterations++ > 32) return;
-                // TODO: Implement Dijkstra Pathfinding
-
-                //Pathfinding Logic
-                var deltaX = target.X - position.X;
-                var deltaZ = target.Z - position.Z;
-
-                if (deltaX != 0) deltaX /= Mathf.Abs(deltaX);
-                if (deltaZ != 0) deltaZ /= Mathf.Abs(deltaZ);
-
-                // X Logic
-                var gridPositionX = new GridPosition(position.X + deltaX, position.Z);
-                TryGetGridCellState(gridPositionX, out var cellState);
-                var newTargetPositionX = new Vector3(10000, 10000, 10000);
-                if (cellState != GridCellState.Impassable && cellState != GridCellState.Occupied)
-                {
-                    newTargetPositionX = targetPosition - GetWorldPosition(gridPositionX);
-                }
-
-                // Z Logic
-                var gridPositionZ = new GridPosition(position.X, position.Z + deltaZ);
-                TryGetGridCellState(gridPositionZ, out cellState);
-                var newTargetPositionZ = new Vector3(10000, 10000, 10000);
-                if (cellState != GridCellState.Impassable && cellState != GridCellState.Occupied)
-                {
-                    newTargetPositionZ = targetPosition - GetWorldPosition(gridPositionZ);
-                }
-
-                if (newTargetPositionX == new Vector3(10000, 10000, 10000) && newTargetPositionZ == new Vector3(10000, 10000, 10000))
-                {
-                    outPath.Clear();
-                    break; 
-                }
-                // NOTE: Simple path not found, this is where we expand the logic to find a path.
-
-                // Compare Logic
-                position = newTargetPositionX.magnitude < newTargetPositionZ.magnitude ? gridPositionX : gridPositionZ;
-                outPath.Add(position);
-
-                // TODO: Get 4 Way Pathfinding to work
-            }
-            while (position != target);
+            return Mathf.Sqrt(Mathf.Pow(start.X - end.X,2) + Mathf.Pow(start.Z - end.Z, 2));
         }
+        
         public static GridPosition SwitchLevelGrid(GridPosition doorGridCellPosition, GridCellState doorGridCellState)
         {
-            LevelGrid newLevelGrid = ActiveLevelGrid.GetRoomAdjacentToDoor(doorGridCellState);
-            GridPosition adjacentGridDoorPosition = GridPosition.Invalid;
-            if (newLevelGrid)
-            {
-                Instance._gridObjectMap.Remove(doorGridCellPosition);
-                ActiveLevelGrid.SetGridCellState(doorGridCellPosition, doorGridCellState);
-                RegisterLevelGrid(newLevelGrid);
+            var newLevelGrid = ActiveLevelGrid.GetRoomAdjacentToDoor(doorGridCellState);
+            var adjacentGridDoorPosition = GridPosition.Invalid;
+            if (!newLevelGrid) return adjacentGridDoorPosition;
+            Instance._gridObjectMap.Remove(doorGridCellPosition);
+            ActiveLevelGrid.SetGridCellState(doorGridCellPosition, doorGridCellState);
+            RegisterLevelGrid(newLevelGrid); // Register Level Grid is considered Expensive
 
-                if (doorGridCellState == GridCellState.DoorNorth)
-                    adjacentGridDoorPosition = newLevelGrid.DoorSouth;
-                else if (doorGridCellState == GridCellState.DoorEast)
-                    adjacentGridDoorPosition = newLevelGrid.DoorWest;
-                else if (doorGridCellState == GridCellState.DoorSouth)
-                    adjacentGridDoorPosition = newLevelGrid.DoorNorth;
-                else if (doorGridCellState == GridCellState.DoorWest)
-                    adjacentGridDoorPosition = newLevelGrid.DoorEast;
-            }
+            adjacentGridDoorPosition = doorGridCellState switch
+            {
+                GridCellState.DoorNorth => newLevelGrid.DoorSouth,
+                GridCellState.DoorEast => newLevelGrid.DoorWest,
+                GridCellState.DoorSouth => newLevelGrid.DoorNorth,
+                GridCellState.DoorWest => newLevelGrid.DoorEast,
+                _ => adjacentGridDoorPosition
+            };
 
             return adjacentGridDoorPosition;
         }

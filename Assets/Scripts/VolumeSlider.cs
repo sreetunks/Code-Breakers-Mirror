@@ -5,31 +5,31 @@ using UnityEngine.UI;
 
 public class VolumeSlider : MonoBehaviour
 {
-    [SerializeField] private Slider _slider;
+    [SerializeField] private Slider slider;
 
-    void Start()
+    private void Start()
     {
-        _slider.value = 0.5f;
+        slider.value = 0.5f;
 
-        SoundManager.Instance.ChangeMasterVolume(_slider.value);
-        SoundManager.Instance.ChangeMusicVolume(_slider.value);
-        SoundManager.Instance.ChangeSFXVolume(_slider.value);
+        SoundManager.Instance.ChangeMasterVolume(slider.value);
+        SoundManager.Instance.ChangeMusicVolume(slider.value);
+        SoundManager.Instance.ChangeSfxVolume(slider.value);
 
-        if (_slider = GameObject.FindGameObjectWithTag("MasterSlider").GetComponent<Slider>())
+        if (slider == GameObject.FindGameObjectWithTag("MasterSlider").GetComponent<Slider>())
         {
-            _slider.onValueChanged.AddListener(val => SoundManager.Instance.ChangeMasterVolume(val));
-            _slider.onValueChanged.AddListener(val => SoundManager.Instance.ChangeMusicVolume(val));
-            _slider.onValueChanged.AddListener(val => SoundManager.Instance.ChangeSFXVolume(val));
+            slider.onValueChanged.AddListener(val => SoundManager.Instance.ChangeMasterVolume(val));
+            slider.onValueChanged.AddListener(val => SoundManager.Instance.ChangeMusicVolume(val));
+            slider.onValueChanged.AddListener(val => SoundManager.Instance.ChangeSfxVolume(val));
         }
 
-        if (_slider = GameObject.FindGameObjectWithTag("MusicSlider").GetComponent<Slider>())
+        if (slider == GameObject.FindGameObjectWithTag("MusicSlider").GetComponent<Slider>())
         {
-            _slider.onValueChanged.AddListener(val => SoundManager.Instance.ChangeMusicVolume(val));
+            slider.onValueChanged.AddListener(val => SoundManager.Instance.ChangeMusicVolume(val));
         }
             
-        if (_slider = GameObject.FindGameObjectWithTag("SFXSlider").GetComponent<Slider>())
+        if (slider == GameObject.FindGameObjectWithTag("SFXSlider").GetComponent<Slider>())
         {
-            _slider.onValueChanged.AddListener(val => SoundManager.Instance.ChangeSFXVolume(val));
+            slider.onValueChanged.AddListener(val => SoundManager.Instance.ChangeSfxVolume(val));
         }
     }
 }

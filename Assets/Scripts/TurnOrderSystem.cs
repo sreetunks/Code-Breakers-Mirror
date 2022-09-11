@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using Units;
 using UnityEngine;
 
 public class TurnOrderSystem : MonoBehaviour
@@ -7,7 +8,7 @@ public class TurnOrderSystem : MonoBehaviour
     [SerializeField] private Controller playerController;
     private static TurnOrderSystem Instance { get; set; }
 
-    private List<Controller> _registeredControllers = new List<Controller>();
+    private readonly List<Controller> _registeredControllers = new List<Controller>();
     private List<Controller> _controllerTurnOrderList = new List<Controller>();
 
     private void Awake()
@@ -33,7 +34,7 @@ public class TurnOrderSystem : MonoBehaviour
         MoveNext();
     }
 
-    public static void RegisterController(Controller controller)
+    private static void RegisterController(Controller controller)
     {
         Instance._registeredControllers.Add(controller);
     }

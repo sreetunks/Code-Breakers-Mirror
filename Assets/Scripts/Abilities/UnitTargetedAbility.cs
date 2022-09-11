@@ -1,9 +1,14 @@
-public abstract class UnitTargetedAbility : AbilityBase
-{
-    public abstract bool Use(Unit owningUnit, Unit targetUnit);
+using Units;
 
-    public override void Use(Unit owningUnit)
+namespace Abilities
+{
+    public abstract class UnitTargetedAbility : AbilityBase
     {
-        owningUnit.Controller.TargetAbility(owningUnit, this);
+        public abstract bool Use(Unit owningUnit, Unit targetUnit);
+
+        public override void Use(Unit owningUnit)
+        {
+            owningUnit.Controller.TargetAbility(owningUnit, this);
+        }
     }
 }

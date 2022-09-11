@@ -24,7 +24,7 @@ namespace Grid.Editor
         private SerializedProperty _southDoorGridPosition;
         private SerializedProperty _westDoorGridPosition;
 
-        private HashSet<GridPosition> _selectedGridTiles = new HashSet<GridPosition>();
+        private readonly HashSet<GridPosition> _selectedGridTiles = new();
         private LevelGrid _levelGrid;
 
         private int _newGridWidth;
@@ -79,32 +79,30 @@ namespace Grid.Editor
             }
             else if (Event.current.type == EventType.ScrollWheel)
             {
-                if (_selectedGridTiles.Count > 0)
+                if (_selectedGridTiles.Count <= 0) return;
+                var selectedGridCellState = (GridCellState)(-1);
+                foreach (var gridTile in _selectedGridTiles)
                 {
-                    var selectedGridCellState = (GridCellState)(-1);
-                    foreach (var gridTile in _selectedGridTiles)
+                    GridSystem.TryGetGridCellState(gridTile, out var tempSelectedGridCellState);
+                    if (selectedGridCellState == (GridCellState)(-1))
                     {
-                        GridSystem.TryGetGridCellState(gridTile, out var tempSelectedGridCellState);
-                        if (selectedGridCellState == (GridCellState)(-1))
-                        {
-                            selectedGridCellState = tempSelectedGridCellState;
-                        }
-                        else if (tempSelectedGridCellState != selectedGridCellState)
-                        {
-                            selectedGridCellState = (GridCellState)(-1);
-                            break;
-                        }
+                        selectedGridCellState = tempSelectedGridCellState;
                     }
-                    if (selectedGridCellState == (GridCellState)(-1)) selectedGridCellState = GridCellState.Impassable;
-                    var newGridCellState = (GridCellState)((((int)selectedGridCellState + (int)Mathf.Sign(Event.current.delta.y)) + ((int)GridCellState.LevelExit + 1)) % ((int)GridCellState.LevelExit + 1));
-                    foreach (var gridTile in _selectedGridTiles)
-                        UpdateGridCellState(gridTile, newGridCellState);
-
-                    if (serializedObject.ApplyModifiedProperties())
-                        EditorUtility.SetDirty(target);
-
-                    Event.current.Use();
+                    else if (tempSelectedGridCellState != selectedGridCellState)
+                    {
+                        selectedGridCellState = (GridCellState)(-1);
+                        break;
+                    }
                 }
+                if (selectedGridCellState == (GridCellState)(-1)) selectedGridCellState = GridCellState.Impassable;
+                var newGridCellState = (GridCellState)((((int)selectedGridCellState + (int)Mathf.Sign(Event.current.delta.y)) + ((int)GridCellState.LevelExit + 1)) % ((int)GridCellState.LevelExit + 1));
+                foreach (var gridTile in _selectedGridTiles)
+                    UpdateGridCellState(gridTile, newGridCellState); // Update Grid Cell State is considered Expensive
+
+                if (serializedObject.ApplyModifiedProperties())
+                    EditorUtility.SetDirty(target);
+
+                Event.current.Use();
             }
             else if (Event.current.type == EventType.Repaint)
             {
@@ -131,35 +129,45 @@ namespace Grid.Editor
             var additionalGridCellModified = GridPosition.Invalid;
             SerializedProperty additionalGridCellPosition = null;
 
-            if (state == GridCellState.DoorNorth)
+            switch (state)
             {
-                additionalGridCellModified = _levelGrid.DoorNorth;
-                additionalGridCellPosition = _northDoorGridPosition;
-            }
-            else if (state == GridCellState.DoorEast)
-            {
-                additionalGridCellModified = _levelGrid.DoorEast;
-                additionalGridCellPosition = _eastDoorGridPosition;
-            }
-            else if (state == GridCellState.DoorSouth)
-            {
-                additionalGridCellModified = _levelGrid.DoorSouth;
-                additionalGridCellPosition = _southDoorGridPosition;
-            }
-            else if (state == GridCellState.DoorWest)
-            {
-                additionalGridCellModified = _levelGrid.DoorWest;
-                additionalGridCellPosition = _westDoorGridPosition;
+                case GridCellState.DoorNorth:
+                    additionalGridCellModified = _levelGrid.DoorNorth;
+                    additionalGridCellPosition = _northDoorGridPosition;
+                    break;
+                case GridCellState.DoorEast:
+                    additionalGridCellModified = _levelGrid.DoorEast;
+                    additionalGridCellPosition = _eastDoorGridPosition;
+                    break;
+                case GridCellState.DoorSouth:
+                    additionalGridCellModified = _levelGrid.DoorSouth;
+                    additionalGridCellPosition = _southDoorGridPosition;
+                    break;
+                case GridCellState.DoorWest:
+                    additionalGridCellModified = _levelGrid.DoorWest;
+                    additionalGridCellPosition = _westDoorGridPosition;
+                    break;
+                case GridCellState.Impassable:
+                    break;
+                case GridCellState.Walkable:
+                    break;
+                case GridCellState.Occupied:
+                    break;
+                case GridCellState.LevelExit:
+                    break;
+                default:
+                    throw new ArgumentOutOfRangeException(nameof(state), state, null);
             }
 
             GridSystem.SetGridCellState(position, state);
-            _levelGrid.UpdateGrid();
+            _levelGrid.UpdateGrid(); // Update Grid is considered Expensive
             var gridCellIndex = (position.Z * _levelGrid.GridWidth) + position.X;
             var gridCellState = _gridCellStates.GetArrayElementAtIndex(gridCellIndex);
             gridCellState.enumValueIndex = (int)state;
 
             if (additionalGridCellModified == position)
             {
+                if (additionalGridCellPosition == null) return;
                 additionalGridCellPosition.FindPropertyRelative("X").intValue = -1;
                 additionalGridCellPosition.FindPropertyRelative("Z").intValue = -1;
             }
@@ -171,7 +179,8 @@ namespace Grid.Editor
                     var additionalGridCellState = _gridCellStates.GetArrayElementAtIndex(additionalGridCellIndex);
                     additionalGridCellState.enumValueIndex = (int)GridCellState.Walkable;
                 }
-
+                
+                if (additionalGridCellPosition == null) return;
                 additionalGridCellPosition.FindPropertyRelative("X").intValue = position.X;
                 additionalGridCellPosition.FindPropertyRelative("Z").intValue = position.Z;
             }
@@ -197,7 +206,7 @@ namespace Grid.Editor
             if (tempGridHeight != _gridHeight.intValue)
                 _newGridHeight = tempGridHeight;
             var tempGridCellSize = EditorGUILayout.FloatField(_newGridCellSize);
-            if (tempGridCellSize != _gridCellSize.floatValue)
+            if (tempGridCellSize != _gridCellSize.floatValue) // Floating Point Comparsion
                 _newGridCellSize = tempGridCellSize;
             EditorGUILayout.EndVertical();
             EditorGUILayout.Space();
@@ -225,7 +234,7 @@ namespace Grid.Editor
                 if (newGridCellState != selectedGridCellState)
                 {
                     foreach (var gridTile in _selectedGridTiles)
-                        UpdateGridCellState(gridTile, newGridCellState);
+                        UpdateGridCellState(gridTile, newGridCellState); // Update Grid Cell State is considered Expensive
                     if (serializedObject.ApplyModifiedProperties())
                         EditorUtility.SetDirty(target);
                 }
@@ -243,7 +252,7 @@ namespace Grid.Editor
 
                 serializedObject.ApplyModifiedProperties();
 
-                _levelGrid.ResetGrid();
+                _levelGrid.ResetGrid(); // Reset Grid is considered Expensive
 
                 serializedObject.Update();
                 _gridCellStates = serializedObject.FindProperty("gridCellStates");
@@ -259,7 +268,7 @@ namespace Grid.Editor
                 GUILayout.MinHeight(EditorGUIUtility.singleLineHeight * 1.5f)),
                 "Regenerate Mesh"))
             {
-                _levelGrid.UpdateGridMeshData();
+                _levelGrid.UpdateGridMeshData(); // Update Grid Mesh Data is considered Expensive
 
                 _selectedGridTiles.Clear();
 

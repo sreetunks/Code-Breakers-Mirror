@@ -65,3 +65,8 @@ crashlytics-build.properties
 
 #External
 /UserSettings/
+
+#Unity plugin
+/Assets/Editor/
+.erp
+/Assets/Editor.meta

@@ -14,7 +14,7 @@ namespace Rendering
             private static int _gridHighlightInfoShaderProperty;
             private static int _gridCellColorsShaderProperty;
 
-            Vector4[] cellStateColors;
+            private readonly Vector4[] _cellStateColors;
 
             public GridRenderPass(Vector4[] gridCellStateColors)
             {
@@ -22,12 +22,12 @@ namespace Rendering
                 _gridHighlightInfoShaderProperty = Shader.PropertyToID("_GridHighlightInfo");
                 _gridCellColorsShaderProperty = Shader.PropertyToID("_GridCellColors");
 
-                cellStateColors = gridCellStateColors;
+                _cellStateColors = gridCellStateColors;
             }
 
             public override void Execute(ScriptableRenderContext context, ref RenderingData renderingData)
             {
-                Shader.SetGlobalVectorArray(_gridCellColorsShaderProperty, cellStateColors);
+                Shader.SetGlobalVectorArray(_gridCellColorsShaderProperty, _cellStateColors);
                 var levelGrid = GridSystem.ActiveLevelGrid;
                 if (levelGrid)
                 {

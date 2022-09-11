@@ -1,41 +1,45 @@
 using System.Collections.Generic;
-using UnityEngine;
 using Grid;
+using Units;
+using UnityEngine;
 
-[CreateAssetMenu(fileName = "New Ability", menuName = "Abilities/Move")]
-public class UnitMoveAbility : PositionTargetedAbility
+namespace Abilities
 {
-    [SerializeField] private int apCostPerTile = 1;
-
-    public override int CooldownDuration => 0;
-
-    public override int ActionPointCost => 1;
-
-    public override int UpdateRange(Unit owningUnit)
+    [CreateAssetMenu(fileName = "New Ability", menuName = "Abilities/Move")]
+    public class UnitMoveAbility : PositionTargetedAbility
     {
-        return (owningUnit.CurrentAP / apCostPerTile);
-    }
+        [SerializeField] private int apCostPerTile = 1;
 
-    public override bool Use(Unit owningUnit, GridPosition targetPosition)
-    {
-        List<GridPosition> movePath = new List<GridPosition>();
-        GridSystem.GetPath(owningUnit.Position, targetPosition, ref movePath);
-        if (movePath.Count == 0) return false;
+        public override int CooldownDuration => 0;
 
-        var start = owningUnit.Position;
-        var end = movePath[movePath.Count - 1];
+        public override int ActionPointCost => 1;
 
-        var distanceMoved = Mathf.Abs(end.X - start.X) + Mathf.Abs(end.Z - start.Z);
-        var range = (owningUnit.CurrentAP / apCostPerTile);
-        if (distanceMoved > range)
+        public override int UpdateRange(Unit owningUnit)
         {
-            movePath.RemoveRange(range, movePath.Count - range);
-            distanceMoved = range;
+            return (owningUnit.CurrentAP / apCostPerTile);
         }
 
-        owningUnit.ConsumeAP(distanceMoved * apCostPerTile);
-        owningUnit.Move(movePath);
+        public override bool Use(Unit owningUnit, GridPosition targetPosition)
+        {
+            var movePath = new List<GridPosition>();
+            PathFinding.GetPath(owningUnit.Position, targetPosition, ref movePath);
+            if (movePath.Count == 0) return false;
 
-        return true;
+            var start = owningUnit.Position;
+            var end = movePath[^1];
+
+            var distanceMoved = Mathf.Abs(end.X - start.X) + Mathf.Abs(end.Z - start.Z);
+            var range = (owningUnit.CurrentAP / apCostPerTile);
+            if (distanceMoved > range)
+            {
+                movePath.RemoveRange(range, movePath.Count - range);
+                distanceMoved = range;
+            }
+
+            owningUnit.ConsumeAP(distanceMoved * apCostPerTile);
+            owningUnit.Move(movePath);
+
+            return true;
+        }
     }
 }
