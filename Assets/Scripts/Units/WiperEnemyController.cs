@@ -21,7 +21,10 @@ namespace Units
         private void Awake()
         {
             foreach (var controlledUnit in controlledUnits)
+            {
                 controlledUnit.Controller = this;
+                controlledUnit.OnUnitDeath += OnControlledUnitDeath;
+            }
         }
 
         public override void BeginTurn()
@@ -46,6 +49,12 @@ namespace Units
             }
             else
                 StartCoroutine(DelayedEndTurn());
+        }
+
+        void OnControlledUnitDeath(Unit unit)
+        {
+            unit.OnUnitDeath -= OnControlledUnitDeath;
+            controlledUnits.Remove(unit);
         }
 
         private void OnControlledUnitMoveFinished()

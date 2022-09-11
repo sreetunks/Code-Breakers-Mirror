@@ -21,7 +21,7 @@ namespace Units
             }
         }
 
-        public delegate void OnUnitDeathEventHandler();
+        public delegate void OnUnitDeathEventHandler(Unit unit);
         public OnUnitDeathEventHandler OnUnitDeath;
 
         public delegate void OnUnitDamagedEventHandler(int damageDealt);
@@ -158,7 +158,12 @@ namespace Units
             _currentHealth = Mathf.Max(0, _currentHealth - damageDealt);
             OnUnitDamaged?.Invoke(damageDealt);
             if (_currentHealth == 0)
-                OnUnitDeath?.Invoke(); // Invoke is considered Expensive
+            {
+                OnUnitDeath?.Invoke(this); // Invoke is considered Expensive
+
+                gameObject.SetActive(false);
+                GridSystem.SetGridCellState(Position, GridCellPreviousState);
+            }
         }
 
         public void Heal(int healthRestored)

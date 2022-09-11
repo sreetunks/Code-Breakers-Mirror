@@ -167,12 +167,12 @@ namespace Units
             _selectedUnit.GetComponentInChildren<UnitSelectedVisual>().UpdateVisual(true); // Get Component In Childern is considered Expensive
         }
 
-        private void OnSelectedUnitDeath()
+        private void OnSelectedUnitDeath(Unit unit)
         {
             SelectUnit(playerCharacter); // Select Unit is considered Expensive
         }
 
-        private void OnPlayerCharacterDeath()
+        private void OnPlayerCharacterDeath(Unit unit)
         {
             _selectedUnit.OnUnitDeath -= OnSelectedUnitDeath;
             playerHUD.ShowDefeatedScreen();
