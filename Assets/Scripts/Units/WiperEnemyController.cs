@@ -36,7 +36,7 @@ public class WiperEnemyController : Controller
     {
         var controlledUnit = unitEnumerator.Current;
         var playerCharacter = PlayerScript.PlayerCharacter;
-        var distanceToPlayer = Mathf.Max(Mathf.Abs(playerCharacter.Position.X - controlledUnit.Position.X), Mathf.Abs(playerCharacter.Position.Z - controlledUnit.Position.Z));
+        var distanceToPlayer = Mathf.Abs(playerCharacter.Position.X - controlledUnit.Position.X) + Mathf.Abs(playerCharacter.Position.Z - controlledUnit.Position.Z);
         if (distanceToPlayer > 1 && controlledUnit.CurrentAP > 0)
         {
             controlledUnit.OnUnitMoveFinished += OnControlledUnitMoveFinished;
@@ -84,7 +84,7 @@ public class WiperEnemyController : Controller
                     if (GridSystem.TryGetGridCellState(tempPosition, out var tempGridCellState))
                     {
                         if (tempGridCellState == GridCellState.Impassable || tempGridCellState == GridCellState.Occupied) continue;
-                        var distanceToPosition = Mathf.Max(Mathf.Abs(tempPosition.X - controlledUnit.Position.X), Mathf.Abs(tempPosition.Z - controlledUnit.Position.Z));
+                        var distanceToPosition = Mathf.Abs(tempPosition.X - controlledUnit.Position.X) + Mathf.Abs(tempPosition.Z - controlledUnit.Position.Z);
                         if (distanceToPosition < currentShortestDistance)
                         {
                             currentShortestDistance = distanceToPosition;

@@ -25,7 +25,7 @@ public class UnitMoveAbility : PositionTargetedAbility
         var start = owningUnit.Position;
         var end = movePath[movePath.Count - 1];
 
-        var distanceMoved = Mathf.Max(Mathf.Abs(end.X - start.X), Mathf.Abs(end.Z - start.Z));
+        var distanceMoved = Mathf.Abs(end.X - start.X) + Mathf.Abs(end.Z - start.Z);
         var range = (owningUnit.CurrentAP / apCostPerTile);
         if (distanceMoved > range)
         {

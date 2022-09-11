@@ -90,7 +90,7 @@ public class PlayerScript : Controller
                     if (Input.GetMouseButton(0) && !EventSystem.current.IsPointerOverGameObject() && _positionTargetedAbility != null)
                     {
                         var targetGridPosition = GridSystem.GetGridPosition(MouseWorld.GetPosition());
-                        var distance = Mathf.Max(Mathf.Abs(targetGridPosition.X - CurrentlySelectedUnit.Position.X), Mathf.Abs(targetGridPosition.Z - CurrentlySelectedUnit.Position.Z));
+                        var distance = Mathf.Abs(targetGridPosition.X - CurrentlySelectedUnit.Position.X) + Mathf.Abs(targetGridPosition.Z - CurrentlySelectedUnit.Position.Z);
                         if (distance > _targetingRange) return;
                         if (_positionTargetedAbility.Use(CurrentlySelectedUnit, targetGridPosition))
                         {
