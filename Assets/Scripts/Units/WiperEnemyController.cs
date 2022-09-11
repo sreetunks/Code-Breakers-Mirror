@@ -44,7 +44,7 @@ namespace Units
             var distanceToPlayer = Mathf.Max(Mathf.Abs(playerCharacter.Position.X - controlledUnit.Position.X), Mathf.Abs(playerCharacter.Position.Z - controlledUnit.Position.Z));
             if (distanceToPlayer > 1 && controlledUnit.CurrentAP > 0)
             {
-                controlledUnit.OnUnitMoveFinished += OnControlledUnitMoveFinished;
+                controlledUnit.OnUnitActionFinished += OnControlledUnitActionFinished;
                 moveAbility.Use(controlledUnit);
             }
             else
@@ -60,10 +60,10 @@ namespace Units
                 TurnOrderSystem.DeregisterController(this);
         }
 
-        private void OnControlledUnitMoveFinished()
+        private void OnControlledUnitActionFinished()
         {
             var controlledUnit = _unitEnumerator.Current;
-            if (controlledUnit != null) controlledUnit.OnUnitMoveFinished -= OnControlledUnitMoveFinished; // Comparison to Null is Expensive
+            if (controlledUnit != null) controlledUnit.OnUnitActionFinished -= OnControlledUnitActionFinished; // Comparison to Null is Expensive
             ContinueTurn();
         }
 

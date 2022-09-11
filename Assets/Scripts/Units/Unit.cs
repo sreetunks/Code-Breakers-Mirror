@@ -30,8 +30,8 @@ namespace Units
         public delegate void OnUnitAPChangedEventHandler();
         public OnUnitAPChangedEventHandler OnUnitAPChanged;
 
-        public delegate void OnUnitMoveFinishedEventHandler();
-        public OnUnitMoveFinishedEventHandler OnUnitMoveFinished;
+        public delegate void OnUnitActionFinishedEventHandler();
+        public OnUnitActionFinishedEventHandler OnUnitActionFinished;
 
         public delegate void OnUnitReachedLevelExitEventHandler();
         public OnUnitReachedLevelExitEventHandler OnUnitReachedLevelExit;
@@ -124,7 +124,7 @@ namespace Units
 
                 if (_path.Count == 0)
                 {
-                    OnUnitMoveFinished?.Invoke();
+                    OnUnitActionFinished?.Invoke();
 
                     unitAnimator.SetBool(IsWalking, false); // Ends "Walk" Animations^M
                 }

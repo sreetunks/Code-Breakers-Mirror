@@ -103,7 +103,7 @@ namespace Units
                             {
                                 _positionTargetedAbility = null;
 
-                                _inputState = InputState.Active;
+                                CurrentlySelectedUnit.OnUnitActionFinished += OnSelectedUnitActionFinished;
 
                                 GridSystem.ResetGridRangeInfo();
                                 GridSystem.HighlightPosition = GridPosition.Invalid;
@@ -172,6 +172,11 @@ namespace Units
         private void OnSelectedUnitDeath(Unit unit)
         {
             SelectUnit(playerCharacter); // Select Unit is considered Expensive
+        }
+
+        private void OnSelectedUnitActionFinished()
+        {
+            if (CurrentlySelectedUnit != null) CurrentlySelectedUnit.OnUnitActionFinished -= OnSelectedUnitActionFinished; // Comparison to Null is Expensive
         }
 
         private void OnPlayerCharacterDeath(Unit unit)
