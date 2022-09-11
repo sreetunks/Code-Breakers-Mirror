@@ -56,6 +56,7 @@ namespace Units
         {
             playerCharacter.OnUnitDeath += OnPlayerCharacterDeath;
             playerCharacter.OnUnitReachedLevelExit += OnReachedLevelExit;
+            TurnOrderSystem.MoveNext();
             SelectUnit(playerCharacter);
         }
 
@@ -82,6 +83,7 @@ namespace Units
                             _selectedUnit.transform.position = targetPosition;
                             GridSystem.UpdateGridObjectPosition(_selectedUnit, newGridPosition);
                             mainCamera.UpdateTarget(GridSystem.ActiveLevelGrid.transform);
+                            TurnOrderSystem.MoveNext();
                         }
                         else if (Input.GetKeyDown(KeyCode.K))
                         {
@@ -197,7 +199,9 @@ namespace Units
 
         public void EndTurn()
         {
-            if(_inputState == InputState.Active) TurnOrderSystem.MoveNext();
+            if (_inputState != InputState.Active) return;
+            TurnOrderSystem.MoveNext();
+            playerHUD.UpdateSelectedUnit(_selectedUnit);
             _inputState = InputState.Inactive;
         }
 

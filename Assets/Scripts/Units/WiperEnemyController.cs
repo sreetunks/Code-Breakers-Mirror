@@ -55,6 +55,9 @@ namespace Units
         {
             unit.OnUnitDeath -= OnControlledUnitDeath;
             controlledUnits.Remove(unit);
+
+            if (controlledUnits.Count == 0)
+                TurnOrderSystem.DeregisterController(this);
         }
 
         private void OnControlledUnitMoveFinished()

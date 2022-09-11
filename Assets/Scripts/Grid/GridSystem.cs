@@ -59,6 +59,7 @@ namespace Grid
 #endif
             Instance._activeLevelGrid = levelGrid;
             Instance._gridObjectMap = new Dictionary<GridPosition, IGridObject>(levelGrid.GridWidth * levelGrid.GridHeight);
+            if(Application.isPlaying) TurnOrderSystem.RegisterLevelGrid();
         }
 
         public static Vector3 GetWorldPosition(GridPosition gridPosition)

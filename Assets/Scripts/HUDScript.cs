@@ -57,7 +57,7 @@ public class HUDScript : MonoBehaviour
         {
             abilityButtons[i].Initialize(unit.AbilityList[i].ability);
 
-            if (unit.Controller == PlayerScript.Instance)
+            if (unit.Controller == PlayerScript.Instance && unit.Controller == TurnOrderSystem.ActiveController)
                 abilityButtons[i].EnableButton();
         }
 
@@ -76,7 +76,8 @@ public class HUDScript : MonoBehaviour
         actionPointBarText.text = $"{_selectedUnit.CurrentAP} / {_selectedUnit.MaximumAP}";
         actionPointBarImage.fillAmount = (float)_selectedUnit.CurrentAP / _selectedUnit.MaximumAP;
 
-        if (_selectedUnit.Controller != PlayerScript.Instance) return;
+        if (_selectedUnit.Controller != PlayerScript.Instance || _selectedUnit.Controller != TurnOrderSystem.ActiveController)
+            return;
 
         for (var i = 0; i < _selectedUnit.AbilityList.Count; ++i)
         {
