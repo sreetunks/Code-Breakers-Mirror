@@ -80,18 +80,23 @@ public class SoundManager : MonoBehaviour
 
     private void LoadSettings()
     {
-        if (!PlayerPrefs.HasKey("MasterVolume")) return;
-        masterSlider.value = PlayerPrefs.GetFloat("MasterVolume");
-        audioMixer.SetFloat("MasterVolume", PlayerPrefs.GetFloat("MasterVolume"));
-        
+        if (PlayerPrefs.HasKey("MasterVolume"))
+        {
+            masterSlider.value = PlayerPrefs.GetFloat("MasterVolume");
+            audioMixer.SetFloat("MasterVolume", PlayerPrefs.GetFloat("MasterVolume"));
+        }
 
-        if (!PlayerPrefs.HasKey("MusicVolume")) return;
-        musicSlider.value = PlayerPrefs.GetFloat("MusicVolume");
-        audioMixer.SetFloat("MusicVolume", PlayerPrefs.GetFloat("MusicVolume"));
-        
 
-        if (!PlayerPrefs.HasKey("SFXVolume")) return;
-        effectSlider.value = PlayerPrefs.GetFloat("SFXVolume");
-        audioMixer.SetFloat("SFXVolume", PlayerPrefs.GetFloat("SFXVolume"));
+        if (PlayerPrefs.HasKey("MusicVolume"))
+        {
+            musicSlider.value = PlayerPrefs.GetFloat("MusicVolume");
+            audioMixer.SetFloat("MusicVolume", PlayerPrefs.GetFloat("MusicVolume"));
+        }
+
+        if (PlayerPrefs.HasKey("SFXVolume"))
+        {
+            effectSlider.value = PlayerPrefs.GetFloat("SFXVolume");
+            audioMixer.SetFloat("SFXVolume", PlayerPrefs.GetFloat("SFXVolume"));
+        }
     }
 }
