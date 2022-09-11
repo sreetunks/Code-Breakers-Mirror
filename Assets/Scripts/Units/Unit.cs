@@ -143,6 +143,7 @@ namespace Units
         {
             var targetGridPosition = GridSystem.GetGridPosition(targetPosition);
             GridSystem.TryGetGridCellState(targetGridPosition, out var targetCellState);
+            if (targetCellState is GridCellState.Impassable or GridCellState.Occupied or GridCellState.OccupiedEnemy) return;
             Position = targetGridPosition;
             IsOnDoorGridCell = CheckIsOnDoorGridCell(targetCellState);
         }

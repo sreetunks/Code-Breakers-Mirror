@@ -83,7 +83,7 @@ namespace Units
                 {
                     var tempPosition = new GridPosition(playerCharacter.Position.X + x, playerCharacter.Position.Z + y);
                     if (!GridSystem.TryGetGridCellState(tempPosition, out var tempGridCellState)) continue;
-                    if (tempGridCellState is GridCellState.Impassable or GridCellState.Occupied) continue;
+                    if (tempGridCellState is GridCellState.Impassable or GridCellState.Occupied or GridCellState.OccupiedEnemy) continue;
                     if (controlledUnit != null) // Comparison to Null is Expensive
                     {
                         var distanceToPosition = Mathf.Abs(tempPosition.X - controlledUnit.Position.X) + Mathf.Abs(tempPosition.Z - controlledUnit.Position.Z);
