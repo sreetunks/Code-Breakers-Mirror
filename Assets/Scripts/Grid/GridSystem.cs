@@ -116,16 +116,17 @@ namespace Grid
         {
             outPath.Clear();
             TryGetGridCellState(target, out var targetCellState);
-            if (targetCellState is GridCellState.Impassable or GridCellState.Occupied)
-                return;
+            
+            if (targetCellState is GridCellState.Impassable or GridCellState.Occupied) return;
+            
             var position = start;
             var targetPosition = GetWorldPosition(target);
-            int numIterations = 0;
+            var numIterations = 0;
+            
             do
             {
                 if (numIterations++ > 32) return;
                 // TODO: Implement Dijkstra Pathfinding
-                // Currently just moves in a simplistic way
 
                 //Pathfinding Logic
                 var deltaX = target.X - position.X;
@@ -155,8 +156,9 @@ namespace Grid
                 if (newTargetPositionX == new Vector3(10000, 10000, 10000) && newTargetPositionZ == new Vector3(10000, 10000, 10000))
                 {
                     outPath.Clear();
-                    break; // NOTE: Simple path not found, this is where we expand the logic to find a path.
+                    break; 
                 }
+                // NOTE: Simple path not found, this is where we expand the logic to find a path.
 
                 // Compare Logic
                 position = newTargetPositionX.magnitude < newTargetPositionZ.magnitude ? gridPositionX : gridPositionZ;
@@ -165,8 +167,6 @@ namespace Grid
                 // TODO: Get 4 Way Pathfinding to work
             }
             while (position != target);
-
-            // Move Logic - TODO: Update to use Pathfinding
         }
         public static GridPosition SwitchLevelGrid(GridPosition doorGridCellPosition, GridCellState doorGridCellState)
         {
