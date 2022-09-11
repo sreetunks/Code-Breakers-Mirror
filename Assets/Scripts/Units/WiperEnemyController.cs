@@ -41,7 +41,7 @@ namespace Units
             var controlledUnit = _unitEnumerator.Current;
             var playerCharacter = PlayerScript.PlayerCharacter;
             if (controlledUnit == null) return; // Comparison to Null is Expensive
-            var distanceToPlayer = Mathf.Abs(playerCharacter.Position.X - controlledUnit.Position.X) + Mathf.Abs(playerCharacter.Position.Z - controlledUnit.Position.Z);
+            var distanceToPlayer = Mathf.Max(Mathf.Abs(playerCharacter.Position.X - controlledUnit.Position.X), Mathf.Abs(playerCharacter.Position.Z - controlledUnit.Position.Z));
             if (distanceToPlayer > 1 && controlledUnit.CurrentAP > 0)
             {
                 controlledUnit.OnUnitMoveFinished += OnControlledUnitMoveFinished;
