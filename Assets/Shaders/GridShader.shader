@@ -32,16 +32,18 @@ Shader "TheHungrySwans/Grid"
             // the vertex shader.
             struct Attributes
             {
-                float4 positionOS   : POSITION;
-                float2 uv : TEXCOORD0;
-                nointerpolation float cellState : COLOR;
+                float4 positionOS                       : POSITION;
+                float2 uv                               : TEXCOORD0;
+                nointerpolation float cellState         : TEXCOORD1;
+                nointerpolation float pathFindingState  : TEXCOORD2;
             };
 
             struct Varyings
             {
                 float4 positionHCS  : SV_POSITION;
-                float2 uv : TEXCOORD0;
-                float4 color : COLOR;
+                float2 uv           : TEXCOORD0;
+                float pathFindingState : TEXCOORD1;
+                float4 color        : COLOR;
             };
 
             half4 _HighlightColor;
@@ -57,6 +59,7 @@ Shader "TheHungrySwans/Grid"
                 Varyings OUT;
                 OUT.positionHCS = TransformObjectToHClip(IN.positionOS.xyz);
                 OUT.uv = IN.uv;
+                OUT.pathFindingState = IN.pathFindingState;
                 OUT.color = _GridCellColors[IN.cellState];
                 OUT.color.a = 1 - frac(IN.cellState);
                 return OUT;
@@ -74,10 +77,7 @@ Shader "TheHungrySwans/Grid"
                 alpha = saturate(alpha + smoothstep(0.498, 0.5, radialUV.y));
                 half4 outColor =  half4(IN.color.xyz, lerp(alpha, smoothstep(0.5, 1, IN.color.a), 1 - sign(length(IN.color.xyz))));
 
-                float2 gridCellPosition = float2((int)(IN.uv.x / _GridCellUVSize.x), (int)(IN.uv.y / _GridCellUVSize.y));
-                float distance = abs(gridCellPosition.x - _GridHighlightInfo.z) + abs(gridCellPosition.y - _GridHighlightInfo.w);
-                float inRange = smoothstep(0, _GridHighlightInfo.y + 1, distance);
-                float lerpFactor = sign(1 - inRange) * sign(inRange);
+                float lerpFactor = saturate(IN.pathFindingState);
                 half4 highlightColor = lerp(outColor, half4(_HighlightColor.xyz, lerp(alpha, smoothstep(0.5, 1, IN.color.a), 1 - sign(length(IN.color.xyz)))), lerpFactor);
 
                 return lerp(outColor, highlightColor, _GridHighlightInfo.x);

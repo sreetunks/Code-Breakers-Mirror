@@ -65,74 +65,78 @@ namespace Units
             {
                 case InputState.Inactive: return;
                 case InputState.Active:
-                {
-                    if (Input.GetMouseButtonDown(0) && !EventSystem.current.IsPointerOverGameObject())
                     {
-                        var targetGridPosition = GridSystem.GetGridPosition(MouseWorld.GetPosition()); // Get Position is considered Expensive
-                        GridSystem.TryGetGridObject(targetGridPosition, out var targetObject);
-                        var targetUnit = targetObject as Unit;
-                        if (targetUnit && targetUnit != _selectedUnit)
-                            SelectUnit(targetUnit); // Select unit is considered Expensive
+                        if (Input.GetMouseButtonDown(0) && !EventSystem.current.IsPointerOverGameObject())
+                        {
+                            var targetGridPosition = GridSystem.GetGridPosition(MouseWorld.GetPosition()); // Get Position is considered Expensive
+                            GridSystem.TryGetGridObject(targetGridPosition, out var targetObject);
+                            var targetUnit = targetObject as Unit;
+                            if (targetUnit && targetUnit != _selectedUnit)
+                                SelectUnit(targetUnit); // Select unit is considered Expensive
+                        }
+                        else if (Input.GetMouseButtonDown(1) && !EventSystem.current.IsPointerOverGameObject() && _selectedUnit && _selectedUnit.IsOnDoorGridCell && !GridSystem.ActiveLevelGrid.AreDoorsLocked)
+                        {
+                            var newGridPosition = GridSystem.SwitchLevelGrid(_selectedUnit.Position, _selectedUnit.GridCellPreviousState); // Switch Level Grid is considered Expensive
+                            var targetPosition = GridSystem.GetWorldPosition(newGridPosition);
+                            _selectedUnit.ForceMove(targetPosition);
+                            _selectedUnit.transform.position = targetPosition;
+                            GridSystem.UpdateGridObjectPosition(_selectedUnit, newGridPosition);
+                            mainCamera.UpdateTarget(GridSystem.ActiveLevelGrid.transform);
+                        }
+                        else if (Input.GetKeyDown(KeyCode.K))
+                        {
+                            _selectedUnit.TakeDamage(1); // Take Damage is considered Expensive
+                        }
+                        break;
                     }
-                    else if (Input.GetMouseButtonDown(1) && !EventSystem.current.IsPointerOverGameObject() && _selectedUnit && _selectedUnit.IsOnDoorGridCell && !GridSystem.ActiveLevelGrid.AreDoorsLocked)
-                    {
-                        var newGridPosition = GridSystem.SwitchLevelGrid(_selectedUnit.Position, _selectedUnit.GridCellPreviousState); // Switch Level Grid is considered Expensive
-                        var targetPosition = GridSystem.GetWorldPosition(newGridPosition);
-                        _selectedUnit.ForceMove(targetPosition);
-                        _selectedUnit.transform.position = targetPosition;
-                        GridSystem.UpdateGridObjectPosition(_selectedUnit, newGridPosition);
-                        mainCamera.UpdateTarget(GridSystem.ActiveLevelGrid.transform);
-                    }
-                    else if (Input.GetKeyDown(KeyCode.K))
-                    {
-                        _selectedUnit.TakeDamage(1); // Take Damage is considered Expensive
-                    }
-                    break;
-                }
                 case InputState.TargetingPosition:
-                {
-                    if (Input.GetMouseButton(0) && !EventSystem.current.IsPointerOverGameObject() && _positionTargetedAbility != null) // Comparing to Null is considered Expensive
                     {
-                        var targetGridPosition = GridSystem.GetGridPosition(MouseWorld.GetPosition()); // Get Position is considered Expensive
-                        var distance = Mathf.Abs(targetGridPosition.X - CurrentlySelectedUnit.Position.X) + Mathf.Abs(targetGridPosition.Z - CurrentlySelectedUnit.Position.Z);
-                        if (distance > _targetingRange) return;
-                        if (_positionTargetedAbility.Use(CurrentlySelectedUnit, targetGridPosition))
+                        if (Input.GetMouseButton(0) && !EventSystem.current.IsPointerOverGameObject() && _positionTargetedAbility != null) // Comparing to Null is considered Expensive
+                        {
+                            var targetGridPosition = GridSystem.GetGridPosition(MouseWorld.GetPosition()); // Get Position is considered Expensive
+                            var movePath = new List<GridPosition>();
+                            PathFinding.GetPath(CurrentlySelectedUnit.Position, targetGridPosition, ref movePath);
+                            if (movePath.Count > _targetingRange) return;
+                            if (_positionTargetedAbility.Use(CurrentlySelectedUnit, targetGridPosition))
+                            {
+                                _positionTargetedAbility = null;
+
+                                _inputState = InputState.Active;
+
+                                GridSystem.ResetGridRangeInfo();
+                                GridSystem.HighlightPosition = GridPosition.Invalid;
+                                GridSystem.HighlightRange = -1;
+                            }
+                        }
+                        else if (Input.GetMouseButton(1))
                         {
                             _positionTargetedAbility = null;
 
                             _inputState = InputState.Active;
 
+                            GridSystem.ResetGridRangeInfo();
                             GridSystem.HighlightPosition = GridPosition.Invalid;
                             GridSystem.HighlightRange = -1;
                         }
+                        break;
                     }
-                    else if (Input.GetMouseButton(1))
-                    {
-                        _positionTargetedAbility = null;
-                        _inputState = InputState.Active;
-
-                        GridSystem.HighlightPosition = GridPosition.Invalid;
-                        GridSystem.HighlightRange = -1;
-                    }
-                    break;
-                }
                 case InputState.TargetingUnit:
-                {
-                    if (_unitTargetedAbility != null && Input.GetMouseButton(0) && !EventSystem.current.IsPointerOverGameObject())
                     {
-                        var targetGridPosition = GridSystem.GetGridPosition(MouseWorld.GetPosition()); // Get Position is considered Expensive
-                        GridSystem.TryGetGridObject(targetGridPosition, out var targetObject);
-                        var targetUnit = targetObject as Unit;
-                        if (targetUnit)
+                        if (_unitTargetedAbility != null && Input.GetMouseButton(0) && !EventSystem.current.IsPointerOverGameObject())
                         {
-                            _unitTargetedAbility.Use(CurrentlySelectedUnit, targetUnit);
-                            _unitTargetedAbility = null;
+                            var targetGridPosition = GridSystem.GetGridPosition(MouseWorld.GetPosition()); // Get Position is considered Expensive
+                            GridSystem.TryGetGridObject(targetGridPosition, out var targetObject);
+                            var targetUnit = targetObject as Unit;
+                            if (targetUnit)
+                            {
+                                _unitTargetedAbility.Use(CurrentlySelectedUnit, targetUnit);
+                                _unitTargetedAbility = null;
 
-                            _inputState = InputState.Active;
+                                _inputState = InputState.Active;
+                            }
                         }
+                        break;
                     }
-                    break;
-                }
                 default:
                     throw new ArgumentOutOfRangeException();
             }

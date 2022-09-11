@@ -95,6 +95,7 @@ namespace Units
                 }
             }
 
+            GridSystem.ResetGridRangeInfo();
             ability.Use(controlledUnit, targetGridPosition);
         }
 

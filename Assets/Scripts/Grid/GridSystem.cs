@@ -1,5 +1,7 @@
 using System.Collections.Generic;
 using UnityEngine;
+using Units;
+using Unity.Collections;
 
 namespace Grid
 {
@@ -19,8 +21,6 @@ namespace Grid
 
     public class GridSystem : MonoBehaviour
     {
-        private const float CellSize = 2.0f;
-
         [SerializeField] private LevelGrid startingLevelGrid;
 
         // ReSharper disable once FieldCanBeMadeReadOnly.Local
@@ -115,6 +115,16 @@ namespace Grid
                 ActiveLevelGrid.SetGridCellState(newGridPosition, GridCellState.OccupiedEnemy);
             else
                 ActiveLevelGrid.SetGridCellState(newGridPosition, GridCellState.Occupied);
+        }
+
+        public static void UpdateGridRangeInfo(NativeArray<float> rangeArray)
+        {
+            ActiveLevelGrid.UpdateCellRangeInfo(rangeArray);
+        }
+
+        public static void ResetGridRangeInfo()
+        {
+            ActiveLevelGrid.ResetCellRangeInfo();
         }
 
         public static float GetDistance(GridPosition start, GridPosition end)

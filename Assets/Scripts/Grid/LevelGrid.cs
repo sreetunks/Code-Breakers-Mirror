@@ -72,6 +72,45 @@ namespace Grid
             }
             mesh.SetVertexBufferData(cellStateArray, 0, 0, vertexCount, 2);
         }
+
+        public void UpdateCellRangeInfo(NativeArray<float> rangeArray)
+        {
+            var mesh = _meshFilter.mesh;
+            var vertexCount = gridWidth * gridHeight * 4;
+            var cellStateArray = new NativeArray<float>(vertexCount, Allocator.Temp);
+            for (var y = 0; y < gridHeight; ++y)
+            {
+                for (var x = 0; x < gridWidth; ++x)
+                {
+                    var idx = (y * gridWidth) + x;
+                    var vertIndex = GetCellStateVertexIndex(x, y);
+                    cellStateArray[vertIndex] = rangeArray[idx];
+                    cellStateArray[vertIndex + 1] = rangeArray[idx];
+                    cellStateArray[vertIndex + 2] = rangeArray[idx];
+                    cellStateArray[vertIndex + 3] = rangeArray[idx];
+                }
+            }
+            mesh.SetVertexBufferData(cellStateArray, 0, 0, vertexCount, 3);
+        }
+
+        public void ResetCellRangeInfo()
+        {
+            var mesh = _meshFilter.mesh;
+            var vertexCount = gridWidth * gridHeight * 4;
+            var cellStateArray = new NativeArray<float>(vertexCount, Allocator.Temp);
+            for (var y = 0; y < gridHeight; ++y)
+            {
+                for (var x = 0; x < gridWidth; ++x)
+                {
+                    var vertIndex = GetCellStateVertexIndex(x, y);
+                    cellStateArray[vertIndex] = 0;
+                    cellStateArray[vertIndex + 1] = 0;
+                    cellStateArray[vertIndex + 2] = 0;
+                    cellStateArray[vertIndex + 3] = 0;
+                }
+            }
+            mesh.SetVertexBufferData(cellStateArray, 0, 0, vertexCount, 3);
+        }
 #if UNITY_EDITOR
         public void UpdateGridMeshData()
         {
@@ -87,7 +126,8 @@ namespace Grid
             {
                 new VertexAttributeDescriptor(VertexAttribute.Position, VertexAttributeFormat.Float32, 3),
                 new VertexAttributeDescriptor(VertexAttribute.TexCoord0, VertexAttributeFormat.Float32, 2, 1),
-                new VertexAttributeDescriptor(VertexAttribute.Color, VertexAttributeFormat.Float32, 1, 2)
+                new VertexAttributeDescriptor(VertexAttribute.TexCoord1, VertexAttributeFormat.Float32, 1, 2),
+                new VertexAttributeDescriptor(VertexAttribute.TexCoord2, VertexAttributeFormat.Float32, 1, 3)
             };
             gridMesh.SetVertexBufferParams(vertexCount, vertexLayout);
 
