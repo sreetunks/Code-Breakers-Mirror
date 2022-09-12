@@ -62,7 +62,7 @@ namespace Grid.Editor
             if (Event.current.type == EventType.MouseDown && Event.current.button == 0)
             {
                 var mouseDirRay = HandleUtility.GUIPointToWorldRay(Event.current.mousePosition);
-                if (Physics.Raycast(mouseDirRay, out var hit, LayerMask.GetMask("MousePlane")))
+                if (Physics.Raycast(mouseDirRay, out var hit, Mathf.Infinity, LayerMask.GetMask("MousePlane")))
                 {
                     if (!Event.current.shift) _selectedGridTiles.Clear();
 
