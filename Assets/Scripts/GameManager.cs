@@ -7,7 +7,7 @@ public class GameManager : MonoBehaviour
     public static GameManager Instance;
 
     public AudioSource mainMenuTheme;
-    public AudioSource mainMenuSFX;
+    public AudioSource mainMenuSfx;
 
     public GameObject saveMenu;
     public GameObject settingsMenu;
@@ -16,7 +16,7 @@ public class GameManager : MonoBehaviour
 
     public bool isPaused = false;
 
-    void Awake()
+    private void Awake()
     {
         if (Instance == null)
         {
@@ -61,10 +61,10 @@ public class GameManager : MonoBehaviour
 
     public IEnumerator MenuSoundEffect()
     {
-        mainMenuSFX.mute = false;
-        mainMenuSFX.Play();
+        mainMenuSfx.mute = false;
+        mainMenuSfx.Play();
         yield return new WaitForSeconds(0.25f);
-        mainMenuSFX.mute = true;
-        mainMenuSFX.Stop();
+        mainMenuSfx.mute = true;
+        mainMenuSfx.Stop();
     }
 }

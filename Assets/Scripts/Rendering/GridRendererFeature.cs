@@ -11,21 +11,23 @@ namespace Rendering
         private class GridRenderPass : ScriptableRenderPass
         {
             private static int _gridCellUVSizeShaderProperty;
+            private static int _gridHighlightInfoShaderProperty;
             private static int _gridCellColorsShaderProperty;
 
-            Vector4[] cellStateColors;
+            private readonly Vector4[] _cellStateColors;
 
             public GridRenderPass(Vector4[] gridCellStateColors)
             {
                 _gridCellUVSizeShaderProperty = Shader.PropertyToID("_GridCellUVSize");
+                _gridHighlightInfoShaderProperty = Shader.PropertyToID("_GridHighlightInfo");
                 _gridCellColorsShaderProperty = Shader.PropertyToID("_GridCellColors");
 
-                cellStateColors = gridCellStateColors;
+                _cellStateColors = gridCellStateColors;
             }
 
             public override void Execute(ScriptableRenderContext context, ref RenderingData renderingData)
             {
-                Shader.SetGlobalVectorArray(_gridCellColorsShaderProperty, cellStateColors);
+                Shader.SetGlobalVectorArray(_gridCellColorsShaderProperty, _cellStateColors);
                 var levelGrid = GridSystem.ActiveLevelGrid;
                 if (levelGrid)
                 {
@@ -34,6 +36,11 @@ namespace Rendering
                         1.0f / levelGrid.GridHeight,
                         0,
                         0));
+                    Shader.SetGlobalVector(_gridHighlightInfoShaderProperty, new Vector4(
+                        (Application.isPlaying && GridSystem.HighlightPosition != GridPosition.Invalid) ? 1 : 0,
+                        GridSystem.HighlightRange,
+                        GridSystem.HighlightPosition.X,
+                        GridSystem.HighlightPosition.Z));
                 }
                 var drawingSettings = CreateDrawingSettings(new ShaderTagId("Grid"), ref renderingData, SortingCriteria.CommonTransparent);
                 var filteringSettings = FilteringSettings.defaultValue;

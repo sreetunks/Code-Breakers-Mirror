@@ -1,8 +1,11 @@
-public interface IDamageable
+namespace Units
 {
-    public int MaximumHealth { get; }
-    public int CurrentHealth { get; }
+    public interface IDamageable
+    {
+        public int MaximumHealth { get; }
+        public int CurrentHealth { get; }
 
-    void TakeDamage(int damageDealt);
-    void Heal(int healthRestored);
+        void TakeDamage(int damageDealt);
+        void Heal(int healthRestored);
+    }
 }

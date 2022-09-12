@@ -1,7 +1,9 @@
 Shader "TheHungrySwans/Grid"
 {
     Properties
-    { }
+    {
+        _HighlightColor("Highlight Color", Color) = (0,1,0,1)
+    }
  
     SubShader
     {
@@ -30,20 +32,24 @@ Shader "TheHungrySwans/Grid"
             // the vertex shader.
             struct Attributes
             {
-                float4 positionOS   : POSITION;
-                float2 uv : TEXCOORD0;
-                nointerpolation float cellState : COLOR;
+                float4 positionOS                       : POSITION;
+                float2 uv                               : TEXCOORD0;
+                nointerpolation float cellState         : TEXCOORD1;
+                nointerpolation float pathFindingState  : TEXCOORD2;
             };
 
             struct Varyings
             {
                 float4 positionHCS  : SV_POSITION;
-                float2 uv : TEXCOORD0;
-                float4 color : COLOR;
+                float2 uv           : TEXCOORD0;
+                float pathFindingState : TEXCOORD1;
+                float4 color        : COLOR;
             };
 
+            half4 _HighlightColor;
             float4 _GridCellUVSize;
-            float4 _GridCellColors[8];
+            float4 _GridHighlightInfo;
+            float4 _GridCellColors[9];
 
             // The vertex shader definition with properties defined in the Varyings 
             // structure. The type of the vert function must match the type (struct)
@@ -53,6 +59,7 @@ Shader "TheHungrySwans/Grid"
                 Varyings OUT;
                 OUT.positionHCS = TransformObjectToHClip(IN.positionOS.xyz);
                 OUT.uv = IN.uv;
+                OUT.pathFindingState = IN.pathFindingState;
                 OUT.color = _GridCellColors[IN.cellState];
                 OUT.color.a = 1 - frac(IN.cellState);
                 return OUT;
@@ -69,7 +76,11 @@ Shader "TheHungrySwans/Grid"
                 alpha = saturate(alpha + smoothstep(0.498, 0.5, radialUV.x));
                 alpha = saturate(alpha + smoothstep(0.498, 0.5, radialUV.y));
                 half4 outColor =  half4(IN.color.xyz, lerp(alpha, smoothstep(0.5, 1, IN.color.a), 1 - sign(length(IN.color.xyz))));
-                return outColor;
+
+                float lerpFactor = saturate(IN.pathFindingState);
+                half4 highlightColor = lerp(outColor, half4(_HighlightColor.xyz, lerp(alpha, smoothstep(0.5, 1, IN.color.a), 1 - sign(length(IN.color.xyz)))), lerpFactor);
+
+                return lerp(outColor, highlightColor, _GridHighlightInfo.x);
             }
             ENDHLSL
         }

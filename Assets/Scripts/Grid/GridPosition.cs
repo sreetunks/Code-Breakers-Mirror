@@ -1,14 +1,16 @@
 using System;
 
+// TODO: Overhaul this class
+
 namespace Grid
 {
     [Serializable]
     public struct GridPosition : IEquatable<GridPosition>
     {
-        public int X;
-        public int Z;
+        public int X; // Rename to x
+        public int Z; // Rename to z
 
-        public static GridPosition Invalid { get => new GridPosition(-1, -1); }
+        public static GridPosition Invalid { get => new GridPosition(-1, -1); } // Can be changed to be more optimized
 
         public GridPosition(int x, int z)
         {

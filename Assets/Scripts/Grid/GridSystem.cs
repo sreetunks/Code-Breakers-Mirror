@@ -1,5 +1,7 @@
 using System.Collections.Generic;
 using UnityEngine;
+using Units;
+using Unity.Collections;
 
 namespace Grid
 {
@@ -9,6 +11,7 @@ namespace Grid
         Impassable,
         Walkable,
         Occupied,
+        OccupiedEnemy,
         DoorNorth,
         DoorEast,
         DoorSouth,
@@ -18,8 +21,6 @@ namespace Grid
 
     public class GridSystem : MonoBehaviour
     {
-        private const float CellSize = 2.0f;
-
         [SerializeField] private LevelGrid startingLevelGrid;
 
         // ReSharper disable once FieldCanBeMadeReadOnly.Local
@@ -28,6 +29,8 @@ namespace Grid
         private LevelGrid _activeLevelGrid;
 
         public static LevelGrid ActiveLevelGrid { get => Instance?._activeLevelGrid; }
+        public static GridPosition HighlightPosition { get; set; } = GridPosition.Invalid;
+        public static int HighlightRange { get; set; } = -1;
 
         private static GridSystem Instance { get; set; }
 
@@ -52,10 +55,11 @@ namespace Grid
         public static void RegisterLevelGrid(LevelGrid levelGrid)
         {
 #if UNITY_EDITOR
-            if (Instance == null) Instance = FindObjectOfType<GridSystem>();
+            if (Instance == null) Instance = FindObjectOfType<GridSystem>(); // Comparison with null & Find Object Of Type is considered Expensive
 #endif
             Instance._activeLevelGrid = levelGrid;
             Instance._gridObjectMap = new Dictionary<GridPosition, IGridObject>(levelGrid.GridWidth * levelGrid.GridHeight);
+            if(Application.isPlaying) TurnOrderSystem.RegisterLevelGrid();
         }
 
         public static Vector3 GetWorldPosition(GridPosition gridPosition)
@@ -107,28 +111,45 @@ namespace Grid
             ActiveLevelGrid.TryGetGridCellState(newGridPosition, out GridCellState newGridCellState);
             ActiveLevelGrid.SetGridCellState(gridObject.Position, gridObject.GridCellPreviousState);
             gridObject.GridCellPreviousState = newGridCellState;
-            ActiveLevelGrid.SetGridCellState(newGridPosition, GridCellState.Occupied);
+            var gridUnit = gridObject as Unit;
+            if (gridUnit != null && gridUnit.Controller.Faction == Controller.FactionType.Enemy)
+                ActiveLevelGrid.SetGridCellState(newGridPosition, GridCellState.OccupiedEnemy);
+            else
+                ActiveLevelGrid.SetGridCellState(newGridPosition, GridCellState.Occupied);
+        }
+
+        public static void UpdateGridRangeInfo(NativeArray<float> rangeArray)
+        {
+            ActiveLevelGrid.UpdateCellRangeInfo(rangeArray);
+        }
+
+        public static void ResetGridRangeInfo()
+        {
+            ActiveLevelGrid.ResetCellRangeInfo();
+        }
+
+        public static float GetDistance(GridPosition start, GridPosition end)
+        {
+            return Mathf.Sqrt(Mathf.Pow(start.X - end.X,2) + Mathf.Pow(start.Z - end.Z, 2));
         }
 
         public static GridPosition SwitchLevelGrid(GridPosition doorGridCellPosition, GridCellState doorGridCellState)
         {
-            LevelGrid newLevelGrid = ActiveLevelGrid.GetRoomAdjacentToDoor(doorGridCellState);
-            GridPosition adjacentGridDoorPosition = GridPosition.Invalid;
-            if (newLevelGrid)
-            {
-                Instance._gridObjectMap.Remove(doorGridCellPosition);
-                ActiveLevelGrid.SetGridCellState(doorGridCellPosition, doorGridCellState);
-                RegisterLevelGrid(newLevelGrid);
+            var newLevelGrid = ActiveLevelGrid.GetRoomAdjacentToDoor(doorGridCellState);
+            var adjacentGridDoorPosition = GridPosition.Invalid;
+            if (!newLevelGrid) return adjacentGridDoorPosition;
+            Instance._gridObjectMap.Remove(doorGridCellPosition);
+            ActiveLevelGrid.SetGridCellState(doorGridCellPosition, doorGridCellState);
+            RegisterLevelGrid(newLevelGrid); // Register Level Grid is considered Expensive
 
-                if (doorGridCellState == GridCellState.DoorNorth)
-                    adjacentGridDoorPosition = newLevelGrid.DoorSouth;
-                else if (doorGridCellState == GridCellState.DoorEast)
-                    adjacentGridDoorPosition = newLevelGrid.DoorWest;
-                else if (doorGridCellState == GridCellState.DoorSouth)
-                    adjacentGridDoorPosition = newLevelGrid.DoorNorth;
-                else if (doorGridCellState == GridCellState.DoorWest)
-                    adjacentGridDoorPosition = newLevelGrid.DoorEast;
-            }
+            adjacentGridDoorPosition = doorGridCellState switch
+            {
+                GridCellState.DoorNorth => newLevelGrid.DoorSouth,
+                GridCellState.DoorEast => newLevelGrid.DoorWest,
+                GridCellState.DoorSouth => newLevelGrid.DoorNorth,
+                GridCellState.DoorWest => newLevelGrid.DoorEast,
+                _ => adjacentGridDoorPosition
+            };
 
             return adjacentGridDoorPosition;
         }

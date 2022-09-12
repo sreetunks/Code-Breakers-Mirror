@@ -1,60 +1,64 @@
+using Abilities;
+using TMPro;
+using Units;
 using UnityEngine;
 using UnityEngine.UI;
-using TMPro;
 
-public class AbilityButton : MonoBehaviour
+namespace UI
 {
-    [SerializeField] private TMP_Text abilityNameText;
-    [SerializeField] private CanvasGroup abilityCooldownCanvasGroup;
-    [SerializeField] private TMP_Text abilityCooldownCount;
-    [SerializeField] private Button abilityButton;
-
-    private AbilityBase _abilityToTrigger;
-
-    public AbilityBase Ability => _abilityToTrigger;
-
-    public void ResetButton()
+    public class AbilityButton : MonoBehaviour
     {
-        gameObject.SetActive(false);
-    }
+        [SerializeField] private TMP_Text abilityNameText;
+        [SerializeField] private CanvasGroup abilityCooldownCanvasGroup;
+        [SerializeField] private TMP_Text abilityCooldownCount;
+        [SerializeField] private Button abilityButton;
 
-    public void Initialize(AbilityBase ability)
-    {
-        gameObject.SetActive(true);
-        _abilityToTrigger = ability;
-        abilityNameText.text = ability.name;
-    }
+        private AbilityBase _abilityToTrigger;
 
-    public void EnableButton()
-    {
-        abilityCooldownCanvasGroup.alpha = 0;
-        abilityButton.interactable = true;
-    }
+        public AbilityBase Ability => _abilityToTrigger;
 
-    public void DisableButton()
-    {
-        abilityCooldownCount.text = "";
-        abilityCooldownCanvasGroup.alpha = 1;
-        abilityButton.interactable = false;
-    }
-
-    public void TriggerAbility()
-    {
-        _abilityToTrigger.Use(PlayerScript.CurrentlySelectedUnit);
-        PlayerScript.CurrentlySelectedUnit.OnAbilityUsed(_abilityToTrigger);
-    }
-
-    public void UpdateCooldown()
-    {
-        int coolDownRemaining = PlayerScript.CurrentlySelectedUnit.GetAbilityCooldown(_abilityToTrigger);
-        if (coolDownRemaining != 0)
+        public void ResetButton()
         {
-            DisableButton();
-            abilityCooldownCount.text = coolDownRemaining--.ToString();
+            gameObject.SetActive(false);
         }
-        else
+
+        public void Initialize(AbilityBase ability)
         {
-            EnableButton();
+            gameObject.SetActive(true);
+            _abilityToTrigger = ability;
+            abilityNameText.text = ability.name;
+        }
+
+        public void EnableButton()
+        {
+            abilityCooldownCanvasGroup.alpha = 0;
+            abilityButton.interactable = true;
+        }
+
+        public void DisableButton()
+        {
+            abilityCooldownCount.text = "";
+            abilityCooldownCanvasGroup.alpha = 1;
+            abilityButton.interactable = false;
+        }
+
+        public void TriggerAbility()
+        {
+            _abilityToTrigger.Use(PlayerScript.CurrentlySelectedUnit);
+        }
+
+        public void UpdateCooldown()
+        {
+            var coolDownRemaining = PlayerScript.CurrentlySelectedUnit.GetAbilityCooldown(_abilityToTrigger);
+            if (coolDownRemaining != 0)
+            {
+                DisableButton();
+                abilityCooldownCount.text = coolDownRemaining.ToString();
+            }
+            else
+            {
+                EnableButton();
+            }
         }
     }
 }

@@ -1,9 +1,16 @@
-public abstract class PositionTargetedAbility : AbilityBase
-{
-    public abstract bool Use(Unit owningUnit, Grid.GridPosition targetPosition);
+using Units;
 
-    public override void Use(Unit owningUnit)
+namespace Abilities
+{
+    public abstract class PositionTargetedAbility : AbilityBase
     {
-        owningUnit.Controller.TargetAbility(owningUnit, this);
+        public abstract int UpdateRange(Unit owningUnit);
+        public abstract bool Use(Unit owningUnit, Grid.GridPosition targetPosition);
+
+        public override void Use(Unit owningUnit)
+        {
+            var range = UpdateRange(owningUnit);
+            owningUnit.Controller.TargetAbility(owningUnit, this, range);
+        }
     }
 }

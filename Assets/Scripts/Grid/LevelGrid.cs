@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using Unity.Collections;
 using UnityEngine;
@@ -71,11 +72,50 @@ namespace Grid
             }
             mesh.SetVertexBufferData(cellStateArray, 0, 0, vertexCount, 2);
         }
+
+        public void UpdateCellRangeInfo(NativeArray<float> rangeArray)
+        {
+            var mesh = _meshFilter.mesh;
+            var vertexCount = gridWidth * gridHeight * 4;
+            var cellStateArray = new NativeArray<float>(vertexCount, Allocator.Temp);
+            for (var y = 0; y < gridHeight; ++y)
+            {
+                for (var x = 0; x < gridWidth; ++x)
+                {
+                    var idx = (y * gridWidth) + x;
+                    var vertIndex = GetCellStateVertexIndex(x, y);
+                    cellStateArray[vertIndex] = rangeArray[idx];
+                    cellStateArray[vertIndex + 1] = rangeArray[idx];
+                    cellStateArray[vertIndex + 2] = rangeArray[idx];
+                    cellStateArray[vertIndex + 3] = rangeArray[idx];
+                }
+            }
+            mesh.SetVertexBufferData(cellStateArray, 0, 0, vertexCount, 3);
+        }
+
+        public void ResetCellRangeInfo()
+        {
+            var mesh = _meshFilter.mesh;
+            var vertexCount = gridWidth * gridHeight * 4;
+            var cellStateArray = new NativeArray<float>(vertexCount, Allocator.Temp);
+            for (var y = 0; y < gridHeight; ++y)
+            {
+                for (var x = 0; x < gridWidth; ++x)
+                {
+                    var vertIndex = GetCellStateVertexIndex(x, y);
+                    cellStateArray[vertIndex] = 0;
+                    cellStateArray[vertIndex + 1] = 0;
+                    cellStateArray[vertIndex + 2] = 0;
+                    cellStateArray[vertIndex + 3] = 0;
+                }
+            }
+            mesh.SetVertexBufferData(cellStateArray, 0, 0, vertexCount, 3);
+        }
 #if UNITY_EDITOR
         public void UpdateGridMeshData()
         {
-            if (_meshFilter == null) _meshFilter = GetComponent<MeshFilter>();
-            if (_meshCollider == null) _meshCollider = GetComponent<MeshCollider>();
+            if (_meshFilter == null) _meshFilter = GetComponent<MeshFilter>(); // Get Components is considered Expensive
+            if (_meshCollider == null) _meshCollider = GetComponent<MeshCollider>(); // Get Components is considered Expensive
 
             var gridMesh = new Mesh();
             gridMesh.Clear();
@@ -86,7 +126,8 @@ namespace Grid
             {
                 new VertexAttributeDescriptor(VertexAttribute.Position, VertexAttributeFormat.Float32, 3),
                 new VertexAttributeDescriptor(VertexAttribute.TexCoord0, VertexAttributeFormat.Float32, 2, 1),
-                new VertexAttributeDescriptor(VertexAttribute.Color, VertexAttributeFormat.Float32, 1, 2)
+                new VertexAttributeDescriptor(VertexAttribute.TexCoord1, VertexAttributeFormat.Float32, 1, 2),
+                new VertexAttributeDescriptor(VertexAttribute.TexCoord2, VertexAttributeFormat.Float32, 1, 3)
             };
             gridMesh.SetVertexBufferParams(vertexCount, vertexLayout);
 
@@ -99,7 +140,7 @@ namespace Grid
             {
                 for (var x = 0; x < gridWidth; ++x)
                 {
-                    Vector3 cellCenter = new Vector3(x, 0, y) * gridCellSize;
+                    var cellCenter = new Vector3(x, 0, y) * gridCellSize;
                     var idx = ((y * gridWidth) + x) * 4;
 
                     posArray[idx] = gridVertexOffset + cellCenter;
@@ -146,11 +187,13 @@ namespace Grid
             gridMesh.SetIndexBufferParams(quadCount * 6, IndexFormat.UInt16);
             gridMesh.SetIndexBufferData(indices, 0, 0, quadCount * 6);
 
-            var subMeshDescriptor = new SubMeshDescriptor();
-            subMeshDescriptor.baseVertex = 0;
-            subMeshDescriptor.indexCount = quadCount * 6;
-            subMeshDescriptor.indexStart = 0;
-            subMeshDescriptor.topology = MeshTopology.Triangles;
+            var subMeshDescriptor = new SubMeshDescriptor
+            {
+                baseVertex = 0,
+                indexCount = quadCount * 6,
+                indexStart = 0,
+                topology = MeshTopology.Triangles
+            };
 
             gridMesh.subMeshCount = 1;
             gridMesh.SetSubMesh(0, subMeshDescriptor);
@@ -183,13 +226,13 @@ namespace Grid
             southDoorGridPosition = GridPosition.Invalid;
             westDoorGridPosition = GridPosition.Invalid;
 
-            UpdateGridMeshData();
+            UpdateGridMeshData(); // Update the Mesh is considered Expensive
         }
 
         public void UpdateGrid()
         {
-            if (_meshFilter == null) _meshFilter = GetComponent<MeshFilter>();
-            if (_meshCollider == null) _meshCollider = GetComponent<MeshCollider>();
+            if (_meshFilter == null) _meshFilter = GetComponent<MeshFilter>(); // Get Components is considered Expensive
+            if (_meshCollider == null) _meshCollider = GetComponent<MeshCollider>(); // Get Components is considered Expensive
             UpdateCellState(_meshFilter.sharedMesh);
             _meshCollider.sharedMesh = _meshFilter.sharedMesh;
         }
@@ -212,7 +255,7 @@ namespace Grid
             }
         }
 
-        public bool IsValidGridPosition(GridPosition gridPosition)
+        private bool IsValidGridPosition(GridPosition gridPosition)
         {
             return (
                 gridPosition.X > -1 &&
@@ -235,37 +278,54 @@ namespace Grid
                 return;
             }
 
-            if (gridCellState == GridCellState.DoorNorth)
+            switch (gridCellState)
             {
-                if (northDoorGridPosition != GridPosition.Invalid)
+                case GridCellState.DoorNorth:
                 {
-                    gridCellStates[(northDoorGridPosition.Z * gridWidth) + northDoorGridPosition.X] = GridCellState.Walkable;
+                    if (northDoorGridPosition != GridPosition.Invalid)
+                    {
+                        gridCellStates[(northDoorGridPosition.Z * gridWidth) + northDoorGridPosition.X] = GridCellState.Walkable;
+                    }
+                    northDoorGridPosition = gridPosition;
+                    break;
                 }
-                northDoorGridPosition = gridPosition;
-            }
-            if (gridCellState == GridCellState.DoorEast)
-            {
-                if (eastDoorGridPosition != GridPosition.Invalid)
+                case GridCellState.DoorEast:
                 {
-                    gridCellStates[(eastDoorGridPosition.Z * gridWidth) + eastDoorGridPosition.X] = GridCellState.Walkable;
+                    if (eastDoorGridPosition != GridPosition.Invalid)
+                    {
+                        gridCellStates[(eastDoorGridPosition.Z * gridWidth) + eastDoorGridPosition.X] = GridCellState.Walkable;
+                    }
+                    eastDoorGridPosition = gridPosition;
+                    break;
                 }
-                eastDoorGridPosition = gridPosition;
-            }
-            if (gridCellState == GridCellState.DoorSouth)
-            {
-                if (southDoorGridPosition != GridPosition.Invalid)
+                case GridCellState.DoorSouth:
                 {
-                    gridCellStates[(southDoorGridPosition.Z * gridWidth) + southDoorGridPosition.X] = GridCellState.Walkable;
+                    if (southDoorGridPosition != GridPosition.Invalid)
+                    {
+                        gridCellStates[(southDoorGridPosition.Z * gridWidth) + southDoorGridPosition.X] = GridCellState.Walkable;
+                    }
+                    southDoorGridPosition = gridPosition;
+                    break;
                 }
-                southDoorGridPosition = gridPosition;
-            }
-            if (gridCellState == GridCellState.DoorWest)
-            {
-                if (westDoorGridPosition != GridPosition.Invalid)
+                case GridCellState.DoorWest:
                 {
-                    gridCellStates[(westDoorGridPosition.Z * gridWidth) + westDoorGridPosition.X] = GridCellState.Walkable;
+                    if (westDoorGridPosition != GridPosition.Invalid)
+                    {
+                        gridCellStates[(westDoorGridPosition.Z * gridWidth) + westDoorGridPosition.X] = GridCellState.Walkable;
+                    }
+                    westDoorGridPosition = gridPosition;
+                    break;
                 }
-                westDoorGridPosition = gridPosition;
+                case GridCellState.Impassable:
+                    break;
+                case GridCellState.Walkable:
+                    break;
+                case GridCellState.Occupied:
+                    break;
+                case GridCellState.LevelExit:
+                    break;
+                default:
+                    throw new ArgumentOutOfRangeException(nameof(gridCellState), gridCellState, null);
             }
         }
 
