@@ -253,8 +253,7 @@ namespace Grid.Editor
 
                 _selectedGridTiles.Clear();
 
-                if (serializedObject.ApplyModifiedProperties())
-                    EditorUtility.SetDirty(target);
+                EditorUtility.SetDirty(target);
             }
 
             if (GUI.Button(EditorGUILayout.GetControlRect(
@@ -277,22 +276,7 @@ namespace Grid.Editor
 
                 if (serializedObject.ApplyModifiedProperties())
                     EditorUtility.SetDirty(target);
-<<<<<<< HEAD
-            }           
-=======
             }
-
-            if (GUI.Button(EditorGUILayout.GetControlRect(
-                GUILayout.MinHeight(EditorGUIUtility.singleLineHeight * 1.5f)),
-                "Regenerate Mesh"))
-            {
-                _levelGrid.UpdateGridMeshData(); // Update Grid Mesh Data is considered Expensive
-
-                _selectedGridTiles.Clear();
-
-                EditorUtility.SetDirty(target);
-            }
->>>>>>> c4a6223953ea30eb69eb0e043322235a7236ae43
         }
     }
 }
