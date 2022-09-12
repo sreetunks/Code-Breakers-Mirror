@@ -275,8 +275,7 @@ namespace Grid.Editor
 
                 _selectedGridTiles.Clear();
 
-                if (serializedObject.ApplyModifiedProperties())
-                    EditorUtility.SetDirty(target);
+                EditorUtility.SetDirty(target);
             }
         }
     }

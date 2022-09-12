@@ -133,7 +133,7 @@ namespace Grid
 
             var posArray = new NativeArray<Vector3>(vertexCount, Allocator.Temp);
             var uvArray = new NativeArray<Vector2>(vertexCount, Allocator.Temp);
-
+            var pathfindingArray = new NativeArray<float>(vertexCount, Allocator.Temp);
             var gridVertexOffset = gridOffset - transform.position;
 
             for (var y = 0; y < gridHeight; ++y)
@@ -160,6 +160,7 @@ namespace Grid
             UpdateCellState(gridMesh);
             gridMesh.SetVertexBufferData(posArray, 0, 0, vertexCount, 0);
             gridMesh.SetVertexBufferData(uvArray, 0, 0, vertexCount, 1);
+            gridMesh.SetVertexBufferData(pathfindingArray, 0, 0, vertexCount, 3);
 
             var indices = new NativeArray<ushort>(quadCount * 6, Allocator.Temp);
 
