@@ -34,6 +34,7 @@ namespace Units
 
         Unit _selectedUnit;
         readonly List<Unit> _controlledUnits = new List<Unit>();
+        private List<Unit> _perTurnUnitList;
         InputState _inputState;
 
         private void Awake()
@@ -202,16 +203,31 @@ namespace Units
         public override void BeginTurn()
         {
             _inputState = InputState.Active;
+
             foreach (var controlledUnit in _controlledUnits)
                 controlledUnit.BeginTurn();
+
+            _perTurnUnitList = new List<Unit>(_controlledUnits);
+            SelectUnit(_perTurnUnitList[0]);
         }
 
         public void EndTurn()
         {
-            if (_inputState != InputState.Active) return;
-            TurnOrderSystem.MoveNext();
-            playerHUD.UpdateSelectedUnit(_selectedUnit);
-            playerHUD.SetEndTurnButtonEnabled(false);
+            if (_inputState != InputState.Active)
+                return;
+
+            _selectedUnit.EndTurn();
+            _perTurnUnitList.Remove(_selectedUnit);
+
+            if (_perTurnUnitList.Count > 0)
+                SelectUnit(_perTurnUnitList[0]);
+            else
+            {
+                TurnOrderSystem.MoveNext();
+                playerHUD.UpdateSelectedUnit(_selectedUnit);
+                playerHUD.SetEndTurnButtonEnabled(false);
+            }
+
             _inputState = InputState.Inactive;
         }
 

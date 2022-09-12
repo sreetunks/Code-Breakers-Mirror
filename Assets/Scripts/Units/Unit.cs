@@ -200,5 +200,9 @@ namespace Units
 
             OnUnitAPChanged?.Invoke();
         }
+
+        public void EndTurn()
+        {
+        }
     }
 }
