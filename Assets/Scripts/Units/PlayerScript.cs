@@ -103,6 +103,8 @@ namespace Units
                             {
                                 _positionTargetedAbility = null;
 
+                                _inputState = InputState.Inactive;
+                                playerHUD.SetEndTurnButtonEnabled(false);
                                 CurrentlySelectedUnit.OnUnitActionFinished += OnSelectedUnitActionFinished;
 
                                 GridSystem.ResetGridRangeInfo();
@@ -177,6 +179,8 @@ namespace Units
         private void OnSelectedUnitActionFinished()
         {
             if (CurrentlySelectedUnit != null) CurrentlySelectedUnit.OnUnitActionFinished -= OnSelectedUnitActionFinished; // Comparison to Null is Expensive
+            _inputState = InputState.Active;
+            playerHUD.SetEndTurnButtonEnabled(true);
         }
 
         private void OnPlayerCharacterDeath(Unit unit)
@@ -207,6 +211,7 @@ namespace Units
             if (_inputState != InputState.Active) return;
             TurnOrderSystem.MoveNext();
             playerHUD.UpdateSelectedUnit(_selectedUnit);
+            playerHUD.SetEndTurnButtonEnabled(false);
             _inputState = InputState.Inactive;
         }
 
