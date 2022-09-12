@@ -1,6 +1,6 @@
 %YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
---- !u!1001 &8148232843130566738
+--- !u!1001 &4309011943460295998
 PrefabInstance:
   m_ObjectHideFlags: 0
   serializedVersion: 2
@@ -12,26 +12,22 @@ PrefabInstance:
         type: 3}
       propertyPath: m_Materials.Array.data[0]
       value: 
-      objectReference: {fileID: 2100000, guid: c70e075a2144ba04784d74b7b2889fd3, type: 2}
+      objectReference: {fileID: 2100000, guid: 6968e89851431104b8f931c37d69356b, type: 2}
     - target: {fileID: 7007951768904158068, guid: 0f7dc776639e01f45bf75df50ce4d4d9,
         type: 3}
-      propertyPath: maximumAP
-      value: 4
-      objectReference: {fileID: 0}
-    - target: {fileID: 7007951768904158068, guid: 0f7dc776639e01f45bf75df50ce4d4d9,
-        type: 3}
-      propertyPath: maximumHealth
+      propertyPath: unitAbilities.Array.size
       value: 3
       objectReference: {fileID: 0}
     - target: {fileID: 7007951768904158068, guid: 0f7dc776639e01f45bf75df50ce4d4d9,
         type: 3}
-      propertyPath: unitAbilities.Array.size
-      value: 1
-      objectReference: {fileID: 0}
+      propertyPath: unitAbilities.Array.data[2]
+      value: 
+      objectReference: {fileID: 11400000, guid: 8f3d9ffd3ec19884081a08035e6a761f,
+        type: 2}
     - target: {fileID: 7007951768904158070, guid: 0f7dc776639e01f45bf75df50ce4d4d9,
         type: 3}
       propertyPath: m_Name
-      value: EnemyUnit
+      value: Player Unit
       objectReference: {fileID: 0}
     - target: {fileID: 7007951768904158071, guid: 0f7dc776639e01f45bf75df50ce4d4d9,
         type: 3}
@@ -41,7 +37,7 @@ PrefabInstance:
     - target: {fileID: 7007951768904158071, guid: 0f7dc776639e01f45bf75df50ce4d4d9,
         type: 3}
       propertyPath: m_LocalPosition.x
-      value: 6
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 7007951768904158071, guid: 0f7dc776639e01f45bf75df50ce4d4d9,
         type: 3}
@@ -51,7 +47,7 @@ PrefabInstance:
     - target: {fileID: 7007951768904158071, guid: 0f7dc776639e01f45bf75df50ce4d4d9,
         type: 3}
       propertyPath: m_LocalPosition.z
-      value: -4
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 7007951768904158071, guid: 0f7dc776639e01f45bf75df50ce4d4d9,
         type: 3}
