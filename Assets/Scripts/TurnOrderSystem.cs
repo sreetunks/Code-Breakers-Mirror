@@ -11,7 +11,7 @@ public class TurnOrderSystem : MonoBehaviour
     public static Controller ActiveController => Instance._activeController;
 
     private readonly List<Controller> _registeredControllers = new List<Controller>();
-    private List<Controller> _perTurnControllerList = new List<Controller>();
+    private List<Controller> _perTurnControllerList;
     private Controller _activeController;
 
     private void Awake()
@@ -26,6 +26,7 @@ public class TurnOrderSystem : MonoBehaviour
         Instance = this;
 
         RegisterController(playerController);
+        Instance._perTurnControllerList = new List<Controller>(Instance._registeredControllers);
     }
 
     public static void RegisterLevelGrid()

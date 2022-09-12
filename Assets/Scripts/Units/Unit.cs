@@ -50,6 +50,7 @@ namespace Units
 
         private int _currentHealth;
         private int _currentAP;
+        private int _currentShields;
         private List<AbilityData> _unitAbilityDataList;
 
         private static readonly int IsWalking = Animator.StringToHash("IsWalking"); // Caching ID for Parameter
@@ -67,6 +68,8 @@ namespace Units
 
         public int MaximumAP => maximumAP;
         public int CurrentAP => _currentAP;
+
+        public int CurrentShields => _currentShields;
 
         private void Awake()
         {
@@ -155,6 +158,16 @@ namespace Units
 
         public void TakeDamage(int damageDealt)
         {
+            if (_currentShields > 0)
+            {
+                damageDealt -= _currentShields;
+                if (!(damageDealt > 0))
+                {
+                    OnUnitDamaged?.Invoke(damageDealt);
+                    return;
+                }
+            }
+
             _currentHealth = Mathf.Max(0, _currentHealth - damageDealt);
             OnUnitDamaged?.Invoke(damageDealt);
             if (_currentHealth == 0)
@@ -170,6 +183,13 @@ namespace Units
         {
             _currentHealth = Mathf.Min(maximumHealth, _currentHealth + healthRestored);
             OnUnitDamaged?.Invoke(-healthRestored);
+        }
+
+        public void GainShields(int shieldsGained)
+        {
+            _currentShields = shieldsGained;
+
+            OnUnitDamaged?.Invoke(0);
         }
 
         public void ConsumeAP(int apToConsume)
@@ -194,6 +214,12 @@ namespace Units
 
         public void BeginTurn()
         {
+            if (_currentShields > 0)
+            {
+                _currentShields = 0;
+                OnUnitDamaged?.Invoke(0);
+            }
+
             _currentAP = Mathf.Min(maximumAP, _currentAP + apGainPerRound);
 
             foreach (var abilityData in _unitAbilityDataList.Where(abilityData => abilityData.cooldownDuration > 0)) --abilityData.cooldownDuration;

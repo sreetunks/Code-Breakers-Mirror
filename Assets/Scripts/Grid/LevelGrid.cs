@@ -133,7 +133,7 @@ namespace Grid
 
             var posArray = new NativeArray<Vector3>(vertexCount, Allocator.Temp);
             var uvArray = new NativeArray<Vector2>(vertexCount, Allocator.Temp);
-
+            var pathfindingArray = new NativeArray<float>(vertexCount, Allocator.Temp);
             var gridVertexOffset = gridOffset - transform.position;
 
             for (var y = 0; y < gridHeight; ++y)
@@ -144,22 +144,23 @@ namespace Grid
                     var idx = ((y * gridWidth) + x) * 4;
 
                     posArray[idx] = gridVertexOffset + cellCenter;
-                    uvArray[idx] = new Vector2((float)x / gridWidth, (float)y / gridHeight);
+                    uvArray[idx] = new Vector2(0, 0);
 
                     posArray[idx + 1] = gridVertexOffset + cellCenter + new Vector3(0, 0, gridCellSize);
-                    uvArray[idx + 1] = new Vector2((float)x / gridWidth, (float)(y + 1) / gridHeight);
+                    uvArray[idx + 1] = new Vector2(0, 1);
 
                     posArray[idx + 2] = gridVertexOffset + cellCenter + new Vector3(gridCellSize, 0, gridCellSize);
-                    uvArray[idx + 2] = new Vector2((float)(x + 1) / gridWidth, (float)(y + 1) / gridHeight);
+                    uvArray[idx + 2] = new Vector2(1, 1);
 
                     posArray[idx + 3] = gridVertexOffset + cellCenter + new Vector3(gridCellSize, 0, 0);
-                    uvArray[idx + 3] = new Vector2((float)(x + 1) / gridWidth, (float)y / gridHeight);
+                    uvArray[idx + 3] = new Vector2(1, 0);
                 }
             }
 
             UpdateCellState(gridMesh);
             gridMesh.SetVertexBufferData(posArray, 0, 0, vertexCount, 0);
             gridMesh.SetVertexBufferData(uvArray, 0, 0, vertexCount, 1);
+            gridMesh.SetVertexBufferData(pathfindingArray, 0, 0, vertexCount, 3);
 
             var indices = new NativeArray<ushort>(quadCount * 6, Allocator.Temp);
 

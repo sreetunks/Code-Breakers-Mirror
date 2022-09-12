@@ -40,10 +40,10 @@ Shader "TheHungrySwans/Grid"
 
             struct Varyings
             {
-                float4 positionHCS  : SV_POSITION;
-                float2 uv           : TEXCOORD0;
-                float pathFindingState : TEXCOORD1;
-                float4 color        : COLOR;
+                float4 positionHCS      : SV_POSITION;
+                float2 uv               : TEXCOORD0;
+                float pathFindingState  : TEXCOORD1;
+                float4 color            : COLOR;
             };
 
             half4 _HighlightColor;
@@ -68,13 +68,10 @@ Shader "TheHungrySwans/Grid"
             // The fragment shader definition.
             half4 frag(Varyings IN) : SV_Target
             {
-                float2 perCellUV = float2(
-                    smoothstep(0.0f, _GridCellUVSize.x, IN.uv.x % _GridCellUVSize.x),
-                    smoothstep(0.0f, _GridCellUVSize.y, IN.uv.y % _GridCellUVSize.y));
-                float2 radialUV = abs(perCellUV - float2(0.5, 0.5));
+                float2 radialUV = abs(IN.uv - float2(0.5, 0.5));
                 float alpha = (radialUV.x * radialUV.x) + (radialUV.y * radialUV.y);// length(radialUV);
-                alpha = saturate(alpha + smoothstep(0.498, 0.5, radialUV.x));
-                alpha = saturate(alpha + smoothstep(0.498, 0.5, radialUV.y));
+                alpha = saturate(alpha + smoothstep(0.48, 0.5, radialUV.x));
+                alpha = saturate(alpha + smoothstep(0.48, 0.5, radialUV.y));
                 half4 outColor =  half4(IN.color.xyz, lerp(alpha, smoothstep(0.5, 1, IN.color.a), 1 - sign(length(IN.color.xyz))));
 
                 float lerpFactor = saturate(IN.pathFindingState);
