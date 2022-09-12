@@ -247,6 +247,18 @@ namespace Grid.Editor
 
             if (GUI.Button(EditorGUILayout.GetControlRect(
                 GUILayout.MinHeight(EditorGUIUtility.singleLineHeight * 1.5f)),
+                "Regenerate Mesh"))
+            {
+                _levelGrid.UpdateGridMeshData(); // Update Grid Mesh Data is considered Expensive
+
+                _selectedGridTiles.Clear();
+
+                if (serializedObject.ApplyModifiedProperties())
+                    EditorUtility.SetDirty(target);
+            }
+
+            if (GUI.Button(EditorGUILayout.GetControlRect(
+                GUILayout.MinHeight(EditorGUIUtility.singleLineHeight * 1.5f)),
                 "Reset"))
             {
                 _gridWidth.intValue = _newGridWidth;
@@ -265,19 +277,7 @@ namespace Grid.Editor
 
                 if (serializedObject.ApplyModifiedProperties())
                     EditorUtility.SetDirty(target);
-            }
-
-            if (GUI.Button(EditorGUILayout.GetControlRect(
-                GUILayout.MinHeight(EditorGUIUtility.singleLineHeight * 1.5f)),
-                "Regenerate Mesh"))
-            {
-                _levelGrid.UpdateGridMeshData(); // Update Grid Mesh Data is considered Expensive
-
-                _selectedGridTiles.Clear();
-
-                if (serializedObject.ApplyModifiedProperties())
-                    EditorUtility.SetDirty(target);
-            }
+            }           
         }
     }
 }

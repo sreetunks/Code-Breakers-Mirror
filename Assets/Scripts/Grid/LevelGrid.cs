@@ -206,6 +206,13 @@ namespace Grid
             _meshCollider.sharedMesh = gridMesh;
         }
 
+        public void UpdateGrid()
+        {
+            if (_meshFilter == null) _meshFilter = GetComponent<MeshFilter>(); // Get Components is considered Expensive
+            if (_meshCollider == null) _meshCollider = GetComponent<MeshCollider>(); // Get Components is considered Expensive
+            UpdateCellState(_meshFilter.sharedMesh);
+            _meshCollider.sharedMesh = _meshFilter.sharedMesh;
+        }
         public void ResetGrid()
         {
             gridOffset = transform.position + (new Vector3(-0.5f * gridWidth, 0, -0.5f * gridHeight) * gridCellSize);
@@ -227,14 +234,6 @@ namespace Grid
             westDoorGridPosition = GridPosition.Invalid;
 
             UpdateGridMeshData(); // Update the Mesh is considered Expensive
-        }
-
-        public void UpdateGrid()
-        {
-            if (_meshFilter == null) _meshFilter = GetComponent<MeshFilter>(); // Get Components is considered Expensive
-            if (_meshCollider == null) _meshCollider = GetComponent<MeshCollider>(); // Get Components is considered Expensive
-            UpdateCellState(_meshFilter.sharedMesh);
-            _meshCollider.sharedMesh = _meshFilter.sharedMesh;
         }
 #endif
         public void SetDoorLock(bool shouldLock)
