@@ -198,6 +198,9 @@ namespace Grid.Editor
             EditorGUILayout.EndVertical();
             EditorGUILayout.Space();
 
+            serializedObject.ApplyModifiedProperties();
+            serializedObject.Update();
+
             EditorGUILayout.BeginVertical();
             var tempGridWidth = EditorGUILayout.IntField(_newGridWidth);
             if (tempGridWidth != _gridWidth.intValue)
