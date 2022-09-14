@@ -17,6 +17,7 @@ public class HUDScript : MonoBehaviour
     [SerializeField] private Button endTurnButton;
 
     [SerializeField] private CanvasGroup ingameHUDScreen;
+    [SerializeField] private CanvasGroup pauseScreen;
     [SerializeField] private CanvasGroup levelCompleteScreen;
     [SerializeField] private CanvasGroup defeatedScreen;
 
@@ -141,6 +142,23 @@ public class HUDScript : MonoBehaviour
         dropDown = !dropDown;
     }
 
+    public void ShowPauseScreen()
+    {
+        pauseScreen.alpha = 1;
+        pauseScreen.interactable = true;
+        pauseScreen.blocksRaycasts = true;
+        Time.timeScale = 0;
+
+        ingameHUDScreen.alpha = 0;
+        ingameHUDScreen.interactable = false;
+        ingameHUDScreen.blocksRaycasts = false;
+    }
+
+    public void ToggleSettingsMenu()
+    {
+        GameManager.Instance.EnableSettingsMenu();
+    }
+
     public void ShowLevelCompleteScreen()
     {
         levelCompleteScreen.alpha = 1;
@@ -163,9 +181,26 @@ public class HUDScript : MonoBehaviour
         ingameHUDScreen.blocksRaycasts = false;
     }
 
+    public void ResumeLevel()
+    {
+        pauseScreen.alpha = 0;
+        pauseScreen.interactable = false;
+        pauseScreen.blocksRaycasts = false;
+        Time.timeScale = 1;
+
+        ingameHUDScreen.alpha = 1;
+        ingameHUDScreen.interactable = true;
+        ingameHUDScreen.blocksRaycasts = true;
+    }
+
+    public void Continue()
+    {
+        GameManager.Instance.LoadNextGameScene();
+    }
+
     public void ReloadLevel()
     {
-        GameManager.Instance.LoadGameScene();
+        GameManager.Instance.ReloadGameScene();
     }
 
     public void LoadMainMenu()

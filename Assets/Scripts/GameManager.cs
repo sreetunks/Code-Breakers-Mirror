@@ -1,21 +1,33 @@
 using System.Collections;
+using System.IO;
+using System.Runtime.Serialization.Formatters.Binary;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
 public class GameManager : MonoBehaviour
 {
+    [System.Serializable]
+    class SaveData
+    {
+        public System.DateTime lastPlayed;
+        public System.TimeSpan playTime;
+        public int lastSceneIndex;
+    }
+
     public static GameManager Instance;
     public SoundManager SoundManager { get; private set; }
 
-    public AudioSource mainMenuTheme;
     public AudioSource mainMenuSfx;
 
     public GameObject saveMenu;
-    public GameObject settingsMenu;
+    public MenuScreen settingsMenu;
     public GameObject creditsMenu;
     public GameObject exitMenu;
 
-    public bool isPaused = false;
+    [SerializeField] AudioClip mainMenuMusic;
+
+    private SaveData _saveData = new SaveData();
+    BinaryFormatter _binaryFormatter = new BinaryFormatter();
 
     private void Awake()
     {
@@ -25,11 +37,43 @@ public class GameManager : MonoBehaviour
             SoundManager = GetComponent<SoundManager>();
             transform.parent = null;
             DontDestroyOnLoad(gameObject);
+
+            if (HasSaveGame()) LoadSavedData();
         }
         else
         {
             Destroy(gameObject);
         }
+    }
+
+    private void OnGameSceneLoaded(Scene scene, LoadSceneMode loadSceneMode)
+    {
+        SceneManager.sceneLoaded -= OnGameSceneLoaded;
+        SoundManager.PlayInGameMusic();
+        _saveData.lastSceneIndex = scene.buildIndex;
+        SaveGame();
+    }
+
+    public bool HasSaveGame()
+    {
+        return File.Exists(Application.persistentDataPath + "/gamedata.sav");
+    }
+
+    public void LoadSavedData()
+    {
+        var file = new FileStream(Application.persistentDataPath + "/gamedata.sav", FileMode.Open);
+        _saveData = _binaryFormatter.Deserialize(file) as SaveData;
+        file.Close();
+    }
+
+    public void SaveGame()
+    {
+        _saveData.lastPlayed = System.DateTime.Now;
+        _saveData.lastSceneIndex = SceneManager.GetActiveScene().buildIndex;
+
+        var file = new FileStream(Application.persistentDataPath + "/gamedata.sav", FileMode.OpenOrCreate);
+        _binaryFormatter.Serialize(file, _saveData);
+        file.Close();
     }
 
     public void ToggleSaveMenu()
@@ -38,10 +82,19 @@ public class GameManager : MonoBehaviour
         StartCoroutine(MenuSoundEffect());
     }
 
+    public void EnableSettingsMenu()
+    {
+        settingsMenu.Show();
+    }
+
     public void ToggleSettingsMenu()
     {
-        settingsMenu.SetActive(!settingsMenu.activeInHierarchy);
-        mainMenuTheme.Stop();
+        if (settingsMenu.Visible)
+            settingsMenu.Hide();
+        else
+            settingsMenu.Show();
+
+        SoundManager.PauseMusic();
         StartCoroutine(MenuSoundEffect());
     }
 
@@ -57,7 +110,30 @@ public class GameManager : MonoBehaviour
         StartCoroutine(MenuSoundEffect());
     }
 
-    public void LoadGameScene() { SceneManager.LoadScene(1); }
+    public void LoadNewGame()
+    {
+        SceneManager.sceneLoaded += OnGameSceneLoaded;
+        SceneManager.LoadScene(1);
+    }
+
+    public void LoadSavedGameScene()
+    {
+        SceneManager.sceneLoaded += OnGameSceneLoaded;
+        SceneManager.LoadScene(_saveData.lastSceneIndex);
+    }
+
+    public void LoadNextGameScene()
+    {
+        var scene = SceneManager.GetActiveScene();
+        SceneManager.sceneLoaded += OnGameSceneLoaded;
+        SceneManager.LoadScene(scene.buildIndex + 1);
+    }
+
+    public void ReloadGameScene()
+    {
+        var scene = SceneManager.GetActiveScene();
+        SceneManager.LoadScene(scene.buildIndex);
+    }
 
     public void LoadMainMenuScene() { SceneManager.LoadScene(0); }
 
