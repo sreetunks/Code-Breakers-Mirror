@@ -5,7 +5,7 @@ public class MenuButtonFunctions : MonoBehaviour
     // Button to load the last saved game
     public void Continue()
     {
-        GameManager.Instance.LoadGameScene();
+        GameManager.Instance.LoadNextGameScene();
     }
 
     // Button to start a new game
@@ -51,23 +51,12 @@ public class MenuButtonFunctions : MonoBehaviour
         GameManager.Instance.mainMenuSfx.Play();
 
         GameManager.Instance.saveMenu.SetActive(false);
-        GameManager.Instance.settingsMenu.SetActive(false);
         GameManager.Instance.creditsMenu.SetActive(false);
         GameManager.Instance.exitMenu.SetActive(false);
-
-        if (GameManager.Instance.SoundManager.musicSource.mute == false)
-        {
-            GameManager.Instance.SoundManager.ToggleMusic();
-        }
 
         if (GameManager.Instance.SoundManager.effectSource.mute == false)
         {
             GameManager.Instance.SoundManager.ToggleEffects();
-        }
-
-        if (GameManager.Instance.settingsMenu.activeInHierarchy == false && GameManager.Instance.mainMenuTheme.isPlaying != true)
-        {
-            GameManager.Instance.mainMenuTheme.Play();
         }
 
         GameManager.Instance.mainMenuSfx.mute = true;
