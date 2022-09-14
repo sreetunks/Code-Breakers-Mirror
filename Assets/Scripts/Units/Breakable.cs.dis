@@ -1,0 +1,57 @@
+// using Grid;
+// using UnityEngine;
+//
+// namespace Units
+// {
+//     public class Breakable : MonoBehaviour, IGridObject, IDamageable
+//     {
+//         public delegate void OnObjectDamagedEventHandler(int damageDealt);
+//         public delegate void OnObjectDeathEventHandler(Breakable unit);
+//
+//         private readonly OnObjectDeathEventHandler _onObjectDeath;
+//         private readonly OnObjectDamagedEventHandler _onObjectDamaged;
+//
+//         [SerializeField] private int health;
+//
+//         public Breakable(OnObjectDamagedEventHandler onObjectDamaged, OnObjectDeathEventHandler onObjectDeath, int maximumHealth, int currentHealth) // TODO: THIS IS A PLACEHOLDER METHOD TO KEEP THE EDITOR FROM BREAKING
+//         {
+//             _onObjectDamaged = onObjectDamaged;
+//             _onObjectDeath = onObjectDeath;
+//             MaximumHealth = maximumHealth;
+//             CurrentHealth = currentHealth;
+//         }
+//
+//         public GridCellState GridCellPreviousState { get; set; }
+//         public GridPosition Position { get; private set; }
+//
+//         public int Health => health;
+//         // Start is called before the first frame update
+//         private void Start()
+//         {
+//             GetComponentInChildren<UnitSelectedVisual>().UpdateVisual(false);
+//             Position = GridSystem.GetGridPosition(transform.position);
+//             GridCellPreviousState = GridCellState.Impassable;
+//             GridSystem.UpdateGridObjectPosition(this, Position);
+//             transform.position = GridSystem.GetWorldPosition(Position);
+//         }
+//
+//         public int MaximumHealth { get; } // TODO: THIS IS A PLACEHOLDER METHOD TO KEEP THE EDITOR FROM BREAKING
+//         public int CurrentHealth { get; } // TODO: THIS IS A PLACEHOLDER METHOD TO KEEP THE EDITOR FROM BREAKING
+//
+//         public void TakeDamage(int damageDealt)
+//         {
+//             health = Mathf.Max(0, health - damageDealt);
+//             _onObjectDamaged?.Invoke(damageDealt);
+//             if (health != 0) return;
+//             _onObjectDeath?.Invoke(this); // Invoke is considered Expensive
+//
+//             gameObject.SetActive(false);
+//             GridSystem.SetGridCellState(Position, GridCellPreviousState);
+//         }
+//
+//         public void Heal(int healthRestored) // TODO: THIS IS A PLACEHOLDER METHOD TO KEEP THE EDITOR FROM BREAKING
+//         {
+//             throw new System.NotImplementedException();
+//         }
+//     }
+// }
