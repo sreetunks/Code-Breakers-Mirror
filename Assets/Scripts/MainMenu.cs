@@ -9,6 +9,7 @@ public class MainMenu : MonoBehaviour
     public GameObject creditsMenu;
     public GameObject exitMenu;
 
+    [SerializeField] Button continueButton;
     [SerializeField] Button exitButton;
 
     private void Awake()
@@ -20,6 +21,7 @@ public class MainMenu : MonoBehaviour
 
     private void Start()
     {
+        continueButton.interactable = GameManager.Instance.HasSaveGame();
         GameManager.Instance.mainMenuSfx = mainMenuSfx;
 
         GameManager.Instance.saveMenu = saveMenu;
