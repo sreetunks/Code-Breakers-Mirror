@@ -111,7 +111,7 @@ namespace Units
             ability.Use(controlledUnit, targetGridPosition);
         }
 
-        public override void TargetAbility(Unit owningUnit, UnitTargetedAbility ability)
+        public override void TargetAbility(Unit owningUnit, UnitTargetedAbility ability, int range)
         {
         }
     }

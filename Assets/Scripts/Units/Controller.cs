@@ -15,7 +15,7 @@ namespace Units
         public abstract FactionType Faction { get; }
 
         public abstract void TargetAbility(Unit owningUnit, PositionTargetedAbility ability, int range);
-        public abstract void TargetAbility(Unit owningUnit, UnitTargetedAbility ability);
+        public abstract void TargetAbility(Unit owningUnit, UnitTargetedAbility ability, int range);
 
         public abstract void BeginTurn();
     }

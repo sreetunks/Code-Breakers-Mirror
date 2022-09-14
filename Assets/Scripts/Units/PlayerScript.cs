@@ -139,6 +139,16 @@ namespace Units
                                 _inputState = InputState.Active;
                             }
                         }
+                        else if (Input.GetMouseButton(1))
+                        {
+                            _unitTargetedAbility = null;
+
+                            _inputState = InputState.Active;
+
+                            GridSystem.ResetGridRangeInfo();
+                            GridSystem.HighlightPosition = GridPosition.Invalid;
+                            GridSystem.HighlightRange = -1;
+                        }
                         break;
                     }
                 default:
@@ -244,10 +254,11 @@ namespace Units
             GridSystem.HighlightPosition = owningUnit.Position;
         }
 
-        public override void TargetAbility(Unit owningUnit, UnitTargetedAbility ability)
+        public override void TargetAbility(Unit owningUnit, UnitTargetedAbility ability, int range)
         {
             _unitTargetedAbility = ability;
             _inputState = InputState.TargetingUnit;
+            GridSystem.HighlightPosition = owningUnit.Position;
         }
     }
 }
