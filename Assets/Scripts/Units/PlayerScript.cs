@@ -154,6 +154,11 @@ namespace Units
                 default:
                     throw new ArgumentOutOfRangeException();
             }
+
+            if (Input.GetKeyDown(KeyCode.Escape))
+            {
+                playerHUD.ShowPauseScreen();
+            }
         }
 
         private void OnReachedLevelExit()
