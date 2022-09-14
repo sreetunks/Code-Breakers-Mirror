@@ -39,17 +39,20 @@ namespace Abilities
 
         public override bool Use(Unit owningUnit, GridPosition targetPosition)
         {
+            var range = (owningUnit.CurrentAP / apCostPerTile);
+
             var movePath = new List<GridPosition>();
             PathFinding.GetPath(owningUnit.Position, targetPosition, ref movePath);
-            if (movePath.Count == 0) return false;
-
-            var start = owningUnit.Position;
-            var end = movePath[^1];
-
             var distanceMoved = movePath.Count;
-            var range = (owningUnit.CurrentAP / apCostPerTile);
+
+            if (distanceMoved == 0)
+                return false;
+
             if (distanceMoved > range)
             {
+                if (owningUnit.Controller.Faction == Controller.FactionType.Player)
+                    return false;
+
                 movePath.RemoveRange(range, movePath.Count - range);
                 distanceMoved = range;
             }

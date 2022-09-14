@@ -99,9 +99,6 @@ namespace Units
                         if (Input.GetMouseButton(0) && !EventSystem.current.IsPointerOverGameObject() && _positionTargetedAbility != null) // Comparing to Null is considered Expensive
                         {
                             var targetGridPosition = GridSystem.GetGridPosition(MouseWorld.GetPosition()); // Get Position is considered Expensive
-                            var movePath = new List<GridPosition>();
-                            PathFinding.GetPath(CurrentlySelectedUnit.Position, targetGridPosition, ref movePath);
-                            if (movePath.Count > _targetingRange) return;
                             if (_positionTargetedAbility.Use(CurrentlySelectedUnit, targetGridPosition))
                             {
                                 _positionTargetedAbility = null;
