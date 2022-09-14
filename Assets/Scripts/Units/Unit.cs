@@ -203,18 +203,6 @@ namespace Units
             }
         }
 
-        public void RangedAttack(int attackDamage)
-        {
-            var controlledUnit = PlayerScript.CurrentlySelectedUnit;
-            var playerCharacter = PlayerScript.PlayerCharacter;
-            var distanceToPlayer = Mathf.Abs(playerCharacter.Position.X - controlledUnit.Position.X) + Mathf.Abs(playerCharacter.Position.Z - controlledUnit.Position.Z);
-
-            if (distanceToPlayer == 3)
-            {
-                controlledUnit.TakeDamage(attackDamage);
-            }
-        }
-
         public void ConsumeAP(int apToConsume)
         {
             _currentAP -= apToConsume;
