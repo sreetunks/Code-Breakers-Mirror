@@ -7,15 +7,14 @@ public class GameManager : MonoBehaviour
     public static GameManager Instance;
     public SoundManager SoundManager { get; private set; }
 
-    public AudioSource mainMenuTheme;
     public AudioSource mainMenuSfx;
 
     public GameObject saveMenu;
-    public GameObject settingsMenu;
+    public MenuScreen settingsMenu;
     public GameObject creditsMenu;
     public GameObject exitMenu;
 
-    public bool isPaused = false;
+    [SerializeField] AudioClip mainMenuMusic;
 
     private void Awake()
     {
@@ -32,16 +31,31 @@ public class GameManager : MonoBehaviour
         }
     }
 
+    private void OnGameSceneLoaded(Scene scene, LoadSceneMode loadSceneMode)
+    {
+        SceneManager.sceneLoaded -= OnGameSceneLoaded;
+        SoundManager.PlayInGameMusic();
+    }
+
     public void ToggleSaveMenu()
     {
         saveMenu.SetActive(!saveMenu.activeInHierarchy);
         StartCoroutine(MenuSoundEffect());
     }
 
+    public void EnableSettingsMenu()
+    {
+        settingsMenu.Show();
+    }
+
     public void ToggleSettingsMenu()
     {
-        settingsMenu.SetActive(!settingsMenu.activeInHierarchy);
-        mainMenuTheme.Stop();
+        if (settingsMenu.Visible)
+            settingsMenu.Hide();
+        else
+            settingsMenu.Show();
+
+        SoundManager.PauseMusic();
         StartCoroutine(MenuSoundEffect());
     }
 
@@ -57,7 +71,18 @@ public class GameManager : MonoBehaviour
         StartCoroutine(MenuSoundEffect());
     }
 
-    public void LoadGameScene() { SceneManager.LoadScene(1); }
+    public void LoadNextGameScene()
+    {
+        var scene = SceneManager.GetActiveScene();
+        SceneManager.sceneLoaded += OnGameSceneLoaded;
+        SceneManager.LoadScene(scene.buildIndex + 1);
+    }
+
+    public void ReloadGameScene()
+    {
+        var scene = SceneManager.GetActiveScene();
+        SceneManager.LoadScene(scene.buildIndex);
+    }
 
     public void LoadMainMenuScene() { SceneManager.LoadScene(0); }
 
