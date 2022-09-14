@@ -5,6 +5,7 @@ using UnityEngine.SceneManagement;
 public class GameManager : MonoBehaviour
 {
     public static GameManager Instance;
+    public SoundManager SoundManager { get; private set; }
 
     public AudioSource mainMenuTheme;
     public AudioSource mainMenuSfx;
@@ -21,6 +22,7 @@ public class GameManager : MonoBehaviour
         if (Instance == null)
         {
             Instance = this;
+            SoundManager = GetComponent<SoundManager>();
             transform.parent = null;
             DontDestroyOnLoad(gameObject);
         }

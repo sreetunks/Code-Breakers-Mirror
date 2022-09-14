@@ -55,14 +55,14 @@ public class MenuButtonFunctions : MonoBehaviour
         GameManager.Instance.creditsMenu.SetActive(false);
         GameManager.Instance.exitMenu.SetActive(false);
 
-        if (SoundManager.Instance.musicSource.mute == false)
+        if (GameManager.Instance.SoundManager.musicSource.mute == false)
         {
-            SoundManager.Instance.ToggleMusic();
+            GameManager.Instance.SoundManager.ToggleMusic();
         }
 
-        if (SoundManager.Instance.effectSource.mute == false)
+        if (GameManager.Instance.SoundManager.effectSource.mute == false)
         {
-            SoundManager.Instance.ToggleEffects();
+            GameManager.Instance.SoundManager.ToggleEffects();
         }
 
         if (GameManager.Instance.settingsMenu.activeInHierarchy == false && GameManager.Instance.mainMenuTheme.isPlaying != true)
