@@ -12,6 +12,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6f816ae03d8437b43aa1832f54aa2e9f, type: 3}
   m_Name: Range Attack
   m_EditorClassIdentifier: 
-  attackDamage: 4
+  attackDamage: 3
   cooldownDuration: 2
   actionPointCost: 4
