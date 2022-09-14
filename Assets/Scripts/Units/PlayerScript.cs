@@ -36,6 +36,8 @@ namespace Units
         readonly List<Unit> _controlledUnits = new List<Unit>();
         InputState _inputState;
 
+        private List<Unit>.Enumerator _unitEnumerator;
+
         private void Awake()
         {
             if (Instance)
