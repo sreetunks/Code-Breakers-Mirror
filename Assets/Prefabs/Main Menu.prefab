@@ -1762,11 +1762,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 52cbf0f42ba6c5243a733c4f05b96382, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  mainMenuTheme: {fileID: 0}
   mainMenuSfx: {fileID: 1663246538}
   saveMenu: {fileID: 3638957679732253656}
   creditsMenu: {fileID: 3638957680420294704}
   exitMenu: {fileID: 3638957679536030826}
+  continueButton: {fileID: 3638957679403945601}
   exitButton: {fileID: 3638957679219922371}
 --- !u!1 &3638957680040057724
 GameObject:
