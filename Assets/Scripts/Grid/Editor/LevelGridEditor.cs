@@ -62,7 +62,7 @@ namespace Grid.Editor
             if (Event.current.type == EventType.MouseDown && Event.current.button == 0)
             {
                 var mouseDirRay = HandleUtility.GUIPointToWorldRay(Event.current.mousePosition);
-                if (Physics.Raycast(mouseDirRay, out var hit, LayerMask.GetMask("MousePlane")))
+                if (Physics.Raycast(mouseDirRay, out var hit, Mathf.Infinity, LayerMask.GetMask("MousePlane")))
                 {
                     if (!Event.current.shift) _selectedGridTiles.Clear();
 
@@ -198,6 +198,9 @@ namespace Grid.Editor
             EditorGUILayout.EndVertical();
             EditorGUILayout.Space();
 
+            serializedObject.ApplyModifiedProperties();
+            serializedObject.Update();
+
             EditorGUILayout.BeginVertical();
             var tempGridWidth = EditorGUILayout.IntField(_newGridWidth);
             if (tempGridWidth != _gridWidth.intValue)
@@ -244,6 +247,17 @@ namespace Grid.Editor
 
             if (GUI.Button(EditorGUILayout.GetControlRect(
                 GUILayout.MinHeight(EditorGUIUtility.singleLineHeight * 1.5f)),
+                "Regenerate Mesh"))
+            {
+                _levelGrid.UpdateGridMeshData(); // Update Grid Mesh Data is considered Expensive
+
+                _selectedGridTiles.Clear();
+
+                EditorUtility.SetDirty(target);
+            }
+
+            if (GUI.Button(EditorGUILayout.GetControlRect(
+                GUILayout.MinHeight(EditorGUIUtility.singleLineHeight * 1.5f)),
                 "Reset"))
             {
                 _gridWidth.intValue = _newGridWidth;
@@ -259,18 +273,6 @@ namespace Grid.Editor
 
                 _selectedGridTiles.Clear();
                 _gridOffset.vector3Value = _levelGrid.GridOffset;
-
-                if (serializedObject.ApplyModifiedProperties())
-                    EditorUtility.SetDirty(target);
-            }
-
-            if (GUI.Button(EditorGUILayout.GetControlRect(
-                GUILayout.MinHeight(EditorGUIUtility.singleLineHeight * 1.5f)),
-                "Regenerate Mesh"))
-            {
-                _levelGrid.UpdateGridMeshData(); // Update Grid Mesh Data is considered Expensive
-
-                _selectedGridTiles.Clear();
 
                 if (serializedObject.ApplyModifiedProperties())
                     EditorUtility.SetDirty(target);

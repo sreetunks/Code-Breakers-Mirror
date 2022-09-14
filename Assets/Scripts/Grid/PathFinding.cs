@@ -10,8 +10,9 @@ namespace Grid
         {
             outPath.Clear();
             GridSystem.TryGetGridCellState(target, out var targetCellState);
-            
-            if (targetCellState is GridCellState.Impassable or GridCellState.Occupied) return; //Prevents walking to a location that is impassable or occupied
+
+            if (start == target) return;
+            if (targetCellState is GridCellState.Impassable or GridCellState.Occupied or GridCellState.OccupiedEnemy) return; //Prevents walking to a location that is impassable or occupied
 
             //Do-While Control Var
             var count = 0; 
@@ -38,7 +39,7 @@ namespace Grid
                     var gp = new GridPosition(posS.X + j, posS.Z + k); // Get the GridPosition
                     if (gp == lastPos) continue;
                     GridSystem.TryGetGridCellState(gp, out var cellState);    //Get the state of that GridPosition
-                    if (cellState is not (GridCellState.Impassable or GridCellState.Occupied))
+                    if (cellState is not (GridCellState.Impassable or GridCellState.Occupied or GridCellState.OccupiedEnemy))
                         if (minDistance > GridSystem.GetDistance(target, gp))
                         {
                             position = gp;
