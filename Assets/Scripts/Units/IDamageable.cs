@@ -6,6 +6,5 @@ namespace Units
         public int CurrentHealth { get; }
 
         void TakeDamage(int damageDealt);
-        void Heal(int healthRestored);
     }
 }
