@@ -147,6 +147,7 @@ public class HUDScript : MonoBehaviour
         pauseScreen.alpha = 1;
         pauseScreen.interactable = true;
         pauseScreen.blocksRaycasts = true;
+        Time.timeScale = 0;
 
         ingameHUDScreen.alpha = 0;
         ingameHUDScreen.interactable = false;
@@ -180,6 +181,7 @@ public class HUDScript : MonoBehaviour
         pauseScreen.alpha = 0;
         pauseScreen.interactable = false;
         pauseScreen.blocksRaycasts = false;
+        Time.timeScale = 1;
 
         ingameHUDScreen.alpha = 1;
         ingameHUDScreen.interactable = true;
