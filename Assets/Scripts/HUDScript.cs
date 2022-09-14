@@ -17,6 +17,7 @@ public class HUDScript : MonoBehaviour
     [SerializeField] private Button endTurnButton;
 
     [SerializeField] private CanvasGroup ingameHUDScreen;
+    [SerializeField] private CanvasGroup pauseScreen;
     [SerializeField] private CanvasGroup levelCompleteScreen;
     [SerializeField] private CanvasGroup defeatedScreen;
 
@@ -141,6 +142,17 @@ public class HUDScript : MonoBehaviour
         dropDown = !dropDown;
     }
 
+    public void ShowPauseScreen()
+    {
+        pauseScreen.alpha = 1;
+        pauseScreen.interactable = true;
+        pauseScreen.blocksRaycasts = true;
+
+        ingameHUDScreen.alpha = 0;
+        ingameHUDScreen.interactable = false;
+        ingameHUDScreen.blocksRaycasts = false;
+    }
+
     public void ShowLevelCompleteScreen()
     {
         levelCompleteScreen.alpha = 1;
@@ -161,6 +173,22 @@ public class HUDScript : MonoBehaviour
         ingameHUDScreen.alpha = 0;
         ingameHUDScreen.interactable = false;
         ingameHUDScreen.blocksRaycasts = false;
+    }
+
+    public void ResumeLevel()
+    {
+        pauseScreen.alpha = 0;
+        pauseScreen.interactable = false;
+        pauseScreen.blocksRaycasts = false;
+
+        ingameHUDScreen.alpha = 1;
+        ingameHUDScreen.interactable = true;
+        ingameHUDScreen.blocksRaycasts = true;
+    }
+
+    public void Continue()
+    {
+
     }
 
     public void ReloadLevel()
