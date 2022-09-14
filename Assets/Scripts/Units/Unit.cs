@@ -52,7 +52,6 @@ namespace Units
         private int _currentAP;
         private int _currentShields;
         private List<AbilityData> _unitAbilityDataList;
-
         private static readonly int IsWalking = Animator.StringToHash("IsWalking"); // Caching ID for Parameter
 
         public Controller Controller { get; set; }
@@ -190,6 +189,30 @@ namespace Units
             _currentShields = shieldsGained;
 
             OnUnitDamaged?.Invoke(0);
+        }
+
+        public void MeleeAttack(int attackDamage)
+        {
+            var controlledUnit = PlayerScript.CurrentlySelectedUnit;
+            var playerCharacter = PlayerScript.PlayerCharacter;
+            var distanceToPlayer = Mathf.Abs(playerCharacter.Position.X - controlledUnit.Position.X) + Mathf.Abs(playerCharacter.Position.Z - controlledUnit.Position.Z);
+
+            if (distanceToPlayer <= 1)
+            {
+                controlledUnit.TakeDamage(attackDamage);
+            }
+        }
+
+        public void RangedAttack(int attackDamage)
+        {
+            var controlledUnit = PlayerScript.CurrentlySelectedUnit;
+            var playerCharacter = PlayerScript.PlayerCharacter;
+            var distanceToPlayer = Mathf.Abs(playerCharacter.Position.X - controlledUnit.Position.X) + Mathf.Abs(playerCharacter.Position.Z - controlledUnit.Position.Z);
+
+            if (distanceToPlayer == 3)
+            {
+                controlledUnit.TakeDamage(attackDamage);
+            }
         }
 
         public void ConsumeAP(int apToConsume)
