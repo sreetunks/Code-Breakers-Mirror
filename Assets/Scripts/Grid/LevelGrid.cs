@@ -72,6 +72,45 @@ namespace Grid
             }
             mesh.SetVertexBufferData(cellStateArray, 0, 0, vertexCount, 2);
         }
+
+        public void UpdateCellRangeInfo(NativeArray<float> rangeArray)
+        {
+            var mesh = _meshFilter.mesh;
+            var vertexCount = gridWidth * gridHeight * 4;
+            var cellStateArray = new NativeArray<float>(vertexCount, Allocator.Temp);
+            for (var y = 0; y < gridHeight; ++y)
+            {
+                for (var x = 0; x < gridWidth; ++x)
+                {
+                    var idx = (y * gridWidth) + x;
+                    var vertIndex = GetCellStateVertexIndex(x, y);
+                    cellStateArray[vertIndex] = rangeArray[idx];
+                    cellStateArray[vertIndex + 1] = rangeArray[idx];
+                    cellStateArray[vertIndex + 2] = rangeArray[idx];
+                    cellStateArray[vertIndex + 3] = rangeArray[idx];
+                }
+            }
+            mesh.SetVertexBufferData(cellStateArray, 0, 0, vertexCount, 3);
+        }
+
+        public void ResetCellRangeInfo()
+        {
+            var mesh = _meshFilter.mesh;
+            var vertexCount = gridWidth * gridHeight * 4;
+            var cellStateArray = new NativeArray<float>(vertexCount, Allocator.Temp);
+            for (var y = 0; y < gridHeight; ++y)
+            {
+                for (var x = 0; x < gridWidth; ++x)
+                {
+                    var vertIndex = GetCellStateVertexIndex(x, y);
+                    cellStateArray[vertIndex] = 0;
+                    cellStateArray[vertIndex + 1] = 0;
+                    cellStateArray[vertIndex + 2] = 0;
+                    cellStateArray[vertIndex + 3] = 0;
+                }
+            }
+            mesh.SetVertexBufferData(cellStateArray, 0, 0, vertexCount, 3);
+        }
 #if UNITY_EDITOR
         public void UpdateGridMeshData()
         {
@@ -87,13 +126,14 @@ namespace Grid
             {
                 new VertexAttributeDescriptor(VertexAttribute.Position, VertexAttributeFormat.Float32, 3),
                 new VertexAttributeDescriptor(VertexAttribute.TexCoord0, VertexAttributeFormat.Float32, 2, 1),
-                new VertexAttributeDescriptor(VertexAttribute.Color, VertexAttributeFormat.Float32, 1, 2)
+                new VertexAttributeDescriptor(VertexAttribute.TexCoord1, VertexAttributeFormat.Float32, 1, 2),
+                new VertexAttributeDescriptor(VertexAttribute.TexCoord2, VertexAttributeFormat.Float32, 1, 3)
             };
             gridMesh.SetVertexBufferParams(vertexCount, vertexLayout);
 
             var posArray = new NativeArray<Vector3>(vertexCount, Allocator.Temp);
             var uvArray = new NativeArray<Vector2>(vertexCount, Allocator.Temp);
-
+            var pathfindingArray = new NativeArray<float>(vertexCount, Allocator.Temp);
             var gridVertexOffset = gridOffset - transform.position;
 
             for (var y = 0; y < gridHeight; ++y)
@@ -104,22 +144,23 @@ namespace Grid
                     var idx = ((y * gridWidth) + x) * 4;
 
                     posArray[idx] = gridVertexOffset + cellCenter;
-                    uvArray[idx] = new Vector2((float)x / gridWidth, (float)y / gridHeight);
+                    uvArray[idx] = new Vector2(0, 0);
 
                     posArray[idx + 1] = gridVertexOffset + cellCenter + new Vector3(0, 0, gridCellSize);
-                    uvArray[idx + 1] = new Vector2((float)x / gridWidth, (float)(y + 1) / gridHeight);
+                    uvArray[idx + 1] = new Vector2(0, 1);
 
                     posArray[idx + 2] = gridVertexOffset + cellCenter + new Vector3(gridCellSize, 0, gridCellSize);
-                    uvArray[idx + 2] = new Vector2((float)(x + 1) / gridWidth, (float)(y + 1) / gridHeight);
+                    uvArray[idx + 2] = new Vector2(1, 1);
 
                     posArray[idx + 3] = gridVertexOffset + cellCenter + new Vector3(gridCellSize, 0, 0);
-                    uvArray[idx + 3] = new Vector2((float)(x + 1) / gridWidth, (float)y / gridHeight);
+                    uvArray[idx + 3] = new Vector2(1, 0);
                 }
             }
 
             UpdateCellState(gridMesh);
             gridMesh.SetVertexBufferData(posArray, 0, 0, vertexCount, 0);
             gridMesh.SetVertexBufferData(uvArray, 0, 0, vertexCount, 1);
+            gridMesh.SetVertexBufferData(pathfindingArray, 0, 0, vertexCount, 3);
 
             var indices = new NativeArray<ushort>(quadCount * 6, Allocator.Temp);
 
@@ -166,6 +207,13 @@ namespace Grid
             _meshCollider.sharedMesh = gridMesh;
         }
 
+        public void UpdateGrid()
+        {
+            if (_meshFilter == null) _meshFilter = GetComponent<MeshFilter>(); // Get Components is considered Expensive
+            if (_meshCollider == null) _meshCollider = GetComponent<MeshCollider>(); // Get Components is considered Expensive
+            UpdateCellState(_meshFilter.sharedMesh);
+            _meshCollider.sharedMesh = _meshFilter.sharedMesh;
+        }
         public void ResetGrid()
         {
             gridOffset = transform.position + (new Vector3(-0.5f * gridWidth, 0, -0.5f * gridHeight) * gridCellSize);
@@ -187,14 +235,6 @@ namespace Grid
             westDoorGridPosition = GridPosition.Invalid;
 
             UpdateGridMeshData(); // Update the Mesh is considered Expensive
-        }
-
-        public void UpdateGrid()
-        {
-            if (_meshFilter == null) _meshFilter = GetComponent<MeshFilter>(); // Get Components is considered Expensive
-            if (_meshCollider == null) _meshCollider = GetComponent<MeshCollider>(); // Get Components is considered Expensive
-            UpdateCellState(_meshFilter.sharedMesh);
-            _meshCollider.sharedMesh = _meshFilter.sharedMesh;
         }
 #endif
         public void SetDoorLock(bool shouldLock)

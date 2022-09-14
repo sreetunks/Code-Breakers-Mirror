@@ -34,6 +34,7 @@ namespace Units
 
         Unit _selectedUnit;
         readonly List<Unit> _controlledUnits = new List<Unit>();
+        private List<Unit> _perTurnUnitList;
         InputState _inputState;
 
         private List<Unit>.Enumerator _unitEnumerator;
@@ -58,6 +59,7 @@ namespace Units
         {
             playerCharacter.OnUnitDeath += OnPlayerCharacterDeath;
             playerCharacter.OnUnitReachedLevelExit += OnReachedLevelExit;
+            TurnOrderSystem.MoveNext();
             SelectUnit(playerCharacter);
         }
 
@@ -67,74 +69,81 @@ namespace Units
             {
                 case InputState.Inactive: return;
                 case InputState.Active:
-                {
-                    if (Input.GetMouseButtonDown(0) && !EventSystem.current.IsPointerOverGameObject())
                     {
-                        var targetGridPosition = GridSystem.GetGridPosition(MouseWorld.GetPosition()); // Get Position is considered Expensive
-                        GridSystem.TryGetGridObject(targetGridPosition, out var targetObject);
-                        var targetUnit = targetObject as Unit;
-                        if (targetUnit && targetUnit != _selectedUnit)
-                            SelectUnit(targetUnit); // Select unit is considered Expensive
+                        if (Input.GetMouseButtonDown(0) && !EventSystem.current.IsPointerOverGameObject())
+                        {
+                            var targetGridPosition = GridSystem.GetGridPosition(MouseWorld.GetPosition()); // Get Position is considered Expensive
+                            GridSystem.TryGetGridObject(targetGridPosition, out var targetObject);
+                            var targetUnit = targetObject as Unit;
+                            if (targetUnit && targetUnit != _selectedUnit)
+                                SelectUnit(targetUnit); // Select unit is considered Expensive
+                        }
+                        else if (Input.GetMouseButtonDown(1) && !EventSystem.current.IsPointerOverGameObject() && _selectedUnit && _selectedUnit.IsOnDoorGridCell && !GridSystem.ActiveLevelGrid.AreDoorsLocked)
+                        {
+                            var newGridPosition = GridSystem.SwitchLevelGrid(_selectedUnit.Position, _selectedUnit.GridCellPreviousState); // Switch Level Grid is considered Expensive
+                            var targetPosition = GridSystem.GetWorldPosition(newGridPosition);
+                            _selectedUnit.ForceMove(targetPosition);
+                            _selectedUnit.transform.position = targetPosition;
+                            GridSystem.UpdateGridObjectPosition(_selectedUnit, newGridPosition);
+                            mainCamera.UpdateTarget(GridSystem.ActiveLevelGrid.transform);
+                            TurnOrderSystem.MoveNext();
+                        }
+                        else if (Input.GetKeyDown(KeyCode.K))
+                        {
+                            _selectedUnit.TakeDamage(1); // Take Damage is considered Expensive
+                        }
+                        break;
                     }
-                    else if (Input.GetMouseButtonDown(1) && !EventSystem.current.IsPointerOverGameObject() && _selectedUnit && _selectedUnit.IsOnDoorGridCell && !GridSystem.ActiveLevelGrid.AreDoorsLocked)
-                    {
-                        var newGridPosition = GridSystem.SwitchLevelGrid(_selectedUnit.Position, _selectedUnit.GridCellPreviousState); // Switch Level Grid is considered Expensive
-                        var targetPosition = GridSystem.GetWorldPosition(newGridPosition);
-                        _selectedUnit.ForceMove(targetPosition);
-                        _selectedUnit.transform.position = targetPosition;
-                        GridSystem.UpdateGridObjectPosition(_selectedUnit, newGridPosition);
-                        mainCamera.UpdateTarget(GridSystem.ActiveLevelGrid.transform);
-                    }
-                    else if (Input.GetKeyDown(KeyCode.K))
-                    {
-                        _selectedUnit.TakeDamage(1); // Take Damage is considered Expensive
-                    }
-                    break;
-                }
                 case InputState.TargetingPosition:
-                {
-                    if (Input.GetMouseButton(0) && !EventSystem.current.IsPointerOverGameObject() && _positionTargetedAbility != null) // Comparing to Null is considered Expensive
                     {
-                        var targetGridPosition = GridSystem.GetGridPosition(MouseWorld.GetPosition()); // Get Position is considered Expensive
-                        var distance = Mathf.Abs(targetGridPosition.X - CurrentlySelectedUnit.Position.X) + Mathf.Abs(targetGridPosition.Z - CurrentlySelectedUnit.Position.Z);
-                        if (distance > _targetingRange) return;
-                        if (_positionTargetedAbility.Use(CurrentlySelectedUnit, targetGridPosition))
+                        if (Input.GetMouseButton(0) && !EventSystem.current.IsPointerOverGameObject() && _positionTargetedAbility != null) // Comparing to Null is considered Expensive
+                        {
+                            var targetGridPosition = GridSystem.GetGridPosition(MouseWorld.GetPosition()); // Get Position is considered Expensive
+                            var movePath = new List<GridPosition>();
+                            PathFinding.GetPath(CurrentlySelectedUnit.Position, targetGridPosition, ref movePath);
+                            if (movePath.Count > _targetingRange) return;
+                            if (_positionTargetedAbility.Use(CurrentlySelectedUnit, targetGridPosition))
+                            {
+                                _positionTargetedAbility = null;
+
+                                _inputState = InputState.Inactive;
+                                playerHUD.SetEndTurnButtonEnabled(false);
+                                CurrentlySelectedUnit.OnUnitActionFinished += OnSelectedUnitActionFinished;
+
+                                GridSystem.ResetGridRangeInfo();
+                                GridSystem.HighlightPosition = GridPosition.Invalid;
+                                GridSystem.HighlightRange = -1;
+                            }
+                        }
+                        else if (Input.GetMouseButton(1))
                         {
                             _positionTargetedAbility = null;
 
                             _inputState = InputState.Active;
 
+                            GridSystem.ResetGridRangeInfo();
                             GridSystem.HighlightPosition = GridPosition.Invalid;
                             GridSystem.HighlightRange = -1;
                         }
+                        break;
                     }
-                    else if (Input.GetMouseButton(1))
-                    {
-                        _positionTargetedAbility = null;
-                        _inputState = InputState.Active;
-
-                        GridSystem.HighlightPosition = GridPosition.Invalid;
-                        GridSystem.HighlightRange = -1;
-                    }
-                    break;
-                }
                 case InputState.TargetingUnit:
-                {
-                    if (_unitTargetedAbility != null && Input.GetMouseButton(0) && !EventSystem.current.IsPointerOverGameObject())
                     {
-                        var targetGridPosition = GridSystem.GetGridPosition(MouseWorld.GetPosition()); // Get Position is considered Expensive
-                        GridSystem.TryGetGridObject(targetGridPosition, out var targetObject);
-                        var targetUnit = targetObject as Unit;
-                        if (targetUnit)
+                        if (_unitTargetedAbility != null && Input.GetMouseButton(0) && !EventSystem.current.IsPointerOverGameObject())
                         {
-                            _unitTargetedAbility.Use(CurrentlySelectedUnit, targetUnit);
-                            _unitTargetedAbility = null;
+                            var targetGridPosition = GridSystem.GetGridPosition(MouseWorld.GetPosition()); // Get Position is considered Expensive
+                            GridSystem.TryGetGridObject(targetGridPosition, out var targetObject);
+                            var targetUnit = targetObject as Unit;
+                            if (targetUnit)
+                            {
+                                _unitTargetedAbility.Use(CurrentlySelectedUnit, targetUnit);
+                                _unitTargetedAbility = null;
 
-                            _inputState = InputState.Active;
+                                _inputState = InputState.Active;
+                            }
                         }
+                        break;
                     }
-                    break;
-                }
                 default:
                     throw new ArgumentOutOfRangeException();
             }
@@ -165,12 +174,19 @@ namespace Units
             _selectedUnit.GetComponentInChildren<UnitSelectedVisual>().UpdateVisual(true); // Get Component In Childern is considered Expensive
         }
 
-        private void OnSelectedUnitDeath()
+        private void OnSelectedUnitDeath(Unit unit)
         {
             SelectUnit(playerCharacter); // Select Unit is considered Expensive
         }
 
-        private void OnPlayerCharacterDeath()
+        private void OnSelectedUnitActionFinished()
+        {
+            if (CurrentlySelectedUnit != null) CurrentlySelectedUnit.OnUnitActionFinished -= OnSelectedUnitActionFinished; // Comparison to Null is Expensive
+            _inputState = InputState.Active;
+            playerHUD.SetEndTurnButtonEnabled(true);
+        }
+
+        private void OnPlayerCharacterDeath(Unit unit)
         {
             _selectedUnit.OnUnitDeath -= OnSelectedUnitDeath;
             playerHUD.ShowDefeatedScreen();
@@ -189,13 +205,31 @@ namespace Units
         public override void BeginTurn()
         {
             _inputState = InputState.Active;
+
             foreach (var controlledUnit in _controlledUnits)
                 controlledUnit.BeginTurn();
+
+            _perTurnUnitList = new List<Unit>(_controlledUnits);
+            SelectUnit(_perTurnUnitList[0]);
         }
 
         public void EndTurn()
         {
-            if(_inputState == InputState.Active) TurnOrderSystem.MoveNext();
+            if (_inputState != InputState.Active)
+                return;
+
+            _selectedUnit.EndTurn();
+            _perTurnUnitList.Remove(_selectedUnit);
+
+            if (_perTurnUnitList.Count > 0)
+                SelectUnit(_perTurnUnitList[0]);
+            else
+            {
+                TurnOrderSystem.MoveNext();
+                playerHUD.UpdateSelectedUnit(_selectedUnit);
+                playerHUD.SetEndTurnButtonEnabled(false);
+            }
+
             _inputState = InputState.Inactive;
         }
 

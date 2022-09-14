@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using Grid;
 using Units;
+using Unity.Collections;
 using UnityEngine;
 
 namespace Abilities
@@ -16,7 +17,24 @@ namespace Abilities
 
         public override int UpdateRange(Unit owningUnit)
         {
-            return (owningUnit.CurrentAP / apCostPerTile);
+            var range = (owningUnit.CurrentAP / apCostPerTile);
+            List<GridPosition> pathList = new List<GridPosition>();
+
+            var levelGrid = GridSystem.ActiveLevelGrid;
+            var cellCount = levelGrid.GridWidth * levelGrid.GridHeight;
+            var cellRangeArray = new NativeArray<float>(cellCount, Allocator.Temp);
+            for (var y = 0; y < levelGrid.GridHeight; ++y)
+            {
+                for (var x = 0; x < levelGrid.GridWidth; ++x)
+                {
+                    var idx = (y * levelGrid.GridWidth) + x;
+                    PathFinding.GetPath(owningUnit.Position, new GridPosition(x, y), ref pathList);
+                    cellRangeArray[idx] = (pathList.Count > range) ? 0 : pathList.Count;
+                }
+            }
+
+            GridSystem.UpdateGridRangeInfo(cellRangeArray);
+            return range;
         }
 
         public override bool Use(Unit owningUnit, GridPosition targetPosition)
@@ -28,7 +46,7 @@ namespace Abilities
             var start = owningUnit.Position;
             var end = movePath[^1];
 
-            var distanceMoved = Mathf.Abs(end.X - start.X) + Mathf.Abs(end.Z - start.Z);
+            var distanceMoved = movePath.Count;
             var range = (owningUnit.CurrentAP / apCostPerTile);
             if (distanceMoved > range)
             {

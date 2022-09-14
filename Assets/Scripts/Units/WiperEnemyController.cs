@@ -21,7 +21,10 @@ namespace Units
         private void Awake()
         {
             foreach (var controlledUnit in controlledUnits)
+            {
                 controlledUnit.Controller = this;
+                controlledUnit.OnUnitDeath += OnControlledUnitDeath;
+            }
         }
 
         public override void BeginTurn()
@@ -38,20 +41,29 @@ namespace Units
             var controlledUnit = _unitEnumerator.Current;
             var playerCharacter = PlayerScript.PlayerCharacter;
             if (controlledUnit == null) return; // Comparison to Null is Expensive
-            var distanceToPlayer = Mathf.Abs(playerCharacter.Position.X - controlledUnit.Position.X) + Mathf.Abs(playerCharacter.Position.Z - controlledUnit.Position.Z);
+            var distanceToPlayer = Mathf.Max(Mathf.Abs(playerCharacter.Position.X - controlledUnit.Position.X), Mathf.Abs(playerCharacter.Position.Z - controlledUnit.Position.Z));
             if (distanceToPlayer > 1 && controlledUnit.CurrentAP > 0)
             {
-                controlledUnit.OnUnitMoveFinished += OnControlledUnitMoveFinished;
+                controlledUnit.OnUnitActionFinished += OnControlledUnitActionFinished;
                 moveAbility.Use(controlledUnit);
             }
             else
                 StartCoroutine(DelayedEndTurn());
         }
 
-        private void OnControlledUnitMoveFinished()
+        void OnControlledUnitDeath(Unit unit)
+        {
+            unit.OnUnitDeath -= OnControlledUnitDeath;
+            controlledUnits.Remove(unit);
+
+            if (controlledUnits.Count == 0)
+                TurnOrderSystem.DeregisterController(this);
+        }
+
+        private void OnControlledUnitActionFinished()
         {
             var controlledUnit = _unitEnumerator.Current;
-            if (controlledUnit != null) controlledUnit.OnUnitMoveFinished -= OnControlledUnitMoveFinished; // Comparison to Null is Expensive
+            if (controlledUnit != null) controlledUnit.OnUnitActionFinished -= OnControlledUnitActionFinished; // Comparison to Null is Expensive
             ContinueTurn();
         }
 
@@ -83,7 +95,7 @@ namespace Units
                 {
                     var tempPosition = new GridPosition(playerCharacter.Position.X + x, playerCharacter.Position.Z + y);
                     if (!GridSystem.TryGetGridCellState(tempPosition, out var tempGridCellState)) continue;
-                    if (tempGridCellState is GridCellState.Impassable or GridCellState.Occupied) continue;
+                    if (tempGridCellState is GridCellState.Impassable or GridCellState.Occupied or GridCellState.OccupiedEnemy) continue;
                     if (controlledUnit != null) // Comparison to Null is Expensive
                     {
                         var distanceToPosition = Mathf.Abs(tempPosition.X - controlledUnit.Position.X) + Mathf.Abs(tempPosition.Z - controlledUnit.Position.Z);
@@ -95,6 +107,7 @@ namespace Units
                 }
             }
 
+            GridSystem.ResetGridRangeInfo();
             ability.Use(controlledUnit, targetGridPosition);
         }
 

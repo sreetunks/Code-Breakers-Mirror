@@ -1,5 +1,7 @@
 using System.Collections.Generic;
 using UnityEngine;
+using Units;
+using Unity.Collections;
 
 namespace Grid
 {
@@ -9,6 +11,7 @@ namespace Grid
         Impassable,
         Walkable,
         Occupied,
+        OccupiedEnemy,
         DoorNorth,
         DoorEast,
         DoorSouth,
@@ -18,8 +21,6 @@ namespace Grid
 
     public class GridSystem : MonoBehaviour
     {
-        private const float CellSize = 2.0f;
-
         [SerializeField] private LevelGrid startingLevelGrid;
 
         // ReSharper disable once FieldCanBeMadeReadOnly.Local
@@ -58,6 +59,7 @@ namespace Grid
 #endif
             Instance._activeLevelGrid = levelGrid;
             Instance._gridObjectMap = new Dictionary<GridPosition, IGridObject>(levelGrid.GridWidth * levelGrid.GridHeight);
+            if(Application.isPlaying) TurnOrderSystem.RegisterLevelGrid();
         }
 
         public static Vector3 GetWorldPosition(GridPosition gridPosition)
@@ -109,14 +111,28 @@ namespace Grid
             ActiveLevelGrid.TryGetGridCellState(newGridPosition, out GridCellState newGridCellState);
             ActiveLevelGrid.SetGridCellState(gridObject.Position, gridObject.GridCellPreviousState);
             gridObject.GridCellPreviousState = newGridCellState;
-            ActiveLevelGrid.SetGridCellState(newGridPosition, GridCellState.Occupied);
+            var gridUnit = gridObject as Unit;
+            if (gridUnit != null && gridUnit.Controller.Faction == Controller.FactionType.Enemy)
+                ActiveLevelGrid.SetGridCellState(newGridPosition, GridCellState.OccupiedEnemy);
+            else
+                ActiveLevelGrid.SetGridCellState(newGridPosition, GridCellState.Occupied);
         }
-        
+
+        public static void UpdateGridRangeInfo(NativeArray<float> rangeArray)
+        {
+            ActiveLevelGrid.UpdateCellRangeInfo(rangeArray);
+        }
+
+        public static void ResetGridRangeInfo()
+        {
+            ActiveLevelGrid.ResetCellRangeInfo();
+        }
+
         public static float GetDistance(GridPosition start, GridPosition end)
         {
             return Mathf.Sqrt(Mathf.Pow(start.X - end.X,2) + Mathf.Pow(start.Z - end.Z, 2));
         }
-        
+
         public static GridPosition SwitchLevelGrid(GridPosition doorGridCellPosition, GridCellState doorGridCellState)
         {
             var newLevelGrid = ActiveLevelGrid.GetRoomAdjacentToDoor(doorGridCellState);

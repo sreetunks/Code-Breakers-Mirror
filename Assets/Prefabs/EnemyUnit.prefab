@@ -8,6 +8,11 @@ PrefabInstance:
     serializedVersion: 2
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 6964948167720534969, guid: 0f7dc776639e01f45bf75df50ce4d4d9,
+        type: 3}
+      propertyPath: m_Materials.Array.data[0]
+      value: 
+      objectReference: {fileID: 2100000, guid: c70e075a2144ba04784d74b7b2889fd3, type: 2}
     - target: {fileID: 7007951768904158068, guid: 0f7dc776639e01f45bf75df50ce4d4d9,
         type: 3}
       propertyPath: maximumAP
@@ -26,7 +31,7 @@ PrefabInstance:
     - target: {fileID: 7007951768904158070, guid: 0f7dc776639e01f45bf75df50ce4d4d9,
         type: 3}
       propertyPath: m_Name
-      value: Enemy Unit
+      value: EnemyUnit
       objectReference: {fileID: 0}
     - target: {fileID: 7007951768904158071, guid: 0f7dc776639e01f45bf75df50ce4d4d9,
         type: 3}

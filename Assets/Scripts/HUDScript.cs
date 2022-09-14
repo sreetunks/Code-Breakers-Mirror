@@ -12,7 +12,9 @@ public class HUDScript : MonoBehaviour
     [SerializeField] private TMP_Text healthBarText;
     [SerializeField] private Image actionPointBarImage;
     [SerializeField] private TMP_Text actionPointBarText;
+    [SerializeField] private Image shieldBarImage;
     [SerializeField] private TMP_Text turnFactionLabel;
+    [SerializeField] private Button endTurnButton;
 
     [SerializeField] private CanvasGroup ingameHUDScreen;
     [SerializeField] private CanvasGroup levelCompleteScreen;
@@ -54,11 +56,13 @@ public class HUDScript : MonoBehaviour
         }
 
         for (var i = 0; i < unit.AbilityList.Count; ++i)
-        {
             abilityButtons[i].Initialize(unit.AbilityList[i].ability);
 
-            if (unit.Controller == PlayerScript.Instance)
+        if (unit.Controller == PlayerScript.Instance && unit.Controller == TurnOrderSystem.ActiveController)
+        {
+            for (var i = 0; i < unit.AbilityList.Count; ++i)
                 abilityButtons[i].EnableButton();
+            SetEndTurnButtonEnabled(true);
         }
 
         UpdateHealth();
@@ -69,6 +73,8 @@ public class HUDScript : MonoBehaviour
     {
         healthBarText.text = $"{_selectedUnit.CurrentHealth} / {_selectedUnit.MaximumHealth}";
         healthBarImage.fillAmount = (float)_selectedUnit.CurrentHealth / _selectedUnit.MaximumHealth;
+
+        shieldBarImage.rectTransform.sizeDelta = new Vector2(25 * _selectedUnit.CurrentShields, shieldBarImage.rectTransform.sizeDelta.y);
     }
 
     public void UpdateActionPoints()
@@ -76,7 +82,8 @@ public class HUDScript : MonoBehaviour
         actionPointBarText.text = $"{_selectedUnit.CurrentAP} / {_selectedUnit.MaximumAP}";
         actionPointBarImage.fillAmount = (float)_selectedUnit.CurrentAP / _selectedUnit.MaximumAP;
 
-        if (_selectedUnit.Controller != PlayerScript.Instance) return;
+        if (_selectedUnit.Controller != PlayerScript.Instance || _selectedUnit.Controller != TurnOrderSystem.ActiveController)
+            return;
 
         for (var i = 0; i < _selectedUnit.AbilityList.Count; ++i)
         {
@@ -91,6 +98,11 @@ public class HUDScript : MonoBehaviour
                     abilityButtons[i].EnableButton();
             }
         }
+    }
+
+    public void SetEndTurnButtonEnabled(bool enabled)
+    {
+        endTurnButton.interactable = enabled;
     }
 
     public void UpdateTurnLabel(string labelString)
