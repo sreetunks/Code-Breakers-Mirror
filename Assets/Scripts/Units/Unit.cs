@@ -39,6 +39,8 @@ namespace Units
         [SerializeField] private float moveSpeed = 4f;
         [SerializeField] private float rotateSpeed = 10f;
         [SerializeField] private Animator unitAnimator;
+        [SerializeField] private ParticleSystem hitEffect;
+        [SerializeField] private ParticleSystem shieldEffect;
 
         [SerializeField] private List<AbilityBase> unitAbilities;
 
@@ -128,7 +130,7 @@ namespace Units
                 {
                     OnUnitActionFinished?.Invoke();
 
-                    unitAnimator.SetBool(IsWalking, false); // Ends "Walk" Animations^M
+                    unitAnimator.SetBool(IsWalking, false); // Ends "Walk" Animations
                 }
 
                 if (GridCellPreviousState == GridCellState.LevelExit)
@@ -159,16 +161,20 @@ namespace Units
         {
             if (_currentShields > 0)
             {
+                var shieldsRemaining = Mathf.Max(0, _currentShields - damageDealt);
                 damageDealt -= _currentShields;
+                _currentShields = shieldsRemaining;
                 if (!(damageDealt > 0))
                 {
                     OnUnitDamaged?.Invoke(damageDealt);
+                    shieldEffect.Play();
                     return;
                 }
             }
 
             _currentHealth = Mathf.Max(0, _currentHealth - damageDealt);
             OnUnitDamaged?.Invoke(damageDealt);
+            hitEffect.Play();
             if (_currentHealth == 0)
             {
                 OnUnitDeath?.Invoke(this); // Invoke is considered Expensive
