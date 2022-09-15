@@ -55,7 +55,7 @@ namespace Grid
                 else
                 {
                     (lastPos, position) = (position, lastPos);
-                    outPath.RemoveAt(outPath.Count - 1);
+                    if(outPath.Count > 0) outPath.RemoveAt(outPath.Count - 1);
                 }
 
                 if (count++ < 10) continue;
