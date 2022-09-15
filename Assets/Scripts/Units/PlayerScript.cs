@@ -225,6 +225,7 @@ namespace Units
 
             _perTurnUnitList = new List<Unit>(_controlledUnits);
             SelectUnit(_perTurnUnitList[0]);
+            playerHUD.SetEndTurnButtonEnabled(true);
         }
 
         public void EndTurn()
@@ -239,12 +240,11 @@ namespace Units
                 SelectUnit(_perTurnUnitList[0]);
             else
             {
+                _inputState = InputState.Inactive;
+                playerHUD.SetEndTurnButtonEnabled(false);
                 TurnOrderSystem.MoveNext();
                 playerHUD.UpdateSelectedUnit(_selectedUnit);
-                playerHUD.SetEndTurnButtonEnabled(false);
             }
-
-            _inputState = InputState.Inactive;
         }
 
         public void UpdateTurnLabel(FactionType factionType)

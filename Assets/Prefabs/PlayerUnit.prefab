@@ -16,7 +16,7 @@ PrefabInstance:
     - target: {fileID: 7007951768904158068, guid: 0f7dc776639e01f45bf75df50ce4d4d9,
         type: 3}
       propertyPath: unitAbilities.Array.size
-      value: 3
+      value: 5
       objectReference: {fileID: 0}
     - target: {fileID: 7007951768904158068, guid: 0f7dc776639e01f45bf75df50ce4d4d9,
         type: 3}
@@ -24,10 +24,22 @@ PrefabInstance:
       value: 
       objectReference: {fileID: 11400000, guid: 8f3d9ffd3ec19884081a08035e6a761f,
         type: 2}
+    - target: {fileID: 7007951768904158068, guid: 0f7dc776639e01f45bf75df50ce4d4d9,
+        type: 3}
+      propertyPath: unitAbilities.Array.data[3]
+      value: 
+      objectReference: {fileID: 11400000, guid: 7871e079531b2b945ad636a6ed994dcd,
+        type: 2}
+    - target: {fileID: 7007951768904158068, guid: 0f7dc776639e01f45bf75df50ce4d4d9,
+        type: 3}
+      propertyPath: unitAbilities.Array.data[4]
+      value: 
+      objectReference: {fileID: 11400000, guid: abf00ac566739634693945ba317c3bbc,
+        type: 2}
     - target: {fileID: 7007951768904158070, guid: 0f7dc776639e01f45bf75df50ce4d4d9,
         type: 3}
       propertyPath: m_Name
-      value: Player Unit
+      value: PlayerUnit
       objectReference: {fileID: 0}
     - target: {fileID: 7007951768904158071, guid: 0f7dc776639e01f45bf75df50ce4d4d9,
         type: 3}

@@ -220,6 +220,9 @@ namespace Units
             int idx = _unitAbilityDataList.FindIndex(abilityData => abilityData.ability == ability);
             if (idx < 0) return;
             _unitAbilityDataList[idx].cooldownDuration = ability.CooldownDuration;
+
+            OnUnitAPChanged?.Invoke();
+            OnUnitActionFinished?.Invoke();
         }
 
         public int GetAbilityCooldown(AbilityBase ability)

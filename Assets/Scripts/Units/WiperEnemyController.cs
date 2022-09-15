@@ -41,7 +41,8 @@ namespace Units
             if (!_unitEnumerator.MoveNext()) return;
             var controlledUnit = _unitEnumerator.Current;
             if (controlledUnit != null) controlledUnit.BeginTurn(); // Comparison to Null is Expensive
-            ContinueTurn();
+
+            StartCoroutine(DelayedContinueTurn());
         }
 
         private void ContinueTurn()
@@ -51,20 +52,30 @@ namespace Units
             var playerCharacter = PlayerScript.PlayerCharacter;
             if (controlledUnit == null) return; // Comparison to Null is Expensive
             var distanceToPlayer = (int) FunctionHelper.PyThag(playerCharacter.Position.X - controlledUnit.Position.X, playerCharacter.Position.Z - controlledUnit.Position.Z);
-            if (distanceToPlayer > 1 && controlledUnit.CurrentAP > 2)
+            if (distanceToPlayer > 1 && controlledUnit.CurrentAP >= moveAbility.ActionPointCost)
             {
                 print("Moving");
                 controlledUnit.OnUnitActionFinished += OnControlledUnitActionFinished;
                 moveAbility.Use(controlledUnit);
             }
-            else if (distanceToPlayer <= 1 && controlledUnit.CurrentAP >= 2)
+            else if (distanceToPlayer == 1 && controlledUnit.CurrentAP >= meleeAbility.ActionPointCost && controlledUnit.GetAbilityCooldown(meleeAbility) == 0)
             {
                 print("Attacking");
+                controlledUnit.OnUnitActionFinished += OnControlledUnitActionFinished;
                 meleeAbility.Use(controlledUnit, playerCharacter);
-                ContinueTurn();
             }
             else
-                StartCoroutine(DelayedEndTurn());
+            {
+                if (_unitEnumerator.MoveNext())
+                {
+                    controlledUnit = _unitEnumerator.Current;
+                    if (controlledUnit != null) // Comparison to Null is Expensive
+                        controlledUnit.BeginTurn();
+                    StartCoroutine(DelayedContinueTurn());
+                }
+                else
+                    TurnOrderSystem.MoveNext();
+            }
             print(controlledUnit);
         }
 
@@ -81,22 +92,15 @@ namespace Units
         {
             var controlledUnit = _unitEnumerator.Current;
             if (controlledUnit != null) controlledUnit.OnUnitActionFinished -= OnControlledUnitActionFinished; // Comparison to Null is Expensive
-            ContinueTurn();
+            StartCoroutine(DelayedContinueTurn());
         }
 
-        private IEnumerator DelayedEndTurn()
+        private IEnumerator DelayedContinueTurn()
         {
             print("Delaying");
             yield return new WaitForSeconds(waitDurationBetweenUnitTurns);
 
-            if (_unitEnumerator.MoveNext())
-            {
-                var controlledUnit = _unitEnumerator.Current;
-                if (controlledUnit != null) controlledUnit.BeginTurn(); // Comparison to Null is Expensive
-                ContinueTurn();
-            }
-            else
-                TurnOrderSystem.MoveNext();
+            ContinueTurn();
         }
 
         public override void TargetAbility(Unit owningUnit, PositionTargetedAbility ability, int range)
@@ -116,7 +120,7 @@ namespace Units
                     if (tempGridCellState is GridCellState.Impassable or GridCellState.Occupied or GridCellState.OccupiedEnemy) continue;
                     if (controlledUnit != null) // Comparison to Null is Expensive
                     {
-                        var distanceToPosition = Mathf.Abs(tempPosition.X - controlledUnit.Position.X) + Mathf.Abs(tempPosition.Z - controlledUnit.Position.Z);
+                        var distanceToPosition = Mathf.Max(Mathf.Abs(tempPosition.X - controlledUnit.Position.X), Mathf.Abs(tempPosition.Z - controlledUnit.Position.Z));
                         if (distanceToPosition >= currentShortestDistance) continue;
                         currentShortestDistance = distanceToPosition;
                     }
