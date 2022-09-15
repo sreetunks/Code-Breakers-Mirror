@@ -22,8 +22,6 @@ public class GameManager : MonoBehaviour
     public GameObject creditsMenu;
     public GameObject exitMenu;
 
-    [SerializeField] AudioClip mainMenuMusic;
-
     private SaveData _saveData = new SaveData();
     BinaryFormatter _binaryFormatter = new BinaryFormatter();
 
@@ -47,7 +45,7 @@ public class GameManager : MonoBehaviour
     private void OnGameSceneLoaded(Scene scene, LoadSceneMode loadSceneMode)
     {
         SceneManager.sceneLoaded -= OnGameSceneLoaded;
-        SoundManager.PlayInGameMusic();
+        SoundManager.ToggleMusic();
         _saveData.lastSceneIndex = scene.buildIndex;
         SaveGame();
     }
@@ -92,7 +90,7 @@ public class GameManager : MonoBehaviour
         else
             settingsMenu.Show();
 
-        SoundManager.PauseMusic();
+        SoundManager.mainMenuTheme.Stop();
         StartCoroutine(MenuSoundEffect());
     }
 

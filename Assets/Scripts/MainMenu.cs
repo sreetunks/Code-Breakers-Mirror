@@ -20,7 +20,6 @@ public class MainMenu : MonoBehaviour
     private void Start()
     {
         continueButton.interactable = GameManager.Instance.HasSaveGame();
-        GameManager.Instance.mainMenuSfx = mainMenuSfx;
 
         GameManager.Instance.saveMenu = saveMenu;
         GameManager.Instance.creditsMenu = creditsMenu;
@@ -28,7 +27,7 @@ public class MainMenu : MonoBehaviour
 
         GameManager.Instance.settingsMenu.OnScreenToggled += OnSettingsScreenToggled;
 
-        GameManager.Instance.SoundManager.PlayMenuMusic();
+        GameManager.Instance.SoundManager.mainMenuTheme.Play();
     }
 
     private void OnDestroy()
@@ -40,15 +39,15 @@ public class MainMenu : MonoBehaviour
     {
         if (!visible)
         {
-            GameManager.Instance.SoundManager.PlayMenuMusic();
+            GameManager.Instance.SoundManager.mainMenuTheme.Play();
 
-            if (GameManager.Instance.SoundManager.effectSource.mute == false)
+            if (GameManager.Instance.SoundManager.settingsTestSFX.mute == false)
             {
                 GameManager.Instance.SoundManager.ToggleEffects();
             }
 
-            mainMenuSfx.mute = true;
-            mainMenuSfx.Stop();
+            GameManager.Instance.SoundManager.menuSFX.mute = true;
+            GameManager.Instance.SoundManager.menuSFX.Stop();
         }
     }
 }
