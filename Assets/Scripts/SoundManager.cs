@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 using UnityEngine.Audio;
 using UnityEngine.UI;
@@ -23,6 +24,17 @@ public class SoundManager : MonoBehaviour
         masterSlider.onValueChanged.AddListener(ChangeMasterVolume);
         musicSlider.onValueChanged.AddListener(ChangeMusicVolume);
         effectSlider.onValueChanged.AddListener(ChangeSfxVolume);
+
+        GameManager.Instance.settingsMenu.OnScreenToggled += OnSettingsScreenToggled;
+    }
+
+    private void OnSettingsScreenToggled(bool visible)
+    {
+        if (_toggleMusicActive && !visible)
+        {
+            _lastMusicClip = musicSource.clip;
+            musicSource.clip = previewMusicClip;
+        }
     }
 
     public void PlayMenuMusic()
@@ -49,6 +61,23 @@ public class SoundManager : MonoBehaviour
     public void PauseMusic()
     {
         musicSource.Pause();
+    }
+
+    public void ToggleMusic()
+    {
+        musicSource.Stop();
+        _toggleMusicActive = !_toggleMusicActive;
+        if (_toggleMusicActive)
+        {
+            _lastMusicClip = musicSource.clip;
+            musicSource.clip = previewMusicClip;
+        }
+        else
+        {
+            musicSource.clip = _lastMusicClip;
+            _lastMusicClip = null;
+        }
+        musicSource.Play();
     }
 
     public void ToggleEffects()

@@ -408,7 +408,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b8082f70bff10a54592a1a300d102c54, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  mainMenuTheme: {fileID: 0}
   mainMenuSfx: {fileID: 0}
   saveMenu: {fileID: 0}
   settingsMenu: {fileID: 2346909278131962656}
