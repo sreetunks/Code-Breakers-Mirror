@@ -134,6 +134,10 @@ namespace Units
                                 _unitTargetedAbility = null;
 
                                 _inputState = InputState.Active;
+
+                                GridSystem.ResetGridRangeInfo();
+                                GridSystem.HighlightPosition = GridPosition.Invalid;
+                                GridSystem.HighlightRange = -1;
                             }
                         }
                         else if (Input.GetMouseButton(1))
