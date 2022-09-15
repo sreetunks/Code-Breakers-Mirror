@@ -11,6 +11,8 @@ namespace Units
     {
         public override FactionType Faction => FactionType.Enemy;
 
+        public override bool IsActive => controlledUnits.Count > 0;
+
         [SerializeField] private float waitDurationBetweenUnitTurns = 0.8f;
 
         [SerializeField] private List<Unit> controlledUnits;
@@ -38,7 +40,12 @@ namespace Units
         public override void BeginTurn()
         {
             _unitEnumerator = controlledUnits.GetEnumerator();
-            if (!_unitEnumerator.MoveNext()) return;
+            if (!_unitEnumerator.MoveNext())
+            {
+                TurnOrderSystem.DeregisterController(this);
+                TurnOrderSystem.MoveNext();
+                return;
+            }
             var controlledUnit = _unitEnumerator.Current;
             if (controlledUnit != null) controlledUnit.BeginTurn(); // Comparison to Null is Expensive
 
@@ -130,7 +137,11 @@ namespace Units
             }
 
             GridSystem.ResetGridRangeInfo();
-            ability.Use(controlledUnit, targetGridPosition);
+            if (!ability.Use(controlledUnit, targetGridPosition))
+            {
+                controlledUnit.ConsumeAP(controlledUnit.CurrentAP); // HACK: We need to handle this with better path-finding failcases.
+                controlledUnit.OnAbilityUsed(ability);
+            }
         }
 
         public override void TargetAbility(Unit owningUnit, UnitTargetedAbility ability, int range)

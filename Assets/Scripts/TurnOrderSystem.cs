@@ -35,9 +35,16 @@ public class TurnOrderSystem : MonoBehaviour
     public static void RegisterLevelGrid()
     {
         var levelEnemyManager = GridSystem.ActiveLevelGrid.GetComponent<LevelEnemyManager>();
-        if(levelEnemyManager.EnemyControllers.Count > 0) GridSystem.ActiveLevelGrid.SetDoorLock(true);
+        bool enemyControllersActive = false;
         foreach (var enemyController in levelEnemyManager.EnemyControllers)
-            RegisterController(enemyController);
+        {
+            if (enemyController.IsActive)
+            {
+                RegisterController(enemyController);
+                enemyControllersActive = true;
+            }
+        }
+        GridSystem.ActiveLevelGrid.SetDoorLock(enemyControllersActive);
     }
 
     private static void RegisterController(Controller controller)

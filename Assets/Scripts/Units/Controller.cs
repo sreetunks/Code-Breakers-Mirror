@@ -14,6 +14,8 @@ namespace Units
 
         public abstract FactionType Faction { get; }
 
+        public abstract bool IsActive { get; }
+
         public abstract void Initialize();
 
         public abstract void TargetAbility(Unit owningUnit, PositionTargetedAbility ability, int range);

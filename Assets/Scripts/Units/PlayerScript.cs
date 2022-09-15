@@ -23,6 +23,8 @@ namespace Units
 
         public override FactionType Faction => FactionType.Player;
 
+        public override bool IsActive => true;
+
         [SerializeField] private Unit playerCharacter;
         [SerializeField] private LayerMask unitLayerMask;
         [SerializeField] private HUDScript playerHUD;
