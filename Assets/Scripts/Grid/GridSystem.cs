@@ -103,7 +103,7 @@ namespace Grid
 
         public static void UpdateGridObjectPosition(IGridObject gridObject, GridPosition newGridPosition)
         {
-            if (TryGetGridObject(newGridPosition, out _)) return;
+            if (newGridPosition != GridPosition.Invalid && TryGetGridObject(newGridPosition, out _)) return;
 
             Instance._gridObjectMap.Remove(gridObject.Position);
             Instance._gridObjectMap[newGridPosition] = gridObject;

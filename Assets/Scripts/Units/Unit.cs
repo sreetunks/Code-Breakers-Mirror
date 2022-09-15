@@ -180,7 +180,7 @@ namespace Units
                 OnUnitDeath?.Invoke(this); // Invoke is considered Expensive
 
                 gameObject.SetActive(false);
-                GridSystem.SetGridCellState(Position, GridCellPreviousState);
+                GridSystem.UpdateGridObjectPosition(this, GridPosition.Invalid);
             }
         }
 
