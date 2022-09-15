@@ -27,7 +27,7 @@ namespace Abilities
                 for (var x = 0; x < levelGrid.GridWidth; ++x)
                 {
                     var idx = (y * levelGrid.GridWidth) + x;
-                    var distanceToTarget = Mathf.Abs(x - owningUnit.Position.X) + Mathf.Abs(y - owningUnit.Position.Z);
+                    var distanceToTarget = Mathf.Max(Mathf.Abs(x - owningUnit.Position.X), Mathf.Abs(y - owningUnit.Position.Z));
                     cellRangeArray[idx] = (distanceToTarget > range) ? 0 : distanceToTarget;
                 }
             }
@@ -38,7 +38,7 @@ namespace Abilities
 
         public override bool Use(Unit owningUnit, Unit targetUnit)
         {
-            var distanceToTarget = Mathf.Abs(targetUnit.Position.X - owningUnit.Position.X) + Mathf.Abs(targetUnit.Position.Z - owningUnit.Position.Z);
+            var distanceToTarget = Mathf.Max(Mathf.Abs(targetUnit.Position.X - owningUnit.Position.X), Mathf.Abs(targetUnit.Position.Z - owningUnit.Position.Z));
             if (distanceToTarget > range || targetUnit.Controller.Faction == Controller.FactionType.Player)
                 return false;
 

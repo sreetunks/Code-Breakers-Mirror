@@ -13,7 +13,7 @@ namespace Abilities
 
         public override int CooldownDuration => 0;
 
-        public override int ActionPointCost => 1;
+        public override int ActionPointCost => apCostPerTile;
 
         public override int UpdateRange(Unit owningUnit)
         {
@@ -39,18 +39,11 @@ namespace Abilities
 
         public override bool Use(Unit owningUnit, GridPosition targetPosition)
         {
-            var range = 0;
-            if(owningUnit.Controller.Faction == Controller.FactionType.Player)
-                range = (owningUnit.CurrentAP / apCostPerTile);
-            else
-                range = (Mathf.Min(2, owningUnit.CurrentAP - 2) / apCostPerTile);
+            var range = (owningUnit.CurrentAP / apCostPerTile);
 
             var movePath = new List<GridPosition>();
             PathFinding.GetPath(owningUnit.Position, targetPosition, ref movePath);
             var distanceMoved = movePath.Count;
-
-            if (distanceMoved == 0)
-                return false;
 
             if (distanceMoved > range)
             {
@@ -60,6 +53,9 @@ namespace Abilities
                 movePath.RemoveRange(range, movePath.Count - range);
                 distanceMoved = range;
             }
+
+            if (distanceMoved == 0)
+                return false;
 
             owningUnit.ConsumeAP(distanceMoved * apCostPerTile);
             owningUnit.Move(movePath);
