@@ -125,6 +125,11 @@ public class GameManager : MonoBehaviour
     public void LoadNextGameScene()
     {
         var scene = SceneManager.GetActiveScene();
+        if (scene.buildIndex == 5)
+        {
+            SceneManager.LoadScene(0);
+            return;
+        }
         SceneManager.sceneLoaded += OnGameSceneLoaded;
         SceneManager.LoadScene(scene.buildIndex + 1);
     }
