@@ -47,31 +47,25 @@ public class MenuButtonFunctions : MonoBehaviour
     // Button to back out of a menu
     public void Back()
     {
-        GameManager.Instance.mainMenuSfx.mute = false;
-        GameManager.Instance.mainMenuSfx.Play();
-
         GameManager.Instance.saveMenu.SetActive(false);
         GameManager.Instance.settingsMenu.SetActive(false);
         GameManager.Instance.creditsMenu.SetActive(false);
         GameManager.Instance.exitMenu.SetActive(false);
 
-        if (GameManager.Instance.SoundManager.musicSource.mute == false)
+        if (GameManager.Instance.SoundManager.settingsTestMusic.mute == false)
         {
             GameManager.Instance.SoundManager.ToggleMusic();
         }
 
-        if (GameManager.Instance.SoundManager.effectSource.mute == false)
+        if (GameManager.Instance.SoundManager.settingsTestSFX.mute == false)
         {
             GameManager.Instance.SoundManager.ToggleEffects();
         }
 
-        if (GameManager.Instance.settingsMenu.activeInHierarchy == false && GameManager.Instance.mainMenuTheme.isPlaying != true)
+        if (GameManager.Instance.settingsMenu.activeInHierarchy == false && GameManager.Instance.SoundManager.mainMenuTheme.isPlaying != true)
         {
-            GameManager.Instance.mainMenuTheme.Play();
+            GameManager.Instance.SoundManager.mainMenuTheme.Play();
         }
-
-        GameManager.Instance.mainMenuSfx.mute = true;
-        GameManager.Instance.mainMenuSfx.Stop();
     }
 
     // Button to confirm exiting the application

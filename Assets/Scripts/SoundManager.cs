@@ -5,7 +5,7 @@ using UnityEngine.UI;
 public class SoundManager : MonoBehaviour
 {
     [SerializeField] private AudioMixer audioMixer;
-    [SerializeField] public AudioSource musicSource, effectSource;
+    [SerializeField] public AudioSource mainMenuTheme, settingsTestMusic, levelOneTheme, levelTwoTheme, levelThreeTheme, levelFourTheme, levelFiveTheme, menuSFX, settingsTestSFX, moveSFX, healSFX, shieldSFX, meleeAttackSFX, rangeAttackSFX;
     [SerializeField] private Slider masterSlider, musicSlider, effectSlider;
 
     private void Start()
@@ -19,29 +19,29 @@ public class SoundManager : MonoBehaviour
 
     public void ToggleMusic()
     {
-        musicSource.mute = !musicSource.mute;
+        settingsTestMusic.mute = !settingsTestMusic.mute;
 
-        if(musicSource.mute == true)
+        if(settingsTestMusic.mute == true)
         {
-            musicSource.Stop();
+            settingsTestMusic.Stop();
         }
         else
         {
-            musicSource.Play();
+            settingsTestMusic.Play();
         }
     }
 
     public void ToggleEffects()
     {
-        effectSource.mute = !effectSource.mute;
+        settingsTestSFX.mute = !settingsTestSFX.mute;
 
-        if (effectSource.mute == true)
+        if (settingsTestSFX.mute == true)
         {
-            effectSource.Stop();
+            settingsTestSFX.Stop();
         }
         else
         {
-            effectSource.Play();
+            settingsTestSFX.Play();
         }
     }
 

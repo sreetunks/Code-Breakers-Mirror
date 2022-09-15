@@ -7,9 +7,6 @@ public class GameManager : MonoBehaviour
     public static GameManager Instance;
     public SoundManager SoundManager { get; private set; }
 
-    public AudioSource mainMenuTheme;
-    public AudioSource mainMenuSfx;
-
     public GameObject saveMenu;
     public GameObject settingsMenu;
     public GameObject creditsMenu;
@@ -41,7 +38,7 @@ public class GameManager : MonoBehaviour
     public void ToggleSettingsMenu()
     {
         settingsMenu.SetActive(!settingsMenu.activeInHierarchy);
-        mainMenuTheme.Stop();
+        SoundManager.mainMenuTheme.Stop();
         StartCoroutine(MenuSoundEffect());
     }
 
@@ -63,10 +60,10 @@ public class GameManager : MonoBehaviour
 
     public IEnumerator MenuSoundEffect()
     {
-        mainMenuSfx.mute = false;
-        mainMenuSfx.Play();
+        SoundManager.menuSFX.mute = false;
+        SoundManager.menuSFX.Play();
         yield return new WaitForSeconds(0.25f);
-        mainMenuSfx.mute = true;
-        mainMenuSfx.Stop();
+        SoundManager.menuSFX.mute = true;
+        SoundManager.menuSFX.Stop();
     }
 }
