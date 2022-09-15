@@ -37,8 +37,6 @@ namespace Units
         private List<Unit> _perTurnUnitList;
         InputState _inputState;
 
-        private List<Unit>.Enumerator _unitEnumerator;
-
         private void Awake()
         {
             if (Instance)
@@ -85,7 +83,6 @@ namespace Units
                             _selectedUnit.ForceMove(targetPosition);
                             _selectedUnit.transform.position = targetPosition;
                             GridSystem.UpdateGridObjectPosition(_selectedUnit, newGridPosition);
-                            mainCamera.UpdateTarget(GridSystem.ActiveLevelGrid.transform);
                             TurnOrderSystem.MoveNext();
                         }
                         else if (Input.GetKeyDown(KeyCode.K))
@@ -181,6 +178,7 @@ namespace Units
             _selectedUnit.OnUnitDamaged += UpdateSelectedUnitHealth;
             _selectedUnit.OnUnitAPChanged += UpdateSelectedUnitAP;
             _selectedUnit.OnUnitDeath += OnSelectedUnitDeath;
+            mainCamera.UpdateTarget(_selectedUnit.transform);
 
             playerHUD.UpdateSelectedUnit(_selectedUnit);
             _selectedUnit.GetComponentInChildren<UnitSelectedVisual>().UpdateVisual(true); // Get Component In Childern is considered Expensive
