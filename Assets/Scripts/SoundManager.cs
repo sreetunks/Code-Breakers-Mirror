@@ -32,8 +32,10 @@ public class SoundManager : MonoBehaviour
     {
         if (_toggleMusicActive && !visible)
         {
-            _lastMusicClip = musicSource.clip;
-            musicSource.clip = previewMusicClip;
+            musicSource.clip = _lastMusicClip;
+            _lastMusicClip = null;
+            _toggleMusicActive = false;
+            musicSource.Play();
         }
     }
 
@@ -71,13 +73,13 @@ public class SoundManager : MonoBehaviour
         {
             _lastMusicClip = musicSource.clip;
             musicSource.clip = previewMusicClip;
+            musicSource.Play();
         }
         else
         {
             musicSource.clip = _lastMusicClip;
             _lastMusicClip = null;
         }
-        musicSource.Play();
     }
 
     public void ToggleEffects()
