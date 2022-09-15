@@ -61,7 +61,7 @@ public class MenuButtonFunctions : MonoBehaviour
             GameManager.Instance.SoundManager.ToggleEffects();
         }
 
-        if (GameManager.Instance.settingsMenu.activeInHierarchy == false && GameManager.Instance.SoundManager.mainMenuTheme.isPlaying != true)
+        if (GameManager.Instance.settingsMenu.Visible == false && GameManager.Instance.SoundManager.mainMenuTheme.isPlaying != true)
         {
             GameManager.Instance.SoundManager.mainMenuTheme.Play();
         }
