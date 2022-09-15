@@ -5,13 +5,13 @@ public class MenuButtonFunctions : MonoBehaviour
     // Button to load the last saved game
     public void Continue()
     {
-        GameManager.Instance.LoadGameScene();
+        GameManager.Instance.LoadSavedGameScene();
     }
 
     // Button to start a new game
     public void NewGame()
     {
-        GameManager.Instance.ToggleSaveMenu();
+        GameManager.Instance.LoadNewGame();
     }
 
     // Button to load a save file
@@ -48,7 +48,6 @@ public class MenuButtonFunctions : MonoBehaviour
     public void Back()
     {
         GameManager.Instance.saveMenu.SetActive(false);
-        GameManager.Instance.settingsMenu.SetActive(false);
         GameManager.Instance.creditsMenu.SetActive(false);
         GameManager.Instance.exitMenu.SetActive(false);
 

@@ -1,53 +1,7 @@
 %YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
---- !u!1 &387050574
+--- !u!1 &1663246536
 GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 387050575}
-  - component: {fileID: 387050577}
-  - component: {fileID: 387050576}
-  m_Layer: 5
-  m_Name: Resources
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!224 &387050575
-RectTransform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 387050574}
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 3638957680420294705}
-  m_RootOrder: -1
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0, y: 0.5}
-  m_AnchorMax: {x: 0, y: 0.5}
-  m_AnchoredPosition: {x: 949, y: 230}
-  m_SizeDelta: {x: 500, y: 50}
-  m_Pivot: {x: 0.5, y: 0.5}
---- !u!222 &387050577
-CanvasRenderer:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 387050574}
-  m_CullTransparentMesh: 1
---- !u!114 &387050576
-MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
@@ -1697,6 +1651,7 @@ RectTransform:
   - {fileID: 3638957679732253657}
   - {fileID: 3638957680420294705}
   - {fileID: 3638957679536030827}
+  - {fileID: 1663246537}
   m_Father: {fileID: 0}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
@@ -1779,11 +1734,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 52cbf0f42ba6c5243a733c4f05b96382, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  mainMenuTheme: {fileID: 0}
-  mainMenuSfx: {fileID: 0}
+  mainMenuSfx: {fileID: 1663246538}
   saveMenu: {fileID: 3638957679732253656}
   creditsMenu: {fileID: 3638957680420294704}
   exitMenu: {fileID: 3638957679536030826}
+  continueButton: {fileID: 3638957679403945601}
   exitButton: {fileID: 3638957679219922371}
 --- !u!1 &3638957680040057724
 GameObject:

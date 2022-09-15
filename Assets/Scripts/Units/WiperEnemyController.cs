@@ -4,6 +4,7 @@ using Abilities;
 using Grid;
 using UnityEngine;
 
+
 namespace Units
 {
     public class WiperEnemyController : Controller
@@ -15,6 +16,7 @@ namespace Units
         [SerializeField] private List<Unit> controlledUnits;
 
         [SerializeField] UnitMoveAbility moveAbility;
+        [SerializeField] UnitMeleeAttackAbility meleeAbility;
 
         private List<Unit>.Enumerator _unitEnumerator;
 
@@ -38,17 +40,26 @@ namespace Units
 
         private void ContinueTurn()
         {
+            print("Continue Turn");
             var controlledUnit = _unitEnumerator.Current;
             var playerCharacter = PlayerScript.PlayerCharacter;
             if (controlledUnit == null) return; // Comparison to Null is Expensive
-            var distanceToPlayer = Mathf.Max(Mathf.Abs(playerCharacter.Position.X - controlledUnit.Position.X), Mathf.Abs(playerCharacter.Position.Z - controlledUnit.Position.Z));
-            if (distanceToPlayer > 1 && controlledUnit.CurrentAP > 0)
+            var distanceToPlayer = (int) FunctionHelper.PyThag(playerCharacter.Position.X - controlledUnit.Position.X, playerCharacter.Position.Z - controlledUnit.Position.Z);
+            if (distanceToPlayer > 1 && controlledUnit.CurrentAP > 2)
             {
+                print("Moving");
                 controlledUnit.OnUnitActionFinished += OnControlledUnitActionFinished;
                 moveAbility.Use(controlledUnit);
             }
+            else if (distanceToPlayer <= 1 && controlledUnit.CurrentAP >= 2)
+            {
+                print("Attacking");
+                meleeAbility.Use(controlledUnit, playerCharacter);
+                ContinueTurn();
+            }
             else
                 StartCoroutine(DelayedEndTurn());
+            print(controlledUnit);
         }
 
         void OnControlledUnitDeath(Unit unit)
@@ -69,6 +80,7 @@ namespace Units
 
         private IEnumerator DelayedEndTurn()
         {
+            print("Delaying");
             yield return new WaitForSeconds(waitDurationBetweenUnitTurns);
 
             if (_unitEnumerator.MoveNext())
@@ -113,6 +125,7 @@ namespace Units
 
         public override void TargetAbility(Unit owningUnit, UnitTargetedAbility ability, int range)
         {
+
         }
     }
 }

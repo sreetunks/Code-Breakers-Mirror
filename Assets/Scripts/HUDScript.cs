@@ -154,6 +154,11 @@ public class HUDScript : MonoBehaviour
         ingameHUDScreen.blocksRaycasts = false;
     }
 
+    public void ToggleSettingsMenu()
+    {
+        GameManager.Instance.EnableSettingsMenu();
+    }
+
     public void ShowLevelCompleteScreen()
     {
         levelCompleteScreen.alpha = 1;
@@ -190,12 +195,12 @@ public class HUDScript : MonoBehaviour
 
     public void Continue()
     {
-
+        GameManager.Instance.LoadNextGameScene();
     }
 
     public void ReloadLevel()
     {
-        GameManager.Instance.LoadGameScene();
+        GameManager.Instance.ReloadGameScene();
     }
 
     public void LoadMainMenu()

@@ -10,7 +10,7 @@ namespace Abilities
     {
         [SerializeField] int attackDamage;
         [SerializeField] int cooldownDuration;
-        [SerializeField] int actionPointCost;
+        [SerializeField] int actionPointCost = 2;
         [SerializeField] int range = 1;
 
         public override int CooldownDuration => cooldownDuration;
@@ -38,8 +38,8 @@ namespace Abilities
 
         public override bool Use(Unit owningUnit, Unit targetUnit)
         {
-            var distanceToTarget = Mathf.Abs(targetUnit.Position.X - owningUnit.Position.X) + Mathf.Abs(targetUnit.Position.Z - owningUnit.Position.Z);
-            if (distanceToTarget > range || targetUnit.Controller.Faction == Controller.FactionType.Player)
+            var distanceToTarget = (int) FunctionHelper.PyThag(targetUnit.Position.X - owningUnit.Position.X, targetUnit.Position.Z - owningUnit.Position.Z);
+            if (distanceToTarget > range || targetUnit.Controller.Faction == owningUnit.Controller.Faction)
                 return false;
 
             targetUnit.TakeDamage(attackDamage);

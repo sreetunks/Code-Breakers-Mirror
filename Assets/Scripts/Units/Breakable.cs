@@ -1,41 +1,43 @@
-using Grid;
+using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
+using Grid;
 
 namespace Units
 {
     public class Breakable : MonoBehaviour, IGridObject, IDamageable
     {
-        public delegate void OnObjectDamagedEventHandler(int damageDealt);
-        public delegate void OnObjectDeathEventHandler(Breakable unit);
+        private OnObjectDeathEventHandler _onObjectDeath;
+        private OnObjectDamagedEventHandler _onObjectDamaged;
+        
+        private delegate void OnObjectDeathEventHandler(Breakable unit);
+        private delegate void OnObjectDamagedEventHandler(int damageDealt);
 
-        private readonly OnObjectDeathEventHandler _onObjectDeath;
-        private readonly OnObjectDamagedEventHandler _onObjectDamaged;
-
-        [SerializeField] private int maximumHealth;
-
-        private int _currentHealth;
+        [SerializeField] private int health;
 
         public GridCellState GridCellPreviousState { get; set; }
         public GridPosition Position { get; private set; }
 
+        public int Health => health;
+        
+        // Start is called before the first frame update
         private void Start()
         {
-            _currentHealth = maximumHealth;
-
+            GetComponentInChildren<UnitSelectedVisual>().UpdateVisual(false);
             Position = GridSystem.GetGridPosition(transform.position);
             GridCellPreviousState = GridCellState.Impassable;
             GridSystem.UpdateGridObjectPosition(this, Position);
             transform.position = GridSystem.GetWorldPosition(Position);
         }
 
-        public int MaximumHealth => maximumHealth;
-        public int CurrentHealth => _currentHealth;
+        public int MaximumHealth { get; }
+        public int CurrentHealth { get; }
 
         public void TakeDamage(int damageDealt)
         {
-            _currentHealth = Mathf.Max(0, _currentHealth - damageDealt);
+            health = Mathf.Max(0, health - damageDealt);
             _onObjectDamaged?.Invoke(damageDealt);
-            if (_currentHealth != 0) return;
+            if (health != 0) return;
             _onObjectDeath?.Invoke(this); // Invoke is considered Expensive
 
             gameObject.SetActive(false);

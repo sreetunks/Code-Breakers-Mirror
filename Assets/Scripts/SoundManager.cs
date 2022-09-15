@@ -4,9 +4,17 @@ using UnityEngine.UI;
 
 public class SoundManager : MonoBehaviour
 {
+    [SerializeField] AudioClip menuMusicClip;
+    [SerializeField] AudioClip inGameMusicClip;
+    [SerializeField] AudioClip combatMusicClip;
+    [SerializeField] AudioClip previewMusicClip;
+
     [SerializeField] private AudioMixer audioMixer;
     [SerializeField] public AudioSource mainMenuTheme, settingsTestMusic, levelOneTheme, levelTwoTheme, levelThreeTheme, levelFourTheme, levelFiveTheme, menuSFX, settingsTestSFX, moveSFX, healSFX, shieldSFX, meleeAttackSFX, rangeAttackSFX;
     [SerializeField] private Slider masterSlider, musicSlider, effectSlider;
+
+    private AudioClip _lastMusicClip;
+    private bool _toggleMusicActive;
 
     private void Start()
     {
@@ -17,7 +25,7 @@ public class SoundManager : MonoBehaviour
         effectSlider.onValueChanged.AddListener(ChangeSfxVolume);
     }
 
-    public void ToggleMusic()
+    public void PlayMenuMusic()
     {
         settingsTestMusic.mute = !settingsTestMusic.mute;
 
