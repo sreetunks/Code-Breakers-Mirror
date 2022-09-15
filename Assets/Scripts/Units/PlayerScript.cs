@@ -263,5 +263,11 @@ namespace Units
             _inputState = InputState.TargetingUnit;
             GridSystem.HighlightPosition = owningUnit.Position;
         }
+
+        public override void Initialize()
+        {
+            foreach (var controlledUnit in _controlledUnits)
+                controlledUnit.Spawn();
+        }
     }
 }

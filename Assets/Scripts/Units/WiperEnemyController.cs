@@ -29,6 +29,12 @@ namespace Units
             }
         }
 
+        public override void Initialize()
+        {
+            foreach (var controlledUnit in controlledUnits)
+                controlledUnit.Spawn();
+        }
+
         public override void BeginTurn()
         {
             _unitEnumerator = controlledUnits.GetEnumerator();

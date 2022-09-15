@@ -24,7 +24,10 @@ public class TurnOrderSystem : MonoBehaviour
         }
 
         Instance = this;
+    }
 
+    private void Start()
+    {
         RegisterController(playerController);
         Instance._perTurnControllerList = new List<Controller>(Instance._registeredControllers);
     }
@@ -40,6 +43,7 @@ public class TurnOrderSystem : MonoBehaviour
     private static void RegisterController(Controller controller)
     {
         Instance._registeredControllers.Add(controller);
+        controller.Initialize();
     }
 
     public static void DeregisterController(Controller controller)
@@ -47,7 +51,7 @@ public class TurnOrderSystem : MonoBehaviour
         Instance._perTurnControllerList.Remove(controller);
         Instance._registeredControllers.Remove(controller);
 
-        if (Instance._registeredControllers.Count == 0)
+        if (Instance._registeredControllers.Count == 1)
             GridSystem.ActiveLevelGrid.SetDoorLock(false);
     }
 

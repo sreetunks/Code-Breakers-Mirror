@@ -82,16 +82,6 @@ namespace Units
                 _unitAbilityDataList.Add(new AbilityData(ability));
         }
 
-        private void Start()
-        {
-            GetComponentInChildren<UnitSelectedVisual>().UpdateVisual(false);
-            Position = GridSystem.GetGridPosition(transform.position);
-            GridCellPreviousState = GridCellState.Impassable;
-            GridSystem.UpdateGridObjectPosition(this, Position);
-            transform.position = GridSystem.GetWorldPosition(Position);
-            IsOnDoorGridCell = CheckIsOnDoorGridCell(GridCellPreviousState);
-        }
-
         private void Update()
         {
             UpdateMove();
@@ -141,6 +131,16 @@ namespace Units
         private static bool CheckIsOnDoorGridCell(GridCellState gridCellState)
         {
             return gridCellState is GridCellState.DoorNorth or GridCellState.DoorEast or GridCellState.DoorSouth or GridCellState.DoorWest;
+        }
+
+        public void Spawn()
+        {
+            GetComponentInChildren<UnitSelectedVisual>().UpdateVisual(false);
+            Position = GridSystem.GetGridPosition(transform.position);
+            GridCellPreviousState = GridCellState.Impassable;
+            GridSystem.UpdateGridObjectPosition(this, Position);
+            transform.position = GridSystem.GetWorldPosition(Position);
+            IsOnDoorGridCell = CheckIsOnDoorGridCell(GridCellPreviousState);
         }
 
         public void ForceMove(Vector3 targetPosition)
