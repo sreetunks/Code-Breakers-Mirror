@@ -134,6 +134,7 @@ public class GameManager : MonoBehaviour
         var scene = SceneManager.GetActiveScene();
         if (scene.buildIndex == 5)
         {
+            File.Delete(Application.persistentDataPath + "/gamedata.sav");
             LoadMainMenuScene();
             return;
         }
