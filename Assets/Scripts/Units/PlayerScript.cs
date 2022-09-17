@@ -70,9 +70,9 @@ namespace Units
                 case InputState.Inactive: return;
                 case InputState.Active:
                     {
-                        if (Input.GetMouseButtonDown(0) && !EventSystem.current.IsPointerOverGameObject())
+                        if (Input.GetMouseButtonDown(0) && !EventSystem.current.IsPointerOverGameObject() && MouseWorld.GetPosition(out var targetWorldPosition))
                         {
-                            var targetGridPosition = GridSystem.GetGridPosition(MouseWorld.GetPosition()); // Get Position is considered Expensive
+                            var targetGridPosition = GridSystem.GetGridPosition(targetWorldPosition); // Get Position is considered Expensive
                             GridSystem.TryGetGridObject(targetGridPosition, out var targetObject);
                             var targetUnit = targetObject as Unit;
                             if (targetUnit && targetUnit != _selectedUnit)
@@ -95,9 +95,9 @@ namespace Units
                     }
                 case InputState.TargetingPosition:
                     {
-                        if (Input.GetMouseButton(0) && !EventSystem.current.IsPointerOverGameObject() && _positionTargetedAbility != null) // Comparing to Null is considered Expensive
+                        if (Input.GetMouseButton(0) && !EventSystem.current.IsPointerOverGameObject() && _positionTargetedAbility != null && MouseWorld.GetPosition(out var targetPosition)) // Comparing to Null is considered Expensive
                         {
-                            var targetGridPosition = GridSystem.GetGridPosition(MouseWorld.GetPosition()); // Get Position is considered Expensive
+                            var targetGridPosition = GridSystem.GetGridPosition(targetPosition); // Get Position is considered Expensive
                             if (_positionTargetedAbility.Use(CurrentlySelectedUnit, targetGridPosition))
                             {
                                 _positionTargetedAbility = null;
@@ -125,9 +125,9 @@ namespace Units
                     }
                 case InputState.TargetingUnit:
                     {
-                        if (_unitTargetedAbility != null && Input.GetMouseButton(0) && !EventSystem.current.IsPointerOverGameObject())
+                        if (_unitTargetedAbility != null && Input.GetMouseButton(0) && !EventSystem.current.IsPointerOverGameObject() && MouseWorld.GetPosition(out var targetPosition))
                         {
-                            var targetGridPosition = GridSystem.GetGridPosition(MouseWorld.GetPosition()); // Get Position is considered Expensive
+                            var targetGridPosition = GridSystem.GetGridPosition(targetPosition); // Get Position is considered Expensive
                             GridSystem.TryGetGridObject(targetGridPosition, out var targetObject);
                             var targetUnit = targetObject as Unit;
                             if (targetUnit)

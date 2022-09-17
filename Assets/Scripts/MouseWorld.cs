@@ -16,12 +16,13 @@ public class MouseWorld : MonoBehaviour
         _instance = this;
     }
 
-    public static Vector3 GetPosition()
+    public static bool GetPosition(out Vector3 position)
     {
         // ReSharper disable once PossibleNullReferenceException
         // ReSharper disable once Unity.PerformanceCriticalCodeCameraMain
         var ray = Camera.main.ScreenPointToRay(Input.mousePosition);
-        Physics.Raycast(ray, out var raycastHit, float.MaxValue, _instance.mousePlaneLayerMask);
-        return raycastHit.point;
+        bool isValidHit = Physics.Raycast(ray, out var raycastHit, float.MaxValue, _instance.mousePlaneLayerMask);
+        position =  raycastHit.point;
+        return isValidHit;
     }
 }
