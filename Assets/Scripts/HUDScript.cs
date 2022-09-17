@@ -32,6 +32,7 @@ public class HUDScript : MonoBehaviour
 
     private Unit _selectedUnit;
     private Canvas _hudCanvas;
+    private bool _canPauseGame = true;
 
     void Awake()
     {
@@ -149,6 +150,8 @@ public class HUDScript : MonoBehaviour
 
     public void ShowPauseScreen()
     {
+        if (!_canPauseGame) return;
+
         pauseScreen.alpha = 1;
         pauseScreen.interactable = true;
         pauseScreen.blocksRaycasts = true;
@@ -166,6 +169,8 @@ public class HUDScript : MonoBehaviour
 
     public void ShowLevelCompleteScreen()
     {
+        _canPauseGame = false;
+
         levelCompleteScreen.alpha = 1;
         levelCompleteScreen.interactable = true;
         levelCompleteScreen.blocksRaycasts = true;
@@ -177,6 +182,8 @@ public class HUDScript : MonoBehaviour
 
     public void ShowDefeatedScreen()
     {
+        _canPauseGame = false;
+
         defeatedScreen.alpha = 1;
         defeatedScreen.interactable = true;
         defeatedScreen.blocksRaycasts = true;
