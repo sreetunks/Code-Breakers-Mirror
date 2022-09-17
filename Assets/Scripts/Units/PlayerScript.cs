@@ -103,6 +103,7 @@ namespace Units
                                 _positionTargetedAbility = null;
 
                                 _inputState = InputState.Inactive;
+                                playerHUD.SetHUDButtonsActive(false);
 
                                 CurrentlySelectedUnit.OnUnitActionFinished += OnSelectedUnitActionFinished;
 
