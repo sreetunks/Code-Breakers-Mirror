@@ -46,9 +46,16 @@ public class GameManager : MonoBehaviour
         }
     }
 
+    private void OnMainMenuLoaded(Scene scene, LoadSceneMode loadSceneMode)
+    {
+        SceneManager.sceneLoaded -= OnMainMenuLoaded;
+        Time.timeScale = 1;
+    }
+
     private void OnGameSceneLoaded(Scene scene, LoadSceneMode loadSceneMode)
     {
         SceneManager.sceneLoaded -= OnGameSceneLoaded;
+        Time.timeScale = 1;
         SoundManager.PlayInGameMusic();
         _saveData.lastSceneIndex = scene.buildIndex;
         SaveGame();
@@ -127,7 +134,7 @@ public class GameManager : MonoBehaviour
         var scene = SceneManager.GetActiveScene();
         if (scene.buildIndex == 5)
         {
-            SceneManager.LoadScene(0);
+            LoadMainMenuScene();
             return;
         }
         SceneManager.sceneLoaded += OnGameSceneLoaded;
@@ -137,10 +144,15 @@ public class GameManager : MonoBehaviour
     public void ReloadGameScene()
     {
         var scene = SceneManager.GetActiveScene();
+        SceneManager.sceneLoaded += OnGameSceneLoaded;
         SceneManager.LoadScene(scene.buildIndex);
     }
 
-    public void LoadMainMenuScene() { SceneManager.LoadScene(0); }
+    public void LoadMainMenuScene()
+    {
+        SceneManager.sceneLoaded += OnMainMenuLoaded;
+        SceneManager.LoadScene(0);
+    }
 
     public IEnumerator MenuSoundEffect()
     {
