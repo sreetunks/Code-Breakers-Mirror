@@ -63,7 +63,7 @@ public class HUDScript : MonoBehaviour
         {
             for (var i = 0; i < unit.AbilityList.Count; ++i)
                 abilityButtons[i].EnableButton();
-            SetEndTurnButtonEnabled(true);
+            endTurnButton.interactable = true;
         }
 
         UpdateHealth();
@@ -101,9 +101,14 @@ public class HUDScript : MonoBehaviour
         }
     }
 
-    public void SetEndTurnButtonEnabled(bool enabled)
+    public void SetHUDButtonsActive(bool isActive)
     {
-        endTurnButton.interactable = enabled;
+        foreach (var abilityButton in abilityButtons)
+            abilityButton.DisableButton();
+        if (isActive)
+            UpdateActionPoints();
+        endTurnButton.interactable = true;
+        endTurnButton.interactable = isActive;
     }
 
     public void UpdateTurnLabel(string labelString)

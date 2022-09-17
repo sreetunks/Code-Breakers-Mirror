@@ -103,7 +103,7 @@ namespace Units
                                 _positionTargetedAbility = null;
 
                                 _inputState = InputState.Inactive;
-                                playerHUD.SetEndTurnButtonEnabled(false);
+
                                 CurrentlySelectedUnit.OnUnitActionFinished += OnSelectedUnitActionFinished;
 
                                 GridSystem.ResetGridRangeInfo();
@@ -116,6 +116,7 @@ namespace Units
                             _positionTargetedAbility = null;
 
                             _inputState = InputState.Active;
+                            playerHUD.SetHUDButtonsActive(true);
 
                             GridSystem.ResetGridRangeInfo();
                             GridSystem.HighlightPosition = GridPosition.Invalid;
@@ -130,12 +131,12 @@ namespace Units
                             var targetGridPosition = GridSystem.GetGridPosition(targetPosition); // Get Position is considered Expensive
                             GridSystem.TryGetGridObject(targetGridPosition, out var targetObject);
                             var targetUnit = targetObject as Unit;
-                            if (targetUnit)
+                            if (targetUnit && _unitTargetedAbility.Use(CurrentlySelectedUnit, targetUnit))
                             {
-                                _unitTargetedAbility.Use(CurrentlySelectedUnit, targetUnit);
                                 _unitTargetedAbility = null;
 
                                 _inputState = InputState.Active;
+                                playerHUD.SetHUDButtonsActive(true);
 
                                 GridSystem.ResetGridRangeInfo();
                                 GridSystem.HighlightPosition = GridPosition.Invalid;
@@ -147,6 +148,7 @@ namespace Units
                             _unitTargetedAbility = null;
 
                             _inputState = InputState.Active;
+                            playerHUD.SetHUDButtonsActive(true);
 
                             GridSystem.ResetGridRangeInfo();
                             GridSystem.HighlightPosition = GridPosition.Invalid;
@@ -199,7 +201,7 @@ namespace Units
         {
             if (CurrentlySelectedUnit != null) CurrentlySelectedUnit.OnUnitActionFinished -= OnSelectedUnitActionFinished; // Comparison to Null is Expensive
             _inputState = InputState.Active;
-            playerHUD.SetEndTurnButtonEnabled(true);
+            playerHUD.SetHUDButtonsActive(true);
         }
 
         private void OnPlayerCharacterDeath(Unit unit)
@@ -227,7 +229,7 @@ namespace Units
 
             _perTurnUnitList = new List<Unit>(_controlledUnits);
             SelectUnit(_perTurnUnitList[0]);
-            playerHUD.SetEndTurnButtonEnabled(true);
+            playerHUD.SetHUDButtonsActive(true);
         }
 
         public void EndTurn()
@@ -243,7 +245,7 @@ namespace Units
             else
             {
                 _inputState = InputState.Inactive;
-                playerHUD.SetEndTurnButtonEnabled(false);
+                playerHUD.SetHUDButtonsActive(false);
                 TurnOrderSystem.MoveNext();
                 playerHUD.UpdateSelectedUnit(_selectedUnit);
             }
@@ -257,7 +259,10 @@ namespace Units
         public override void TargetAbility(Unit owningUnit, PositionTargetedAbility ability, int range)
         {
             _positionTargetedAbility = ability;
+
             _inputState = InputState.TargetingPosition;
+            playerHUD.SetHUDButtonsActive(false);
+
             _targetingRange = range;
             GridSystem.HighlightRange = range;
             GridSystem.HighlightPosition = owningUnit.Position;
@@ -266,7 +271,11 @@ namespace Units
         public override void TargetAbility(Unit owningUnit, UnitTargetedAbility ability, int range)
         {
             _unitTargetedAbility = ability;
+
             _inputState = InputState.TargetingUnit;
+            playerHUD.SetHUDButtonsActive(false);
+
+            GridSystem.HighlightRange = range;
             GridSystem.HighlightPosition = owningUnit.Position;
         }
 
