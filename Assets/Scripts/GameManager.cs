@@ -83,12 +83,6 @@ public class GameManager : MonoBehaviour
         file.Close();
     }
 
-    public void ToggleSaveMenu()
-    {
-        saveMenu.SetActive(!saveMenu.activeInHierarchy);
-        StartCoroutine(MenuSoundEffect());
-    }
-
     public void EnableSettingsMenu()
     {
         settingsMenu.Show();

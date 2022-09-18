@@ -14,12 +14,6 @@ public class MenuButtonFunctions : MonoBehaviour
         GameManager.Instance.LoadNewGame();
     }
 
-    // Button to load a save file
-    public void LoadGame()
-    {
-        GameManager.Instance.ToggleSaveMenu();
-    }
-
     // Button to open the settings menu
     public void Settings()
     {
