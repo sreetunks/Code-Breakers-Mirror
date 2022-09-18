@@ -100,28 +100,15 @@ namespace Units
                             var targetGridPosition = GridSystem.GetGridPosition(targetPosition); // Get Position is considered Expensive
                             if (_positionTargetedAbility.Use(CurrentlySelectedUnit, targetGridPosition))
                             {
-                                _positionTargetedAbility = null;
-
-                                _inputState = InputState.Inactive;
+                                CancelAbility();
                                 playerHUD.SetHUDButtonsActive(false);
-
+                                _inputState = InputState.Inactive;
                                 CurrentlySelectedUnit.OnUnitActionFinished += OnSelectedUnitActionFinished;
-
-                                GridSystem.ResetGridRangeInfo();
-                                GridSystem.HighlightPosition = GridPosition.Invalid;
-                                GridSystem.HighlightRange = -1;
                             }
                         }
                         else if (Input.GetMouseButton(1))
                         {
-                            _positionTargetedAbility = null;
-
-                            _inputState = InputState.Active;
-                            playerHUD.SetHUDButtonsActive(true);
-
-                            GridSystem.ResetGridRangeInfo();
-                            GridSystem.HighlightPosition = GridPosition.Invalid;
-                            GridSystem.HighlightRange = -1;
+                            CancelAbility();
                         }
                         break;
                     }
@@ -134,26 +121,12 @@ namespace Units
                             var targetUnit = targetObject as Unit;
                             if (targetUnit && _unitTargetedAbility.Use(CurrentlySelectedUnit, targetUnit))
                             {
-                                _unitTargetedAbility = null;
-
-                                _inputState = InputState.Active;
-                                playerHUD.SetHUDButtonsActive(true);
-
-                                GridSystem.ResetGridRangeInfo();
-                                GridSystem.HighlightPosition = GridPosition.Invalid;
-                                GridSystem.HighlightRange = -1;
+                                CancelAbility();
                             }
                         }
                         else if (Input.GetMouseButton(1))
                         {
-                            _unitTargetedAbility = null;
-
-                            _inputState = InputState.Active;
-                            playerHUD.SetHUDButtonsActive(true);
-
-                            GridSystem.ResetGridRangeInfo();
-                            GridSystem.HighlightPosition = GridPosition.Invalid;
-                            GridSystem.HighlightRange = -1;
+                            CancelAbility();
                         }
                         break;
                     }
@@ -257,6 +230,23 @@ namespace Units
             playerHUD.UpdateTurnLabel(factionType.ToString());
         }
 
+        public void CancelAbility()
+        {
+            if (_inputState == InputState.TargetingPosition)
+                _positionTargetedAbility = null;
+            else if (_inputState == InputState.TargetingUnit)
+                _unitTargetedAbility = null;
+
+            _inputState = InputState.Active;
+
+            GridSystem.ResetGridRangeInfo();
+            GridSystem.HighlightPosition = GridPosition.Invalid;
+            GridSystem.HighlightRange = -1;
+
+            playerHUD.SetCancelActionButtonEnabled(false);
+            playerHUD.SetHUDButtonsActive(true);
+        }
+
         public override void TargetAbility(Unit owningUnit, PositionTargetedAbility ability, int range)
         {
             _positionTargetedAbility = ability;
@@ -267,6 +257,8 @@ namespace Units
             _targetingRange = range;
             GridSystem.HighlightRange = range;
             GridSystem.HighlightPosition = owningUnit.Position;
+
+            playerHUD.SetCancelActionButtonEnabled(true);
         }
 
         public override void TargetAbility(Unit owningUnit, UnitTargetedAbility ability, int range)
@@ -278,6 +270,8 @@ namespace Units
 
             GridSystem.HighlightRange = range;
             GridSystem.HighlightPosition = owningUnit.Position;
+
+            playerHUD.SetCancelActionButtonEnabled(true);
         }
 
         public override void Initialize()

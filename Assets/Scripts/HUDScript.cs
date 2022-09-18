@@ -17,6 +17,7 @@ public class HUDScript : MonoBehaviour
     [SerializeField] private TMP_Text turnFactionLabel;
     [SerializeField] private TMP_Text floorIndicator;
     [SerializeField] private Button endTurnButton;
+    [SerializeField] private Button cancelActionButton;
 
     [SerializeField] private CanvasGroup ingameHUDScreen;
     [SerializeField] private CanvasGroup pauseScreen;
@@ -113,6 +114,11 @@ public class HUDScript : MonoBehaviour
         endTurnButton.interactable = isActive;
     }
 
+    public void SetCancelActionButtonEnabled(bool enabled)
+    {
+        cancelActionButton.interactable = enabled;
+    }
+
     public void UpdateTurnLabel(string labelString)
     {
         turnFactionLabel.text = $"Current Turn: {labelString}";
@@ -122,6 +128,7 @@ public class HUDScript : MonoBehaviour
     {
         floorIndicator.text = $"Floor: {SceneManager.GetActiveScene().name}";
     }
+
     public void ActionLogEvent(string logMessage)
     {
         alText.text = "";
