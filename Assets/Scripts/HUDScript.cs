@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
+using UnityEngine.SceneManagement;
 using TMPro;
 using UI;
 using Units;
@@ -14,6 +15,7 @@ public class HUDScript : MonoBehaviour
     [SerializeField] private TMP_Text actionPointBarText;
     [SerializeField] private Image shieldBarImage;
     [SerializeField] private TMP_Text turnFactionLabel;
+    [SerializeField] private TMP_Text floorIndicator;
     [SerializeField] private Button endTurnButton;
 
     [SerializeField] private CanvasGroup ingameHUDScreen;
@@ -37,7 +39,7 @@ public class HUDScript : MonoBehaviour
     void Awake()
     {
         _hudCanvas = GetComponent<Canvas>();
-
+        SetFloorNumber();
         dropDown = false;
         _actionLogOrigin = actionLog.transform.localPosition;
         _actionLogText = new List<string>();
@@ -66,7 +68,6 @@ public class HUDScript : MonoBehaviour
                 abilityButtons[i].EnableButton();
             endTurnButton.interactable = true;
         }
-
         UpdateHealth();
         UpdateActionPoints();
     }
@@ -117,6 +118,10 @@ public class HUDScript : MonoBehaviour
         turnFactionLabel.text = $"Current Turn: {labelString}";
     }
 
+    public void SetFloorNumber()
+    {
+        floorIndicator.text = $"Floor: {SceneManager.GetActiveScene().name}";
+    }
     public void ActionLogEvent(string logMessage)
     {
         alText.text = "";

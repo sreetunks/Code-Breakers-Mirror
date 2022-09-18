@@ -15,6 +15,11 @@ PrefabInstance:
       objectReference: {fileID: 2100000, guid: 6968e89851431104b8f931c37d69356b, type: 2}
     - target: {fileID: 7007951768904158068, guid: 0f7dc776639e01f45bf75df50ce4d4d9,
         type: 3}
+      propertyPath: maximumHealth
+      value: 8
+      objectReference: {fileID: 0}
+    - target: {fileID: 7007951768904158068, guid: 0f7dc776639e01f45bf75df50ce4d4d9,
+        type: 3}
       propertyPath: unitAbilities.Array.size
       value: 5
       objectReference: {fileID: 0}
