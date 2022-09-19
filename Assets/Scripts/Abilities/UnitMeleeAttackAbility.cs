@@ -12,6 +12,7 @@ namespace Abilities
         [SerializeField] int cooldownDuration;
         [SerializeField] int actionPointCost = 2;
         [SerializeField] int range = 1;
+        [SerializeField] AudioClip soundEffect;
 
         public override int CooldownDuration => cooldownDuration;
 
@@ -27,7 +28,7 @@ namespace Abilities
                 for (var x = 0; x < levelGrid.GridWidth; ++x)
                 {
                     var idx = (y * levelGrid.GridWidth) + x;
-                    var distanceToTarget = Mathf.Abs(x - owningUnit.Position.X) + Mathf.Abs(y - owningUnit.Position.Z);
+                    var distanceToTarget = (int)FunctionHelper.PyThag(x - owningUnit.Position.X, y - owningUnit.Position.Z);
                     cellRangeArray[idx] = (distanceToTarget > range) ? 0 : distanceToTarget;
                 }
             }
@@ -43,6 +44,7 @@ namespace Abilities
                 return false;
 
             targetUnit.TakeDamage(attackDamage);
+            owningUnit.AudioSource.PlayOneShot(soundEffect);
             owningUnit.ConsumeAP(actionPointCost);
             owningUnit.OnAbilityUsed(this);
 

@@ -15,3 +15,5 @@ MonoBehaviour:
   attackDamage: 2
   cooldownDuration: 1
   actionPointCost: 1
+  range: 1
+  soundEffect: {fileID: 8300000, guid: fe9b561e29b8c2d45ac1ddf924e53e76, type: 3}
