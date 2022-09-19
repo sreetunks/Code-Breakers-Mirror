@@ -7,7 +7,7 @@ using UnityEngine.SceneManagement;
 public class GameManager : MonoBehaviour
 {
     [System.Serializable]
-    class SaveData
+    public class SaveData
     {
         public System.DateTime lastPlayed;
         public System.TimeSpan playTime;
@@ -16,12 +16,11 @@ public class GameManager : MonoBehaviour
 
     public static GameManager Instance;
     public SoundManager SoundManager { get; private set; }
+    public SaveData LastSavedData => _saveData;
 
     public AudioSource mainMenuSfx;
 
-    public GameObject saveMenu;
     public MenuScreen settingsMenu;
-    public GameObject creditsMenu;
     public GameObject exitMenu;
 
     [SerializeField] AudioClip mainMenuMusic;
@@ -96,12 +95,6 @@ public class GameManager : MonoBehaviour
             settingsMenu.Show();
 
         SoundManager.PauseMusic();
-        StartCoroutine(MenuSoundEffect());
-    }
-
-    public void ToggleCreditsMenu()
-    {
-        creditsMenu.SetActive(!creditsMenu.activeInHierarchy);
         StartCoroutine(MenuSoundEffect());
     }
 

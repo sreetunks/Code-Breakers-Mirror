@@ -1,12 +1,12 @@
 using UnityEngine;
 using UnityEngine.UI;
+using UnityEngine.EventSystems;
 
 public class MainMenu : MonoBehaviour
 {
     public AudioSource mainMenuSfx;
 
     public GameObject saveMenu;
-    public GameObject creditsMenu;
     public GameObject exitMenu;
 
     [SerializeField] Button continueButton;
@@ -21,11 +21,14 @@ public class MainMenu : MonoBehaviour
 
     private void Start()
     {
-        continueButton.interactable = GameManager.Instance.HasSaveGame();
+        if (GameManager.Instance.HasSaveGame())
+        {
+            EventSystem.current.SetSelectedGameObject(continueButton.gameObject);
+            continueButton.interactable = true;
+        }
+
         GameManager.Instance.mainMenuSfx = mainMenuSfx;
 
-        GameManager.Instance.saveMenu = saveMenu;
-        GameManager.Instance.creditsMenu = creditsMenu;
         GameManager.Instance.exitMenu = exitMenu;
 
         GameManager.Instance.settingsMenu.OnScreenToggled += OnSettingsScreenToggled;

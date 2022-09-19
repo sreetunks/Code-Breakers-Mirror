@@ -20,12 +20,6 @@ public class MenuButtonFunctions : MonoBehaviour
         GameManager.Instance.ToggleSettingsMenu();
     }
 
-    // Button to open the credits screen
-    public void Credits()
-    {
-        GameManager.Instance.ToggleCreditsMenu();
-    }
-
     // Button to close the application
     public void Exit()
     {
@@ -44,8 +38,6 @@ public class MenuButtonFunctions : MonoBehaviour
         GameManager.Instance.mainMenuSfx.mute = false;
         GameManager.Instance.mainMenuSfx.Play();
 
-        GameManager.Instance.saveMenu.SetActive(false);
-        GameManager.Instance.creditsMenu.SetActive(false);
         GameManager.Instance.exitMenu.SetActive(false);
 
         if (GameManager.Instance.SoundManager.effectSource.mute == false)
