@@ -4,18 +4,20 @@ using UnityEngine.EventSystems;
 
 public class MainMenu : MonoBehaviour
 {
-    public AudioSource mainMenuSfx;
-
     public GameObject saveMenu;
     public GameObject exitMenu;
 
     [SerializeField] Button continueButton;
+    [SerializeField] Button newGameButton;
     [SerializeField] Button exitButton;
+
+    [SerializeField] AudioClip uiButtonClip;
 
     private void Awake()
     {
-#if UNITY_WEBPLAYER || UNITY_WEBGL
+#if UNITY_WEBGL && !UNITY_EDITOR
         exitButton.enabled = false;
+        exitButton.gameObject.SetActive(false);
 #endif
     }
 
@@ -24,36 +26,25 @@ public class MainMenu : MonoBehaviour
         if (GameManager.Instance.HasSaveGame())
         {
             EventSystem.current.SetSelectedGameObject(continueButton.gameObject);
+
             continueButton.interactable = true;
+
+            var navigation = newGameButton.navigation;
+            navigation.selectOnUp = continueButton;
+            newGameButton.navigation = navigation;
+
+            navigation = exitButton.navigation;
+            navigation.selectOnDown = continueButton;
+            exitButton.navigation = navigation;
         }
 
-        GameManager.Instance.mainMenuSfx = mainMenuSfx;
-
         GameManager.Instance.exitMenu = exitMenu;
-
-        GameManager.Instance.settingsMenu.OnScreenToggled += OnSettingsScreenToggled;
 
         GameManager.Instance.SoundManager.PlayMenuMusic();
     }
 
-    private void OnDestroy()
+    public void PlayUISound()
     {
-        GameManager.Instance.settingsMenu.OnScreenToggled -= OnSettingsScreenToggled;
-    }
-
-    private void OnSettingsScreenToggled(bool visible)
-    {
-        if (!visible)
-        {
-            GameManager.Instance.SoundManager.PlayMenuMusic();
-
-            if (GameManager.Instance.SoundManager.effectSource.mute == false)
-            {
-                GameManager.Instance.SoundManager.ToggleEffects();
-            }
-
-            mainMenuSfx.mute = true;
-            mainMenuSfx.Stop();
-        }
+        GameManager.Instance.SoundManager.PlayEffect(uiButtonClip);
     }
 }

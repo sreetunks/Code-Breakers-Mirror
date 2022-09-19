@@ -165,6 +165,7 @@ namespace Units
             _path = inPath;
             unitAudioSource.clip = footStepSFX;
             unitAudioSource.loop = true;
+            unitAudioSource.Play();
         }
 
         public void TakeDamage(int damageDealt)
@@ -204,7 +205,7 @@ namespace Units
         public void GainShields(int shieldsGained)
         {
             _currentShields = shieldsGained;
-
+            unitAudioSource.PlayOneShot(healSFX);
             OnUnitDamaged?.Invoke(0);
         }
 

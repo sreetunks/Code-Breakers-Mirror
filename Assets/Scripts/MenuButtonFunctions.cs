@@ -26,33 +26,15 @@ public class MenuButtonFunctions : MonoBehaviour
         GameManager.Instance.ToggleExitMenu();
     }
 
-    // Button to select a save file
-    public void Select()
-    {
-        StartCoroutine(GameManager.Instance.MenuSoundEffect());
-    }
-
     // Button to back out of a menu
     public void Back()
     {
-        GameManager.Instance.mainMenuSfx.mute = false;
-        GameManager.Instance.mainMenuSfx.Play();
-
         GameManager.Instance.exitMenu.SetActive(false);
-
-        if (GameManager.Instance.SoundManager.effectSource.mute == false)
-        {
-            GameManager.Instance.SoundManager.ToggleEffects();
-        }
-
-        GameManager.Instance.mainMenuSfx.mute = true;
-        GameManager.Instance.mainMenuSfx.Stop();
     }
 
     // Button to confirm exiting the application
     public void Yes()
     {
-        StartCoroutine(GameManager.Instance.MenuSoundEffect());
         Application.Quit();
     }
 }

@@ -18,8 +18,6 @@ public class GameManager : MonoBehaviour
     public SoundManager SoundManager { get; private set; }
     public SaveData LastSavedData => _saveData;
 
-    public AudioSource mainMenuSfx;
-
     public MenuScreen settingsMenu;
     public GameObject exitMenu;
 
@@ -55,7 +53,7 @@ public class GameManager : MonoBehaviour
     {
         SceneManager.sceneLoaded -= OnGameSceneLoaded;
         Time.timeScale = 1;
-        SoundManager.PlayInGameMusic();
+        SoundManager.PlayInGameMusic(scene.buildIndex);
         _saveData.lastSceneIndex = scene.buildIndex;
         SaveGame();
     }
@@ -84,24 +82,27 @@ public class GameManager : MonoBehaviour
 
     public void EnableSettingsMenu()
     {
+        SoundManager.PauseMusic();
         settingsMenu.Show();
     }
 
     public void ToggleSettingsMenu()
     {
         if (settingsMenu.Visible)
+        {
+            SoundManager.ResumeMusic();
             settingsMenu.Hide();
+        }
         else
+        {
+            SoundManager.PauseMusic();
             settingsMenu.Show();
-
-        SoundManager.PauseMusic();
-        StartCoroutine(MenuSoundEffect());
+        }
     }
 
     public void ToggleExitMenu()
     {
         exitMenu.SetActive(!exitMenu.activeInHierarchy);
-        StartCoroutine(MenuSoundEffect());
     }
 
     public void LoadNewGame()
@@ -140,14 +141,5 @@ public class GameManager : MonoBehaviour
     {
         SceneManager.sceneLoaded += OnMainMenuLoaded;
         SceneManager.LoadScene(0);
-    }
-
-    public IEnumerator MenuSoundEffect()
-    {
-        mainMenuSfx.mute = false;
-        mainMenuSfx.Play();
-        yield return new WaitForSeconds(0.25f);
-        mainMenuSfx.mute = true;
-        mainMenuSfx.Stop();
     }
 }
