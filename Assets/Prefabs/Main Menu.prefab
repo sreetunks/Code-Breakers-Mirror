@@ -1644,7 +1644,7 @@ MonoBehaviour:
   m_ScaleFactor: 1
   m_ReferenceResolution: {x: 1920, y: 1080}
   m_ScreenMatchMode: 0
-  m_MatchWidthOrHeight: 0
+  m_MatchWidthOrHeight: 1
   m_PhysicalUnit: 3
   m_FallbackScreenDPI: 96
   m_DefaultSpriteDPI: 96
@@ -1683,7 +1683,6 @@ MonoBehaviour:
   saveMenu: {fileID: 0}
   exitMenu: {fileID: 3638957679536030826}
   continueButton: {fileID: 3638957679403945601}
-  continueButtonText: {fileID: 3638957679566174238}
   exitButton: {fileID: 3638957679219922371}
 --- !u!1 &3638957680040057724
 GameObject:
