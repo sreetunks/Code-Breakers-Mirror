@@ -36,13 +36,18 @@ namespace Units
         public delegate void OnUnitReachedLevelExitEventHandler();
         public OnUnitReachedLevelExitEventHandler OnUnitReachedLevelExit;
 
+        [SerializeField] private Animator unitAnimator;
+        [SerializeField] private AudioSource unitAudioSource;
+
         [SerializeField] private float moveSpeed = 4f;
         [SerializeField] private float rotateSpeed = 10f;
-        [SerializeField] private Animator unitAnimator;
         [SerializeField] private ParticleSystem hitEffect;
         [SerializeField] private ParticleSystem shieldEffect;
 
         [SerializeField] private List<AbilityBase> unitAbilities;
+
+        [SerializeField] private AudioClip footStepSFX;
+        [SerializeField] private AudioClip healSFX;
 
         [SerializeField] private int maximumHealth = 4;
         [SerializeField] private int maximumAP = 6;
@@ -57,6 +62,7 @@ namespace Units
         private static readonly int IsWalking = Animator.StringToHash("IsWalking"); // Caching ID for Parameter
 
         public Controller Controller { get; set; }
+        public AudioSource AudioSource => unitAudioSource;
 
         public List<AbilityData> AbilityList => _unitAbilityDataList;
 
@@ -121,6 +127,8 @@ namespace Units
                     OnUnitActionFinished?.Invoke();
 
                     unitAnimator.SetBool(IsWalking, false); // Ends "Walk" Animations
+                    unitAudioSource.loop = false;
+                    unitAudioSource.Stop();
                 }
 
                 if (GridCellPreviousState == GridCellState.LevelExit)
@@ -155,6 +163,9 @@ namespace Units
         public void Move(List<GridPosition> inPath)
         {
             _path = inPath;
+            unitAudioSource.clip = footStepSFX;
+            unitAudioSource.loop = true;
+            unitAudioSource.Play();
         }
 
         public void TakeDamage(int damageDealt)
@@ -188,25 +199,14 @@ namespace Units
         {
             _currentHealth = Mathf.Min(maximumHealth, _currentHealth + healthRestored);
             OnUnitDamaged?.Invoke(-healthRestored);
+            unitAudioSource.PlayOneShot(healSFX);
         }
 
         public void GainShields(int shieldsGained)
         {
             _currentShields = shieldsGained;
-
+            unitAudioSource.PlayOneShot(healSFX);
             OnUnitDamaged?.Invoke(0);
-        }
-
-        public void MeleeAttack(int attackDamage)
-        {
-            var controlledUnit = PlayerScript.CurrentlySelectedUnit;
-            var playerCharacter = PlayerScript.PlayerCharacter;
-            var distanceToPlayer = Mathf.Abs(playerCharacter.Position.X - controlledUnit.Position.X) + Mathf.Abs(playerCharacter.Position.Z - controlledUnit.Position.Z);
-
-            if (distanceToPlayer <= 1)
-            {
-                controlledUnit.TakeDamage(attackDamage);
-            }
         }
 
         public void ConsumeAP(int apToConsume)

@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.Events;
 
 [RequireComponent(typeof(CanvasGroup))]
 public class MenuScreen : MonoBehaviour
@@ -6,6 +7,8 @@ public class MenuScreen : MonoBehaviour
     public delegate void OnScreenToggledEventHandler(bool visible);
     public OnScreenToggledEventHandler OnScreenToggled;
     public bool Visible => _visible;
+
+    [SerializeField] private UnityEvent onScreenShownEvent;
 
     private CanvasGroup canvasGroup;
     private bool _visible;
@@ -24,6 +27,8 @@ public class MenuScreen : MonoBehaviour
         _visible = true;
 
         OnScreenToggled?.Invoke(true);
+
+        onScreenShownEvent?.Invoke();
     }
 
     public void Hide()

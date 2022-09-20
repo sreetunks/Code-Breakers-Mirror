@@ -70,9 +70,9 @@ namespace Units
                 case InputState.Inactive: return;
                 case InputState.Active:
                     {
-                        if (Input.GetMouseButtonDown(0) && !EventSystem.current.IsPointerOverGameObject())
+                        if (Input.GetMouseButtonDown(0) && !EventSystem.current.IsPointerOverGameObject() && MouseWorld.GetPosition(out var targetWorldPosition))
                         {
-                            var targetGridPosition = GridSystem.GetGridPosition(MouseWorld.GetPosition()); // Get Position is considered Expensive
+                            var targetGridPosition = GridSystem.GetGridPosition(targetWorldPosition); // Get Position is considered Expensive
                             GridSystem.TryGetGridObject(targetGridPosition, out var targetObject);
                             var targetUnit = targetObject as Unit;
                             if (targetUnit && targetUnit != _selectedUnit)
@@ -95,62 +95,38 @@ namespace Units
                     }
                 case InputState.TargetingPosition:
                     {
-                        if (Input.GetMouseButton(0) && !EventSystem.current.IsPointerOverGameObject() && _positionTargetedAbility != null) // Comparing to Null is considered Expensive
+                        if (Input.GetMouseButton(0) && !EventSystem.current.IsPointerOverGameObject() && _positionTargetedAbility != null && MouseWorld.GetPosition(out var targetPosition)) // Comparing to Null is considered Expensive
                         {
-                            var targetGridPosition = GridSystem.GetGridPosition(MouseWorld.GetPosition()); // Get Position is considered Expensive
+                            var targetGridPosition = GridSystem.GetGridPosition(targetPosition); // Get Position is considered Expensive
                             if (_positionTargetedAbility.Use(CurrentlySelectedUnit, targetGridPosition))
                             {
-                                _positionTargetedAbility = null;
-
+                                CancelAbility();
+                                playerHUD.SetHUDButtonsActive(false);
                                 _inputState = InputState.Inactive;
-                                playerHUD.SetEndTurnButtonEnabled(false);
                                 CurrentlySelectedUnit.OnUnitActionFinished += OnSelectedUnitActionFinished;
-
-                                GridSystem.ResetGridRangeInfo();
-                                GridSystem.HighlightPosition = GridPosition.Invalid;
-                                GridSystem.HighlightRange = -1;
                             }
                         }
                         else if (Input.GetMouseButton(1))
                         {
-                            _positionTargetedAbility = null;
-
-                            _inputState = InputState.Active;
-
-                            GridSystem.ResetGridRangeInfo();
-                            GridSystem.HighlightPosition = GridPosition.Invalid;
-                            GridSystem.HighlightRange = -1;
+                            CancelAbility();
                         }
                         break;
                     }
                 case InputState.TargetingUnit:
                     {
-                        if (_unitTargetedAbility != null && Input.GetMouseButton(0) && !EventSystem.current.IsPointerOverGameObject())
+                        if (_unitTargetedAbility != null && Input.GetMouseButton(0) && !EventSystem.current.IsPointerOverGameObject() && MouseWorld.GetPosition(out var targetPosition))
                         {
-                            var targetGridPosition = GridSystem.GetGridPosition(MouseWorld.GetPosition()); // Get Position is considered Expensive
+                            var targetGridPosition = GridSystem.GetGridPosition(targetPosition); // Get Position is considered Expensive
                             GridSystem.TryGetGridObject(targetGridPosition, out var targetObject);
                             var targetUnit = targetObject as Unit;
-                            if (targetUnit)
+                            if (targetUnit && _unitTargetedAbility.Use(CurrentlySelectedUnit, targetUnit))
                             {
-                                _unitTargetedAbility.Use(CurrentlySelectedUnit, targetUnit);
-                                _unitTargetedAbility = null;
-
-                                _inputState = InputState.Active;
-
-                                GridSystem.ResetGridRangeInfo();
-                                GridSystem.HighlightPosition = GridPosition.Invalid;
-                                GridSystem.HighlightRange = -1;
+                                CancelAbility();
                             }
                         }
                         else if (Input.GetMouseButton(1))
                         {
-                            _unitTargetedAbility = null;
-
-                            _inputState = InputState.Active;
-
-                            GridSystem.ResetGridRangeInfo();
-                            GridSystem.HighlightPosition = GridPosition.Invalid;
-                            GridSystem.HighlightRange = -1;
+                            CancelAbility();
                         }
                         break;
                     }
@@ -199,7 +175,7 @@ namespace Units
         {
             if (CurrentlySelectedUnit != null) CurrentlySelectedUnit.OnUnitActionFinished -= OnSelectedUnitActionFinished; // Comparison to Null is Expensive
             _inputState = InputState.Active;
-            playerHUD.SetEndTurnButtonEnabled(true);
+            playerHUD.SetHUDButtonsActive(true);
         }
 
         private void OnPlayerCharacterDeath(Unit unit)
@@ -227,7 +203,7 @@ namespace Units
 
             _perTurnUnitList = new List<Unit>(_controlledUnits);
             SelectUnit(_perTurnUnitList[0]);
-            playerHUD.SetEndTurnButtonEnabled(true);
+            playerHUD.SetHUDButtonsActive(true);
         }
 
         public void EndTurn()
@@ -243,7 +219,7 @@ namespace Units
             else
             {
                 _inputState = InputState.Inactive;
-                playerHUD.SetEndTurnButtonEnabled(false);
+                playerHUD.SetHUDButtonsActive(false);
                 TurnOrderSystem.MoveNext();
                 playerHUD.UpdateSelectedUnit(_selectedUnit);
             }
@@ -254,20 +230,48 @@ namespace Units
             playerHUD.UpdateTurnLabel(factionType.ToString());
         }
 
+        public void CancelAbility()
+        {
+            if (_inputState == InputState.TargetingPosition)
+                _positionTargetedAbility = null;
+            else if (_inputState == InputState.TargetingUnit)
+                _unitTargetedAbility = null;
+
+            _inputState = InputState.Active;
+
+            GridSystem.ResetGridRangeInfo();
+            GridSystem.HighlightPosition = GridPosition.Invalid;
+            GridSystem.HighlightRange = -1;
+
+            playerHUD.SetCancelActionButtonEnabled(false);
+            playerHUD.SetHUDButtonsActive(true);
+        }
+
         public override void TargetAbility(Unit owningUnit, PositionTargetedAbility ability, int range)
         {
             _positionTargetedAbility = ability;
+
             _inputState = InputState.TargetingPosition;
+            playerHUD.SetHUDButtonsActive(false);
+
             _targetingRange = range;
             GridSystem.HighlightRange = range;
             GridSystem.HighlightPosition = owningUnit.Position;
+
+            playerHUD.SetCancelActionButtonEnabled(true);
         }
 
         public override void TargetAbility(Unit owningUnit, UnitTargetedAbility ability, int range)
         {
             _unitTargetedAbility = ability;
+
             _inputState = InputState.TargetingUnit;
+            playerHUD.SetHUDButtonsActive(false);
+
+            GridSystem.HighlightRange = range;
             GridSystem.HighlightPosition = owningUnit.Position;
+
+            playerHUD.SetCancelActionButtonEnabled(true);
         }
 
         public override void Initialize()

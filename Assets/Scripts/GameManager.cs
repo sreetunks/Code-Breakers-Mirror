@@ -7,7 +7,7 @@ using UnityEngine.SceneManagement;
 public class GameManager : MonoBehaviour
 {
     [System.Serializable]
-    class SaveData
+    public class SaveData
     {
         public System.DateTime lastPlayed;
         public System.TimeSpan playTime;
@@ -16,12 +16,9 @@ public class GameManager : MonoBehaviour
 
     public static GameManager Instance;
     public SoundManager SoundManager { get; private set; }
+    public SaveData LastSavedData => _saveData;
 
-    public AudioSource mainMenuSfx;
-
-    public GameObject saveMenu;
     public MenuScreen settingsMenu;
-    public GameObject creditsMenu;
     public GameObject exitMenu;
 
     [SerializeField] AudioClip mainMenuMusic;
@@ -46,10 +43,17 @@ public class GameManager : MonoBehaviour
         }
     }
 
+    private void OnMainMenuLoaded(Scene scene, LoadSceneMode loadSceneMode)
+    {
+        SceneManager.sceneLoaded -= OnMainMenuLoaded;
+        Time.timeScale = 1;
+    }
+
     private void OnGameSceneLoaded(Scene scene, LoadSceneMode loadSceneMode)
     {
         SceneManager.sceneLoaded -= OnGameSceneLoaded;
-        SoundManager.PlayInGameMusic();
+        Time.timeScale = 1;
+        SoundManager.PlayInGameMusic(scene.buildIndex);
         _saveData.lastSceneIndex = scene.buildIndex;
         SaveGame();
     }
@@ -76,38 +80,29 @@ public class GameManager : MonoBehaviour
         file.Close();
     }
 
-    public void ToggleSaveMenu()
-    {
-        saveMenu.SetActive(!saveMenu.activeInHierarchy);
-        StartCoroutine(MenuSoundEffect());
-    }
-
     public void EnableSettingsMenu()
     {
+        SoundManager.PauseMusic();
         settingsMenu.Show();
     }
 
     public void ToggleSettingsMenu()
     {
         if (settingsMenu.Visible)
+        {
+            SoundManager.ResumeMusic();
             settingsMenu.Hide();
+        }
         else
+        {
+            SoundManager.PauseMusic();
             settingsMenu.Show();
-
-        SoundManager.PauseMusic();
-        StartCoroutine(MenuSoundEffect());
-    }
-
-    public void ToggleCreditsMenu()
-    {
-        creditsMenu.SetActive(!creditsMenu.activeInHierarchy);
-        StartCoroutine(MenuSoundEffect());
+        }
     }
 
     public void ToggleExitMenu()
     {
         exitMenu.SetActive(!exitMenu.activeInHierarchy);
-        StartCoroutine(MenuSoundEffect());
     }
 
     public void LoadNewGame()
@@ -127,7 +122,8 @@ public class GameManager : MonoBehaviour
         var scene = SceneManager.GetActiveScene();
         if (scene.buildIndex == 5)
         {
-            SceneManager.LoadScene(0);
+            File.Delete(Application.persistentDataPath + "/gamedata.sav");
+            LoadMainMenuScene();
             return;
         }
         SceneManager.sceneLoaded += OnGameSceneLoaded;
@@ -137,17 +133,13 @@ public class GameManager : MonoBehaviour
     public void ReloadGameScene()
     {
         var scene = SceneManager.GetActiveScene();
+        SceneManager.sceneLoaded += OnGameSceneLoaded;
         SceneManager.LoadScene(scene.buildIndex);
     }
 
-    public void LoadMainMenuScene() { SceneManager.LoadScene(0); }
-
-    public IEnumerator MenuSoundEffect()
+    public void LoadMainMenuScene()
     {
-        mainMenuSfx.mute = false;
-        mainMenuSfx.Play();
-        yield return new WaitForSeconds(0.25f);
-        mainMenuSfx.mute = true;
-        mainMenuSfx.Stop();
+        SceneManager.sceneLoaded += OnMainMenuLoaded;
+        SceneManager.LoadScene(0);
     }
 }

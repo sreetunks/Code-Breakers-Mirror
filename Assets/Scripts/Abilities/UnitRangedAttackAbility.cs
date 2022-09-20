@@ -12,6 +12,7 @@ namespace Abilities
         [SerializeField] int cooldownDuration;
         [SerializeField] int actionPointCost;
         [SerializeField] int range = 3;
+        [SerializeField] AudioClip soundEffect;
 
         public override int CooldownDuration => cooldownDuration;
 
@@ -43,6 +44,7 @@ namespace Abilities
                 return false;
 
             targetUnit.TakeDamage(attackDamage);
+            owningUnit.AudioSource.PlayOneShot(soundEffect);
             owningUnit.ConsumeAP(actionPointCost);
             owningUnit.OnAbilityUsed(this);
 

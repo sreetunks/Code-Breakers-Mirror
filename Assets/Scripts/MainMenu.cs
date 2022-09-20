@@ -1,56 +1,50 @@
 using UnityEngine;
 using UnityEngine.UI;
+using UnityEngine.EventSystems;
 
 public class MainMenu : MonoBehaviour
 {
-    public AudioSource mainMenuSfx;
-
     public GameObject saveMenu;
-    public GameObject creditsMenu;
     public GameObject exitMenu;
 
     [SerializeField] Button continueButton;
+    [SerializeField] Button newGameButton;
     [SerializeField] Button exitButton;
+
+    [SerializeField] AudioClip uiButtonClip;
 
     private void Awake()
     {
-#if UNITY_WEBPLAYER || UNITY_WEBGL
+#if UNITY_WEBGL && !UNITY_EDITOR
         exitButton.enabled = false;
+        exitButton.gameObject.SetActive(false);
 #endif
     }
 
     private void Start()
     {
-        continueButton.interactable = GameManager.Instance.HasSaveGame();
-        GameManager.Instance.mainMenuSfx = mainMenuSfx;
+        if (GameManager.Instance.HasSaveGame())
+        {
+            EventSystem.current.SetSelectedGameObject(continueButton.gameObject);
 
-        GameManager.Instance.saveMenu = saveMenu;
-        GameManager.Instance.creditsMenu = creditsMenu;
+            continueButton.interactable = true;
+
+            var navigation = newGameButton.navigation;
+            navigation.selectOnUp = continueButton;
+            newGameButton.navigation = navigation;
+
+            navigation = exitButton.navigation;
+            navigation.selectOnDown = continueButton;
+            exitButton.navigation = navigation;
+        }
+
         GameManager.Instance.exitMenu = exitMenu;
-
-        GameManager.Instance.settingsMenu.OnScreenToggled += OnSettingsScreenToggled;
 
         GameManager.Instance.SoundManager.PlayMenuMusic();
     }
 
-    private void OnDestroy()
+    public void PlayUISound()
     {
-        GameManager.Instance.settingsMenu.OnScreenToggled -= OnSettingsScreenToggled;
-    }
-
-    private void OnSettingsScreenToggled(bool visible)
-    {
-        if (!visible)
-        {
-            GameManager.Instance.SoundManager.PlayMenuMusic();
-
-            if (GameManager.Instance.SoundManager.effectSource.mute == false)
-            {
-                GameManager.Instance.SoundManager.ToggleEffects();
-            }
-
-            mainMenuSfx.mute = true;
-            mainMenuSfx.Stop();
-        }
+        GameManager.Instance.SoundManager.PlayEffect(uiButtonClip);
     }
 }

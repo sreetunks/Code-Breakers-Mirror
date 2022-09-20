@@ -6,9 +6,9 @@ using UnityEngine.UI;
 public class SoundManager : MonoBehaviour
 {
     [SerializeField] AudioClip menuMusicClip;
-    [SerializeField] AudioClip inGameMusicClip;
-    [SerializeField] AudioClip combatMusicClip;
+    [SerializeField] AudioClip[] inGameMusicClips;
     [SerializeField] AudioClip previewMusicClip;
+    [SerializeField] AudioClip previewEffectsClip;
 
     [SerializeField] private AudioMixer audioMixer;
     [SerializeField] public AudioSource musicSource, effectSource;
@@ -37,6 +37,10 @@ public class SoundManager : MonoBehaviour
             _toggleMusicActive = false;
             musicSource.Play();
         }
+
+        effectSource.Stop();
+        effectSource.mute = visible;
+        effectSource.loop = false;
     }
 
     public void PlayMenuMusic()
@@ -46,23 +50,21 @@ public class SoundManager : MonoBehaviour
         musicSource.Play();
     }
 
-    public void PlayInGameMusic()
+    public void PlayInGameMusic(int index)
     {
         musicSource.Stop();
-        musicSource.clip = inGameMusicClip;
-        musicSource.Play();
-    }
-
-    public void PlayCombatMusic()
-    {
-        musicSource.Stop();
-        musicSource.clip = combatMusicClip;
+        musicSource.clip = inGameMusicClips[index];
         musicSource.Play();
     }
 
     public void PauseMusic()
     {
         musicSource.Pause();
+    }
+
+    public void ResumeMusic()
+    {
+        musicSource.Play();
     }
 
     public void ToggleMusic()
@@ -82,16 +84,24 @@ public class SoundManager : MonoBehaviour
         }
     }
 
+    public void PlayEffect(AudioClip effectClip)
+    {
+        effectSource.PlayOneShot(effectClip);
+    }
+
     public void ToggleEffects()
     {
         effectSource.mute = !effectSource.mute;
 
         if (effectSource.mute == true)
         {
+            effectSource.loop = false;
             effectSource.Stop();
         }
         else
         {
+            effectSource.clip = previewEffectsClip;
+            effectSource.loop = true;
             effectSource.Play();
         }
     }

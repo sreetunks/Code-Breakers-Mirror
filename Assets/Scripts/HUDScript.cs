@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
+using UnityEngine.SceneManagement;
 using TMPro;
 using UI;
 using Units;
@@ -14,7 +15,9 @@ public class HUDScript : MonoBehaviour
     [SerializeField] private TMP_Text actionPointBarText;
     [SerializeField] private Image shieldBarImage;
     [SerializeField] private TMP_Text turnFactionLabel;
+    [SerializeField] private TMP_Text floorIndicator;
     [SerializeField] private Button endTurnButton;
+    [SerializeField] private Button cancelActionButton;
 
     [SerializeField] private CanvasGroup ingameHUDScreen;
     [SerializeField] private CanvasGroup pauseScreen;
@@ -32,11 +35,12 @@ public class HUDScript : MonoBehaviour
 
     private Unit _selectedUnit;
     private Canvas _hudCanvas;
+    private bool _canPauseGame = true;
 
     void Awake()
     {
         _hudCanvas = GetComponent<Canvas>();
-
+        SetFloorNumber();
         dropDown = false;
         _actionLogOrigin = actionLog.transform.localPosition;
         _actionLogText = new List<string>();
@@ -63,9 +67,8 @@ public class HUDScript : MonoBehaviour
         {
             for (var i = 0; i < unit.AbilityList.Count; ++i)
                 abilityButtons[i].EnableButton();
-            SetEndTurnButtonEnabled(true);
+            endTurnButton.interactable = true;
         }
-
         UpdateHealth();
         UpdateActionPoints();
     }
@@ -101,14 +104,29 @@ public class HUDScript : MonoBehaviour
         }
     }
 
-    public void SetEndTurnButtonEnabled(bool enabled)
+    public void SetHUDButtonsActive(bool isActive)
     {
-        endTurnButton.interactable = enabled;
+        foreach (var abilityButton in abilityButtons)
+            abilityButton.DisableButton();
+        if (isActive)
+            UpdateActionPoints();
+        endTurnButton.interactable = true;
+        endTurnButton.interactable = isActive;
+    }
+
+    public void SetCancelActionButtonEnabled(bool enabled)
+    {
+        cancelActionButton.interactable = enabled;
     }
 
     public void UpdateTurnLabel(string labelString)
     {
         turnFactionLabel.text = $"Current Turn: {labelString}";
+    }
+
+    public void SetFloorNumber()
+    {
+        floorIndicator.text = $"Floor: {SceneManager.GetActiveScene().name}";
     }
 
     public void ActionLogEvent(string logMessage)
@@ -144,6 +162,8 @@ public class HUDScript : MonoBehaviour
 
     public void ShowPauseScreen()
     {
+        if (!_canPauseGame) return;
+
         pauseScreen.alpha = 1;
         pauseScreen.interactable = true;
         pauseScreen.blocksRaycasts = true;
@@ -161,6 +181,8 @@ public class HUDScript : MonoBehaviour
 
     public void ShowLevelCompleteScreen()
     {
+        _canPauseGame = false;
+
         levelCompleteScreen.alpha = 1;
         levelCompleteScreen.interactable = true;
         levelCompleteScreen.blocksRaycasts = true;
@@ -172,6 +194,8 @@ public class HUDScript : MonoBehaviour
 
     public void ShowDefeatedScreen()
     {
+        _canPauseGame = false;
+
         defeatedScreen.alpha = 1;
         defeatedScreen.interactable = true;
         defeatedScreen.blocksRaycasts = true;

@@ -16,6 +16,7 @@ namespace Abilities
 
         public override void Use(Unit owningUnit)
         {
+            if (owningUnit.CurrentHealth == owningUnit.MaximumHealth) return;
             owningUnit.Heal(healAmount);
             owningUnit.ConsumeAP(actionPointCost);
             owningUnit.OnAbilityUsed(this);
