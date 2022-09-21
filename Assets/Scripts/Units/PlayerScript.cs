@@ -58,7 +58,6 @@ namespace Units
         private void Start()
         {
             playerCharacter.OnUnitDeath += OnPlayerCharacterDeath;
-            playerCharacter.OnUnitReachedLevelExit += OnReachedLevelExit;
             TurnOrderSystem.MoveNext();
             SelectUnit(playerCharacter);
         }
@@ -78,14 +77,21 @@ namespace Units
                             if (targetUnit && targetUnit != _selectedUnit)
                                 SelectUnit(targetUnit); // Select unit is considered Expensive
                         }
-                        else if (Input.GetMouseButtonDown(1) && !EventSystem.current.IsPointerOverGameObject() && _selectedUnit && _selectedUnit.IsOnDoorGridCell && !GridSystem.ActiveLevelGrid.AreDoorsLocked)
+                        else if (Input.GetMouseButtonDown(1) && !EventSystem.current.IsPointerOverGameObject() && !GridSystem.ActiveLevelGrid.AreDoorsLocked)
                         {
-                            var newGridPosition = GridSystem.SwitchLevelGrid(_selectedUnit.Position, _selectedUnit.GridCellPreviousState); // Switch Level Grid is considered Expensive
-                            var targetPosition = GridSystem.GetWorldPosition(newGridPosition);
-                            _selectedUnit.ForceMove(targetPosition);
-                            _selectedUnit.transform.position = targetPosition;
-                            GridSystem.UpdateGridObjectPosition(_selectedUnit, newGridPosition);
-                            TurnOrderSystem.MoveNext();
+                            if (playerCharacter.IsOnDoorGridCell)
+                            {
+                                var newGridPosition = GridSystem.SwitchLevelGrid(_selectedUnit.Position, _selectedUnit.GridCellPreviousState); // Switch Level Grid is considered Expensive
+                                var targetPosition = GridSystem.GetWorldPosition(newGridPosition);
+                                _selectedUnit.ForceMove(targetPosition);
+                                _selectedUnit.transform.position = targetPosition;
+                                GridSystem.UpdateGridObjectPosition(_selectedUnit, newGridPosition);
+                                TurnOrderSystem.MoveNext();
+                            }
+                            else if (playerCharacter.IsOnLevelExit)
+                            {
+                                playerHUD.ShowLevelCompleteScreen();
+                            }
                         }
                         else if (Input.GetKeyDown(KeyCode.K))
                         {
@@ -138,11 +144,6 @@ namespace Units
             {
                 playerHUD.ShowPauseScreen();
             }
-        }
-
-        private void OnReachedLevelExit()
-        {
-            playerHUD.ShowLevelCompleteScreen();
         }
 
         private void SelectUnit(Unit unit)

@@ -33,9 +33,6 @@ namespace Units
         public delegate void OnUnitActionFinishedEventHandler();
         public OnUnitActionFinishedEventHandler OnUnitActionFinished;
 
-        public delegate void OnUnitReachedLevelExitEventHandler();
-        public OnUnitReachedLevelExitEventHandler OnUnitReachedLevelExit;
-
         [SerializeField] private Animator unitAnimator;
         [SerializeField] private AudioSource unitAudioSource;
 
@@ -69,6 +66,7 @@ namespace Units
         public GridCellState GridCellPreviousState { get; set; }
         public GridPosition Position { get; private set; }
         public bool IsOnDoorGridCell { get; private set; }
+        public bool IsOnLevelExit { get; private set; }
 
         public int MaximumHealth => maximumHealth;
         public int CurrentHealth => _currentHealth;
@@ -120,6 +118,7 @@ namespace Units
                 GridSystem.UpdateGridObjectPosition(this, newGridPosition);
                 Position = newGridPosition;
                 IsOnDoorGridCell = CheckIsOnDoorGridCell(GridCellPreviousState);
+                IsOnLevelExit = GridCellPreviousState == GridCellState.LevelExit;
                 _path.RemoveAt(0);
 
                 if (_path.Count == 0)
@@ -130,9 +129,6 @@ namespace Units
                     unitAudioSource.loop = false;
                     unitAudioSource.Stop();
                 }
-
-                if (GridCellPreviousState == GridCellState.LevelExit)
-                    OnUnitReachedLevelExit?.Invoke();
             }
         }
 

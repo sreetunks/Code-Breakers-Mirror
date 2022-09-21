@@ -2166,7 +2166,7 @@ MonoBehaviour:
     m_PersistentCalls:
       m_Calls: []
   m_text: "Click the Ability Buttons to use an Action. \n\nLeft Click select Targets
-    for an Action.\nRight Click to Cancel Action/Use Doors."
+    for an Action.\n\nRight Click to Cancel Actions and\nto Use Doors and Exit Tiles."
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
   m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
@@ -7635,7 +7635,7 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 8323791082751869125}
   m_HandleRect: {fileID: 8323791082751869124}
   m_Direction: 0
-  m_Value: 0
+  m_Value: 1
   m_Size: 1
   m_NumberOfSteps: 0
   m_OnValueChanged:
