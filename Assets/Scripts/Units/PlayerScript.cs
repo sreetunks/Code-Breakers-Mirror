@@ -93,10 +93,6 @@ namespace Units
                                 playerHUD.ShowLevelCompleteScreen();
                             }
                         }
-                        else if (Input.GetKeyDown(KeyCode.K))
-                        {
-                            _selectedUnit.TakeDamage(1); // Take Damage is considered Expensive
-                        }
                         break;
                     }
                 case InputState.TargetingPosition:
