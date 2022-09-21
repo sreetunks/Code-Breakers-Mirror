@@ -35,6 +35,7 @@ namespace Units
 
         [SerializeField] private Animator unitAnimator;
         [SerializeField] private AudioSource unitAudioSource;
+        [SerializeField] private Canvas worldSpaceCanvas;
 
         [SerializeField] private float moveSpeed = 4f;
         [SerializeField] private float rotateSpeed = 10f;
@@ -129,6 +130,9 @@ namespace Units
                     unitAudioSource.loop = false;
                     unitAudioSource.Stop();
                 }
+
+                if (IsOnDoorGridCell || IsOnLevelExit && Controller.Faction == Controller.FactionType.Player)
+                    worldSpaceCanvas.enabled = true;
             }
         }
 
@@ -159,6 +163,7 @@ namespace Units
         public void Move(List<GridPosition> inPath)
         {
             _path = inPath;
+            worldSpaceCanvas.enabled = false;
             unitAudioSource.clip = footStepSFX;
             unitAudioSource.loop = true;
             unitAudioSource.Play();
@@ -245,6 +250,11 @@ namespace Units
 
         public void EndTurn()
         {
+        }
+
+        public void SetWorldSpaceCanvasActive(bool active)
+        {
+            worldSpaceCanvas.enabled = active;
         }
     }
 }
