@@ -42,7 +42,8 @@ Shader "TheHungrySwans/Grid"
             {
                 float4 positionHCS      : SV_POSITION;
                 float2 uv               : TEXCOORD0;
-                float pathFindingState  : TEXCOORD1;
+                float cellState         : TEXCOORD1;
+                float pathFindingState  : TEXCOORD2;
                 float4 color            : COLOR;
             };
 
@@ -59,6 +60,7 @@ Shader "TheHungrySwans/Grid"
                 Varyings OUT;
                 OUT.positionHCS = TransformObjectToHClip(IN.positionOS.xyz);
                 OUT.uv = IN.uv;
+                OUT.cellState = IN.cellState;
                 OUT.pathFindingState = IN.pathFindingState;
                 OUT.color = _GridCellColors[IN.cellState];
                 OUT.color.a = 1 - frac(IN.cellState);
@@ -76,6 +78,8 @@ Shader "TheHungrySwans/Grid"
 
                 float lerpFactor = saturate(IN.pathFindingState);
                 half4 highlightColor = lerp(outColor, half4(_HighlightColor.xyz, lerp(alpha, smoothstep(0.5, 1, IN.color.a), 1 - sign(length(IN.color.xyz)))), lerpFactor);
+
+                highlightColor = lerp(highlightColor, outColor, smoothstep(0, 0.5, saturate(IN.cellState - 8)));
 
                 return lerp(outColor, highlightColor, _GridHighlightInfo.x);
             }
