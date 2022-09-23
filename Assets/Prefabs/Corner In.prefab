@@ -13,7 +13,7 @@ GameObject:
   - component: {fileID: 125550854939535400}
   - component: {fileID: 804998324724621136}
   - component: {fileID: 7273179820128639391}
-  m_Layer: 0
+  m_Layer: 8
   m_Name: Corner In
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -33,7 +33,7 @@ Transform:
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
-  m_RootOrder: 0
+  m_RootOrder: -1
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!33 &349672985894330491
 MeshFilter:

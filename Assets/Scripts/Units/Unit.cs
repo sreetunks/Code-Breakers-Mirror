@@ -36,6 +36,7 @@ namespace Units
         [SerializeField] private Animator unitAnimator;
         [SerializeField] private AudioSource unitAudioSource;
         [SerializeField] private Canvas worldSpaceCanvas;
+        [SerializeField] private MeshRenderer stencilMeshRenderer;
 
         [SerializeField] private float moveSpeed = 4f;
         [SerializeField] private float rotateSpeed = 10f;
@@ -152,6 +153,7 @@ namespace Units
             GridSystem.UpdateGridObjectPosition(this, Position);
             transform.position = GridSystem.GetWorldPosition(Position);
             IsOnDoorGridCell = CheckIsOnDoorGridCell(GridCellPreviousState);
+            stencilMeshRenderer.enabled = true;
         }
 
         public void ForceMove(Vector3 targetPosition)
@@ -192,6 +194,7 @@ namespace Units
             hitEffect.Play();
             if (_currentHealth == 0)
             {
+                stencilMeshRenderer.enabled = false;
                 OnUnitDeath?.Invoke(this); // Invoke is considered Expensive
 
                 gameObject.SetActive(false);

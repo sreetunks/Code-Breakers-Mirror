@@ -57,7 +57,7 @@ namespace Rendering
         {
             _mScriptablePass = new GridRenderPass(gridCellStateColors)
             {
-                renderPassEvent = RenderPassEvent.AfterRenderingOpaques
+                renderPassEvent = RenderPassEvent.BeforeRenderingSkybox
             };
         }
 
