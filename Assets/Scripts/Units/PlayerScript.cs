@@ -102,6 +102,7 @@ namespace Units
                             var targetGridPosition = GridSystem.GetGridPosition(targetPosition); // Get Position is considered Expensive
                             if (_positionTargetedAbility.Use(CurrentlySelectedUnit, targetGridPosition))
                             {
+                                mainCamera.ResetOffset();
                                 CancelAbility();
                                 playerHUD.SetHUDButtonsActive(false);
                                 _inputState = InputState.Inactive;
@@ -123,6 +124,7 @@ namespace Units
                             var targetUnit = targetObject as Unit;
                             if (targetUnit && _unitTargetedAbility.Use(CurrentlySelectedUnit, targetUnit))
                             {
+                                mainCamera.ResetOffset();
                                 CancelAbility();
                             }
                         }
@@ -201,6 +203,7 @@ namespace Units
             _perTurnUnitList = new List<Unit>(_controlledUnits);
             SelectUnit(_perTurnUnitList[0]);
             playerHUD.SetHUDButtonsActive(true);
+            mainCamera.ResetOffset();
         }
 
         public void EndTurn()
