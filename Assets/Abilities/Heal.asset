@@ -15,3 +15,6 @@ MonoBehaviour:
   healAmount: 1
   cooldownDuration: 2
   actionPointCost: 4
+  description: 'Heals the Unit for 1 HP.
+
+    Cannot be used at Full HP.'

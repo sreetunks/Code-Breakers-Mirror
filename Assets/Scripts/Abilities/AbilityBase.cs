@@ -9,6 +9,10 @@ namespace Abilities
         public abstract int ActionPointCost { get; }
         public abstract int CooldownDuration { get; }
 
+        public abstract string ToolTipDescriptionString { get; }
+        public abstract string ToolTipCooldownString { get; }
+        public abstract string ToolTipAPCostString { get; }
+
         public abstract void Use(Unit owningUnit);
     }
 }

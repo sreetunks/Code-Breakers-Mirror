@@ -2,16 +2,23 @@ using Abilities;
 using TMPro;
 using Units;
 using UnityEngine;
+using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
 namespace UI
 {
-    public class AbilityButton : MonoBehaviour
+    public class AbilityButton : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler
     {
         [SerializeField] private TMP_Text abilityNameText;
         [SerializeField] private CanvasGroup abilityCooldownCanvasGroup;
         [SerializeField] private TMP_Text abilityCooldownCount;
         [SerializeField] private Button abilityButton;
+
+        [SerializeField] private CanvasGroup tooltipCanvasGroup;
+        [SerializeField] private TMP_Text tooltipAbilityNameText;
+        [SerializeField] private TMP_Text tooltipAbilityDescText;
+        [SerializeField] private TMP_Text tooltipAbilityCooldownText;
+        [SerializeField] private TMP_Text tooltipAbilityAPCostText;
 
         private AbilityBase _abilityToTrigger;
 
@@ -27,6 +34,10 @@ namespace UI
             gameObject.SetActive(true);
             _abilityToTrigger = ability;
             abilityNameText.text = ability.name;
+            tooltipAbilityNameText.text = ability.name;
+            tooltipAbilityDescText.text = ability.ToolTipDescriptionString;
+            tooltipAbilityCooldownText.text = ability.ToolTipCooldownString;
+            tooltipAbilityAPCostText.text = ability.ToolTipAPCostString;
         }
 
         public void EnableButton()
@@ -59,6 +70,16 @@ namespace UI
             {
                 EnableButton();
             }
+        }
+
+        public void OnPointerEnter(PointerEventData eventData)
+        {
+            tooltipCanvasGroup.alpha = 1;
+        }
+
+        public void OnPointerExit(PointerEventData eventData)
+        {
+            tooltipCanvasGroup.alpha = 0;
         }
     }
 }

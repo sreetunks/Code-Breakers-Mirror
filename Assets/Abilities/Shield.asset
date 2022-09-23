@@ -15,3 +15,5 @@ MonoBehaviour:
   shieldCount: 3
   cooldownDuration: 3
   actionPointCost: 3
+  description: Gives the Unit Temporary Shields that last until the start of its
+    next turn.

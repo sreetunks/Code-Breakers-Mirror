@@ -13,10 +13,17 @@ namespace Abilities
         [SerializeField] int actionPointCost;
         [SerializeField] int range = 3;
         [SerializeField] AudioClip soundEffect;
+        [SerializeField, TextArea(5, 10)] private string description;
 
         public override int CooldownDuration => cooldownDuration;
 
         public override int ActionPointCost => actionPointCost;
+
+        public override string ToolTipDescriptionString => string.Format(description, range);
+
+        public override string ToolTipCooldownString => $"Cooldown - {cooldownDuration}";
+
+        public override string ToolTipAPCostString => $"AP Cost - {actionPointCost}";
 
         public override int UpdateRange(Unit owningUnit)
         {

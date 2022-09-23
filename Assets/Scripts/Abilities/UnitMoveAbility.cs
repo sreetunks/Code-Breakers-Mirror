@@ -10,10 +10,17 @@ namespace Abilities
     public class UnitMoveAbility : PositionTargetedAbility
     {
         [SerializeField] private int apCostPerTile = 1;
+        [SerializeField, TextArea(5, 10)] private string description;
 
         public override int CooldownDuration => 0;
 
         public override int ActionPointCost => apCostPerTile;
+
+        public override string ToolTipCooldownString => "";
+
+        public override string ToolTipAPCostString => $"{apCostPerTile} per Tile Moved";
+
+        public override string ToolTipDescriptionString => description;
 
         public override int UpdateRange(Unit owningUnit)
         {

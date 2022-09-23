@@ -10,10 +10,13 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: d35f09a33623f46488629e846256932b, type: 3}
-  m_Name: Melee Attack
+  m_Name: Melee
   m_EditorClassIdentifier: 
   attackDamage: 2
   cooldownDuration: 1
   actionPointCost: 1
   range: 1
   soundEffect: {fileID: 8300000, guid: fe9b561e29b8c2d45ac1ddf924e53e76, type: 3}
+  description: 'Target an Enemy on an adjacent Tile.
+
+    Deals 2 Points of Damage.'
