@@ -10,6 +10,8 @@ public class SoundManager : MonoBehaviour
     [SerializeField] AudioClip previewMusicClip;
     [SerializeField] AudioClip previewEffectsClip;
 
+    [SerializeField] private Button toggleMusicButton;
+    [SerializeField] private Button toggleSFXButton;
     [SerializeField] private AudioMixer audioMixer;
     [SerializeField] public AudioSource musicSource, effectSource;
     [SerializeField] private Slider masterSlider, musicSlider, effectSlider;
@@ -76,11 +78,13 @@ public class SoundManager : MonoBehaviour
             _lastMusicClip = musicSource.clip;
             musicSource.clip = previewMusicClip;
             musicSource.Play();
+            toggleMusicButton.image.color = new Color32(0, 180, 66, 255);
         }
         else
         {
             musicSource.clip = _lastMusicClip;
             _lastMusicClip = null;
+            toggleMusicButton.image.color = new Color32(3, 102, 39, 255);
         }
     }
 
@@ -97,12 +101,14 @@ public class SoundManager : MonoBehaviour
         {
             effectSource.loop = false;
             effectSource.Stop();
+            toggleSFXButton.image.color = new Color32(3, 102, 39, 255);
         }
         else
         {
             effectSource.clip = previewEffectsClip;
             effectSource.loop = true;
             effectSource.Play();
+            toggleSFXButton.image.color = new Color32(0, 180, 66, 255);
         }
     }
 

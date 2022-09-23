@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1876ef4d3e8abb04197992490112540b, type: 3}
   m_Name: Heal
   m_EditorClassIdentifier: 
-  healAmount: 1
+  healAmount: 2
   cooldownDuration: 2
   actionPointCost: 4
   description: 'Heals the Unit for 1 HP.
