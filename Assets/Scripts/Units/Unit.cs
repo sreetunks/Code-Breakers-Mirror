@@ -132,7 +132,10 @@ namespace Units
                 }
 
                 if (IsOnDoorGridCell || IsOnLevelExit && Controller.Faction == Controller.FactionType.Player)
+                {
+                    worldSpaceCanvas.transform.rotation = Quaternion.Euler(60, 0, 0);
                     worldSpaceCanvas.enabled = true;
+                }
             }
         }
 
