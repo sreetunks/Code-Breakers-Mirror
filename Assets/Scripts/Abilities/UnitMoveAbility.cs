@@ -16,9 +16,9 @@ namespace Abilities
 
         public override int ActionPointCost => apCostPerTile;
 
-        public override string ToolTipCooldownString => "";
+        public override string ToolTipCooldownString => "Cooldown - N/A";
 
-        public override string ToolTipAPCostString => $"{apCostPerTile} per Tile Moved";
+        public override string ToolTipAPCostString => $"AP Cost - {apCostPerTile} per Tile Moved";
 
         public override string ToolTipDescriptionString => description;
 
