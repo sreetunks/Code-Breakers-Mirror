@@ -40,6 +40,12 @@ public class SoundManager : MonoBehaviour
             musicSource.Play();
         }
 
+        if (!visible)
+        {
+            toggleMusicButton.image.color = new Color32(3, 102, 39, 255);
+            toggleSFXButton.image.color = new Color32(3, 102, 39, 255);
+        }
+
         effectSource.Stop();
         effectSource.mute = visible;
         effectSource.loop = false;
